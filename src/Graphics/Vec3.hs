@@ -1,4 +1,4 @@
-module Vec3 where
+module Graphics.Vec3 where
 
 class Vec3 v where
   fromXYZ :: Double -> Double -> Double -> v
@@ -26,7 +26,7 @@ class Vec3 v where
   (.*) v1 v2 = x + y + z
     where
       (x, y, z) = toXYZ $ zipV (*) v1 v2
-  
+
   -- cross
   (><) :: v -> v -> v
   (><) v1 v2 =
@@ -46,7 +46,7 @@ class Vec3 v where
 
   -- L2 norm
   norm :: v -> Double
-  norm v = sqrt(v .* v)
+  norm v = sqrt (v .* v)
 
   distance :: v -> v -> Double
   distance v1 v2 = norm (v1 <-> v2)
@@ -55,6 +55,18 @@ class Vec3 v where
   normalize :: v -> v
   normalize v = v .^ (1 / norm v)
 
+  toX :: v -> Double
+  toX v = x'
+    where
+      (x', _, _) = toXYZ v
+  toY :: v -> Double
+  toY v = y'
+    where
+      (_, y', _) = toXYZ v
+  toZ :: v -> Double
+  toZ v = z'
+    where
+      (_, _, z') = toXYZ v
 
 data V3 = V3 !Double !Double !Double
   deriving (Eq, Show)
@@ -62,9 +74,3 @@ data V3 = V3 !Double !Double !Double
 instance Vec3 V3 where
   fromXYZ = V3
   toXYZ (V3 x y z) = (x, y, z)
-
-newtype Point = Point V3
-  deriving (Eq)
-
-newtype Color = Color V3
-  deriving (Eq)
