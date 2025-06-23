@@ -87,6 +87,8 @@ library
     Graphics.Ray
     Graphics.Vec3
     Graphics.Point
+    Shapes.Sphere
+    Hittable
 
   build-depends:
     , base         ^>=4.18.3.0

@@ -16,16 +16,19 @@ class Vec3 v where
   -- addition
   (<+>) :: v -> v -> v
   (<+>) = zipV (+)
+  infixl 6 <+>
 
   -- subtraction
   (<->) :: v -> v -> v
   (<->) = zipV (-)
+  infixl 6 <->
 
   -- dot
   (.*) :: v -> v -> Double
   (.*) v1 v2 = x + y + z
     where
       (x, y, z) = toXYZ $ zipV (*) v1 v2
+  infixl 7 .*
 
   -- cross
   (><) :: v -> v -> v
@@ -37,12 +40,14 @@ class Vec3 v where
     where
       (x1, y1, z1) = toXYZ v1
       (x2, y2, z2) = toXYZ v2
+  infixl 6 ><
 
   -- scalar mul
   (.^) :: v -> Double -> v
   (.^) v s = fromXYZ (x * s) (y * s) (z * s)
     where
       (x, y, z) = toXYZ v
+  infixl 7 .^
 
   -- L2 norm
   norm :: v -> Double
