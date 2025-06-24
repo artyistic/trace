@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 
-module Graphics.Pixel (Color, color, toRGB8) where
+module Graphics.Pixel (Color, color, toRGB8, colorFromV3) where
 
 import Graphics.Vec3
 import Data.Word (Word8)
@@ -15,6 +15,11 @@ newtype Color = Color { rgb :: V3 }
 color :: Double -> Double -> Double -> Color
 color r g b = Color $ fromXYZ (clamp01 r) (clamp01 g) (clamp01 b)
   where clamp01 x = max 0 (min 1 x)
+
+-- just a helper, calls color
+colorFromV3 :: V3 -> Color
+colorFromV3 v = color r g b
+  where (r, g, b) = toXYZ v
 
 -- interal conversions
 toWord8 :: Double -> Word8

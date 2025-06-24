@@ -86,7 +86,7 @@ rayColor r@(Ray _ direction) =
 
 renderSurfaceNormal :: Sphere -> Ray -> Double -> Color
 renderSurfaceNormal (Sphere center _) r t =
-  color (toX n + 1) (toY n + 1) (toZ n + 1) .^ 0.5
+  colorFromV3 (V3 (toX n + 1) (toY n + 1) (toZ n + 1) .^ 0.5)
   where
     n = normalize $ at r t <-> center
 
