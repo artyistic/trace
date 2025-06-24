@@ -60,6 +60,16 @@ class Vec3 v where
   normalize :: v -> v
   normalize v = v .^ (1 / norm v)
 
+  -- length squared
+  lengthSquared :: v -> Double
+  lengthSquared v = x*x + y*y + z*z
+    where
+      (x, y, z) = toXYZ v
+
+  -- flip the direction of a vector
+  invert :: v -> v
+  invert v = origin <-> v
+
   toX :: v -> Double
   toX v = x'
     where

@@ -72,7 +72,7 @@ executable tracerays
   build-depends:
     , base         ^>=4.18.3.0
     , JuicyPixels
-    , tracerays
+    , tracerays-lib
 
   -- Directories containing source files.
   hs-source-dirs:   app
@@ -80,7 +80,7 @@ executable tracerays
   -- Base language which the package is written in.
   default-language: Haskell2010
 
-library
+library tracerays-lib
   hs-source-dirs:   src
   exposed-modules:
     Graphics.Pixel
