@@ -1,11 +1,11 @@
 module Shapes.Sphere where
 
+import Control.Applicative ((<|>))
+import Control.Monad (guard)
 import Graphics.Point
 import Graphics.Ray
 import Graphics.Vec3
 import Hittable
-import Control.Monad (guard)
-import Control.Applicative ((<|>))
 
 -- A sphere is defined by its center point and a radius
 -- rn no color attribute, later maybe we could have a single color
@@ -13,17 +13,26 @@ import Control.Applicative ((<|>))
 data Sphere = Sphere Point Double
 
 instance Hittable Sphere where
-  hit (Sphere center radius) r@(Ray ptOrigin ptdirection) tMin tMax = do
+  hit (Sphere center radius) r@(Ray ptOrigin ptdirection) tMax tMin = do
+    -- no hit
+    -- evaluates to nothing
     guard (discriminant >= 0)
-    t <- tryRoot root1 <|> tryRoot root2
-    let p = at r t in Just $ generateHitRecord p t r (toV3 $ (p <-> center) .^ (1 / radius))
+
+    -- one or more roots => hit, check if root is within tMin and tMax
+    -- alternative fails will evaluate to nothing
+    t <- checkRootBound root1 <|> checkRootBound root2
+
+    -- generate hit record
+    let p = at r t
+        outwardNormal = toV3 ((p <-> center) .^ (1 / radius))
+    return $ generateHitRecord r p t outwardNormal
     where
       oc = center <-> ptOrigin -- from origin to center of sphere
       a = lengthSquared ptdirection
       h = toV3 oc .* ptdirection
       c = lengthSquared oc - radius * radius
-      discriminant = h*h - a*c
+      discriminant = h * h - a * c
       sqrtDiscriminant = sqrt discriminant
       root1 = (h - sqrtDiscriminant) / a
       root2 = (h + sqrtDiscriminant) / a
-      tryRoot r = if tMin < r && r < tMax then Just r else Nothing
+      checkRootBound r = guard (tMin < r && r < tMax) >> Just r

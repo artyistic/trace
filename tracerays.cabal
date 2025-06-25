@@ -89,6 +89,8 @@ library tracerays-lib
     Graphics.Point
     Shapes.Sphere
     Hittable
+    Hittables
+    Camera
 
   build-depends:
     , base         ^>=4.18.3.0

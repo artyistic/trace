@@ -21,8 +21,8 @@ data HitRecord = HitRecord
     hitFrontFacing :: Bool
   }
 
-generateHitRecord :: Point -> Double -> Ray -> V3 -> HitRecord
-generateHitRecord p t (Ray _ direction) outwardNormal =
+generateHitRecord :: Ray -> Point -> Double -> V3 -> HitRecord
+generateHitRecord (Ray _ direction) p t outwardNormal =
   HitRecord p normal t frontFacing
   where
     frontFacing = (direction .* outwardNormal) < 0
