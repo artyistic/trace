@@ -10,7 +10,7 @@ import Graphics.Vec3
 import Hittable
 import Hittables
 import Shapes.Sphere
-
+import qualified Interval as I
 -- camera is just defined by aspectRatio and imageWidth
 data Camera = Camera
   { aspectRatio :: Double,
@@ -91,7 +91,7 @@ rayColor r@(Ray _ direction) world =
     p1 = white .^ (1.0 - a)
     p2 = lightBlue .^ a
     a = 0.5 * (toY (normalize direction) + 1)
-    hitRecord = hit world r (1 / 0) 0
+    hitRecord = hit world r (I.Interval 0 (1/0))
     normal = hitNormal <$> hitRecord
     renderSurfaceNormal n = colorFromV3 (V3 (toX n + 1) (toY n + 1) (toZ n + 1) .^ 0.5)
 

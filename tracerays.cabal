@@ -91,6 +91,8 @@ library tracerays-lib
     Hittable
     Hittables
     Camera
+    Interval
+    Graphics
 
   build-depends:
     , base         ^>=4.18.3.0

@@ -2,6 +2,7 @@
 module Hittables where
 
 import Hittable
+import Interval
 
 newtype HittableList = HittableList [SomeHittable]
 
@@ -11,10 +12,10 @@ makeHittableList :: Hittable a => [a] -> HittableList
 makeHittableList l = HittableList $ map SomeHittable l
 
 instance Hittable HittableList where
-  hit (HittableList hl) r tMax tMin = scan hl Nothing tMax
+  hit (HittableList hl) r (Interval tMin tMax) = scan hl Nothing tMax 
     where scan :: [SomeHittable] -> Maybe HitRecord -> Double -> Maybe HitRecord
           scan [] closest _ = closest
           scan ((SomeHittable obj) : rest) closest tMax'
-            = case hit obj r tMax' tMin of
+            = case hit obj r (Interval tMin tMax') of
               Just hr -> scan rest (Just hr) (hitT hr)
               Nothing -> scan rest closest tMax'

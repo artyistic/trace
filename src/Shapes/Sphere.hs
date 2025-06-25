@@ -6,6 +6,7 @@ import Graphics.Point
 import Graphics.Ray
 import Graphics.Vec3
 import Hittable
+import qualified Interval as I
 
 -- A sphere is defined by its center point and a radius
 -- rn no color attribute, later maybe we could have a single color
@@ -13,7 +14,7 @@ import Hittable
 data Sphere = Sphere Point Double
 
 instance Hittable Sphere where
-  hit (Sphere center radius) r@(Ray ptOrigin ptdirection) tMax tMin = do
+  hit (Sphere center radius) r@(Ray ptOrigin ptdirection) tInterval = do
     -- no hit
     -- evaluates to nothing
     guard (discriminant >= 0)
@@ -35,4 +36,4 @@ instance Hittable Sphere where
       sqrtDiscriminant = sqrt discriminant
       root1 = (h - sqrtDiscriminant) / a
       root2 = (h + sqrtDiscriminant) / a
-      checkRootBound r = guard (tMin < r && r < tMax) >> Just r
+      checkRootBound r = guard (I.surrounds tInterval r) >> Just r

@@ -13,6 +13,7 @@ where
 import Graphics.Point
 import Graphics.Ray
 import Graphics.Vec3
+import Interval (Interval)
 
 data HitRecord = HitRecord
   { hitP :: Point,
@@ -38,4 +39,4 @@ class Hittable a where
       Just HitRecord if the ray did hit object
       Nothing if no hit
   -}
-  hit :: a -> Ray -> Double -> Double -> Maybe HitRecord
+  hit :: a -> Ray -> Interval -> Maybe HitRecord
