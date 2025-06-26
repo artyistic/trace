@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 
-module Graphics.Pixel (Color, color, toRGB8, colorFromV3) where
+module Graphics.Pixel (Color, color, toRGB8, colorFromV3, averageColor) where
 
 import Graphics.Vec3
 import Data.Word (Word8)
@@ -28,3 +28,10 @@ toWord8 x = fromIntegral (floor (x * 255.99))
 -- exposed conversion
 toRGB8 :: Color -> P.PixelRGB8
 toRGB8 (Color v) = let (r, g, b) = toXYZ v in P.PixelRGB8 (toWord8 r) (toWord8 g) (toWord8 b)
+
+-- a function to average Colors from list
+-- here bc color smart constructor clamps
+-- this is really a safer way to do color I think
+averageColor :: [Color] -> Color
+averageColor xs = let (sum, count) = foldl (\(s, c) x -> (s <+> x, c + 1)) (color 0 0 0, 0) xs
+             in if count == 0 then color 0 0 0 else sum ./ count

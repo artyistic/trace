@@ -4,14 +4,15 @@ import Camera
 import Hittables
 import Shapes.Sphere
 import Graphics.Point
+import Control.Monad.Random
 
 main :: IO ()
 main = do
   let redSphere = Sphere (fromCoord 0 0 (-1)) 0.5
       groundSphere = Sphere (fromCoord 0 (-100.5) (-1)) 100
       world = makeHittableList [redSphere, groundSphere]
-      cam = camera (16.0 / 9.0) 1.0 400 
-  render "./output/test.png" world cam
+      cam = camera (16.0 / 9.0) 1.0 400 10
+  render "./output/test.png" world cam (mkStdGen 1564651)
 
 -- createImage :: IO ()
 

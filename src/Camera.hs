@@ -1,7 +1,8 @@
-module Camera (camera, render) where
+module Camera (camera, render, getSampleSquare) where
 
 import Codec.Picture as P
 import qualified Codec.Picture as P
+import Control.Monad.Random
 import Data.Function
 import Graphics.Pixel
 import Graphics.Point
@@ -9,13 +10,18 @@ import Graphics.Ray
 import Graphics.Vec3
 import Hittable
 import Hittables
-import Shapes.Sphere
 import qualified Interval as I
+import Shapes.Sphere
+import System.Random 
+
+
 -- camera is just defined by aspectRatio and imageWidth
 data Camera = Camera
   { aspectRatio :: Double,
     focalLength :: Double,
     imageWidth :: Int,
+    samplesPerPixel :: Int,
+
     -- convention will set it to be (0, 0, 0)
     center :: Point,
     -- derived from above
@@ -26,12 +32,13 @@ data Camera = Camera
   }
 
 -- init a camera
-camera :: Double -> Double -> Int -> Camera
-camera aspectRatio focalLength imageWidth =
+camera :: Double -> Double -> Int -> Int -> Camera
+camera aspectRatio focalLength imageWidth samplesPerPixel =
   Camera
     aspectRatio
     focalLength
     imageWidth
+    samplesPerPixel
     cameraCenter
     imageHeight
     pixelDu
@@ -62,36 +69,49 @@ camera aspectRatio focalLength imageWidth =
         )
     pixel00Loc = evalPoint viewportUpperLeft (<+> (pixelDu <+> pixelDv) .^ 0.5)
 
-render :: FilePath -> HittableList -> Camera -> IO ()
+render :: FilePath -> HittableList -> Camera -> StdGen -> IO ()
 render
   fpath
   world
-  (Camera
+  ( Camera
       _
       _
       imageWidth
+      samplesPerPixel
       cameraCenter
       imageHeight
       pixelDu
       pixelDv
       pixel00Loc
-    ) =
-    P.writePng "output/test.png" $ P.generateImage pixelRenderer imageWidth imageHeight
-    where
-      pixelRenderer x y =
-        rayColor
-          (Ray cameraCenter (toV3 $ pixelCenter (fromIntegral x) (fromIntegral y) <-> cameraCenter))
-          world
-      pixelCenter x' y' = evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
+    )
+    gen
+     = P.writePng "output/test.png" $ P.generateImage t imageWidth imageHeight
 
-rayColor :: Ray -> HittableList -> P.PixelRGB8
+          where
+            -- for each x y position on viewPort, randomly sample pixels to construct a smooth edge
+            -- obviously this does 10x work for each every pixel, super slow
+            t x y = evalRand (pixelRenderer x y) gen
+
+            -- replicateM makes a random array of position offsets,
+            -- then we map rayColors, average it out and transform it into a PixelRgb8 type
+            pixelRenderer x y =
+              toRGB8 . averageColor . ( ( \(V3 offsetX offsetY _) ->
+                    rayColor
+                      (Ray cameraCenter (toV3 $ pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) <-> cameraCenter))
+                      world
+                )
+                  <$>
+              ) <$> replicateM samplesPerPixel getSampleSquare
+            pixelCenter x' y' = evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
+
+rayColor :: Ray -> HittableList -> Color
 rayColor r@(Ray _ direction) world =
-  toRGB8 $ maybe (p1 <+> p2) renderSurfaceNormal normal
+  maybe (p1 <+> p2) renderSurfaceNormal normal
   where
     p1 = white .^ (1.0 - a)
     p2 = lightBlue .^ a
     a = 0.5 * (toY (normalize direction) + 1)
-    hitRecord = hit world r (I.Interval 0 (1/0))
+    hitRecord = hit world r (I.Interval 0 (1 / 0))
     normal = hitNormal <$> hitRecord
     renderSurfaceNormal n = colorFromV3 (V3 (toX n + 1) (toY n + 1) (toZ n + 1) .^ 0.5)
 
@@ -102,5 +122,7 @@ white = color 1 1 1
 lightBlue :: Color
 lightBlue = color 0.5 0.7 1.0
 
--- redSphere :: Sphere
--- redSphere = Sphere (fromCoord 0 0 (-1)) 0.5
+-- Returns a vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square on viewport
+-- per documentation, the range of random of Doubles lies in [0, 1)
+getSampleSquare :: Rand StdGen V3
+getSampleSquare = (.^ 0.5) <$> liftM3 V3 getRandom getRandom (pure 0)

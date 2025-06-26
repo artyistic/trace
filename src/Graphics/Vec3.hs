@@ -49,6 +49,11 @@ class Vec3 v where
       (x, y, z) = toXYZ v
   infixl 7 .^
 
+  -- scalar division for conveninence
+  -- div by zero NOT checked
+  (./) :: v -> Double -> v
+  (./) v s = v .^ (1/s)
+
   -- L2 norm
   norm :: v -> Double
   norm v = sqrt (v .* v)

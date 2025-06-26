@@ -73,6 +73,7 @@ executable tracerays
     , base         ^>=4.18.3.0
     , JuicyPixels
     , tracerays-lib
+    , MonadRandom ^>=0.6.2
 
   -- Directories containing source files.
   hs-source-dirs:   app
@@ -95,7 +96,10 @@ library tracerays-lib
     Graphics
 
   build-depends:
+    , random ^>=1.3.1
     , base         ^>=4.18.3.0
     , JuicyPixels
+    , MonadRandom ^>=0.6.2
+
 
   default-language: Haskell2010
