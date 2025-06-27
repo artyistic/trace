@@ -11,8 +11,8 @@ main = do
   let redSphere = Sphere (fromCoord 0 0 (-1)) 0.5
       groundSphere = Sphere (fromCoord 0 (-100.5) (-1)) 100
       world = makeHittableList [redSphere, groundSphere]
-      cam = camera (16.0 / 9.0) 1.0 400 10
-  render "./output/test.png" world cam (mkStdGen 1564651)
+      cam = camera (16.0 / 9.0) 1.0 1920 100
+  render "./output/test.ppm" world cam (mkStdGen 564128)
 
 -- createImage :: IO ()
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 
-module Graphics.Pixel (Color, color, toRGB8, colorFromV3, averageColor) where
+module Graphics.Pixel (Color, color, toRGB8, colorFromV3, averageColor, colorToRGBString) where
 
 import Graphics.Vec3
 import Data.Word (Word8)
@@ -35,3 +35,11 @@ toRGB8 (Color v) = let (r, g, b) = toXYZ v in P.PixelRGB8 (toWord8 r) (toWord8 g
 averageColor :: [Color] -> Color
 averageColor xs = let (sum, count) = foldl (\(s, c) x -> (s <+> x, c + 1)) (color 0 0 0, 0) xs
              in if count == 0 then color 0 0 0 else sum ./ count
+
+colorToRGBString :: Color -> String
+colorToRGBString (Color (V3 r g b)) =
+  unwords $ map (show . to255) [r, g, b]
+  where
+    to255 x = round (clamp 0 1 x * 255) :: Int
+    clamp minVal maxVal = max minVal . min maxVal
+
