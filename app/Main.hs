@@ -1,31 +1,46 @@
 module Main where
 
 import Camera
+import Graphics.Pixel
 import Hittables
+import Hittable
 import Shapes.Sphere
 import Graphics.Point
 import Control.Monad.Random
 
 main :: IO ()
 main = do
-  let redSphere = Sphere (fromCoord 0 0 (-1)) 0.5
-      groundSphere = Sphere (fromCoord 0 (-100.5) (-1)) 100
-      world = makeHittableList [redSphere, groundSphere]
-      cam = camera (16.0 / 9.0) 1.0 1920 100
+  -- let redSphere = Sphere (fromCoord 0 0 (-1)) 0.5 (mkLambertian grey)
+  --     groundSphere = Sphere (fromCoord 0 (-100.5) (-1)) 100 (mkLambertian grey)
+  let ground = Sphere (fromCoord 0.0 (-100.5) (-1.0)) 100.0 materialGround
+      center = Sphere (fromCoord 0.0 0.0 (-1.2)) 0.5 materialCenter
+      left = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.5 materialLeft
+      right = Sphere (fromCoord 1.0 0.0 (-1.0)) 0.5 materialRight
+      world = makeHittableList [ground, center, left, right]
+      cam = camera (16.0 / 9.0) 1.0 400 10
   render "./output/test.ppm" world cam (mkStdGen 564128)
 
--- createImage :: IO ()
+-- colors for background
+white :: Color
+white = color 1 1 1
 
--- pixelRenderer :: (Integral a, Integral b) => a -> b -> P.PixelRGB8
+lightBlue :: Color
+lightBlue = color 0.5 0.7 1.0
 
+grey :: Color
+grey = color 0.5 0.5 0.5
 
--- all temp constants of the eye and viewport, ie the scene
+pink :: Color
+pink = color 1 0 0.906
 
+materialGround :: Material
+materialGround = mkLambertian (color 0.8 0.8 0.0)
 
--- | TEMPORARILY MOVED raycolor here due to cyclic dependency of ray and sphere
--- rayColor returns a rgb given a ray
--- hardcoding to consider a red sphere in the scene
--- later maybe pass a object list or sth?
+materialCenter :: Material
+materialCenter = mkLambertian (color 0.1 0.2 0.5)
 
--- temporarily we will define objects in the scene here
--- later move to a data type of list maybe containing objects?
+materialLeft :: Material
+materialLeft = mkMetal (color 0.8 0.8 0.8)
+
+materialRight :: Material
+materialRight = mkMetal (color 0.8 0.6 0.2)

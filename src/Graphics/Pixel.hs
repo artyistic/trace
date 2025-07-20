@@ -1,11 +1,12 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 
-module Graphics.Pixel (Color, color, toRGB8, colorFromV3, averageColor, colorToRGBString) where
+module Graphics.Pixel (Color, color, toRGB8, colorFromV3, averageColor, colorToRGBString, gammaCorrected) where
 
 import Graphics.Vec3
 import Data.Word (Word8)
 import qualified Codec.Picture as P
+import Data.Bool
 
 -- Color are represented by [0,1] range
 newtype Color = Color { rgb :: V3 }
@@ -42,4 +43,7 @@ colorToRGBString (Color (V3 r g b)) =
   where
     to255 x = round (clamp 0 1 x * 255) :: Int
     clamp minVal maxVal = max minVal . min maxVal
+
+gammaCorrected :: Color -> Color
+gammaCorrected = transform (\x -> if x > 0 then sqrt x else x)
 

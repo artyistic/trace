@@ -1,8 +1,12 @@
-module Camera where
+module Camera (Camera, camera, render, rayColor) where
 
 import Codec.Picture as P
 import qualified Codec.Picture as P
+import Codec.Picture.Types
+import Control.Monad.Loops
 import Control.Monad.Random
+import Control.Monad.ST
+import Data.Bool (bool)
 import Data.Function
 import Graphics
 import Hittable
@@ -10,18 +14,13 @@ import Hittables
 import qualified Interval as I
 import Shapes.Sphere
 import System.Random
-import Control.Monad.Loops
-import Data.Bool (bool)
-import Control.Monad.ST
-import Codec.Picture.Types
 
--- camera is just defined by aspectRatio and imageWidth
+-- camera is just defined by aspectRatio, imageWidth, focalLength and samplesPerPixel
 data Camera = Camera
   { aspectRatio :: Double,
     focalLength :: Double,
     imageWidth :: Int,
     samplesPerPixel :: Int,
-
     -- convention will set it to be (0, 0, 0)
     center :: Point,
     -- derived from above
@@ -84,47 +83,73 @@ render
       pixelDv
       pixel00Loc
     )
-    gen
-     = do
-        let pixels = [pixelRenderer x y | y <- [0 .. imageHeight - 1], x <- [0 .. imageWidth - 1]]
-            t = evalRand (sequenceA pixels) gen
-        writeFile fpath $ "P3\n" ++ show imageWidth ++ " " ++ show imageHeight ++ "\n255\n" ++
-          foldr (\x y -> colorToRGBString x ++ "\n" ++ y) "" t
-          where
-            -- for each x y position on viewPort, randomly sample pixels to construct a smooth edge
-            -- obviously this does 10x work for each every pixel, super slow
+  gen =
+    do      
+      let pixels = [pixelRenderer x y world| y <- [0 .. imageHeight - 1], x <- [0 .. imageWidth - 1]]
+      t <- evalRandIO (sequenceA pixels)
+      writeFile fpath $
+        "P3\n"
+          ++ show imageWidth
+          ++ " "
+          ++ show imageHeight
+          ++ "\n255\n"
+          ++ foldr (\x y -> colorToRGBString x ++ "\n" ++ y) "" t
+      
 
-            -- replicateM makes a random array of position offsets,
-            -- then we map rayColors, average it out and transform it into a PixelRgb8 type
-            pixelRenderer :: Int -> Int -> Rand StdGen Color
-            pixelRenderer x y = do
-              samples <- sampleSquares
-              let colors = traverse (\(V3 offsetX offsetY _) -> rayColor
-                      (Ray cameraCenter (toV3 $ pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) <-> cameraCenter))
-                      world
-                      50) samples
-              averageColor <$> colors
-            sampleSquares = replicateM samplesPerPixel getSampleSquare
-            pixelCenter x' y' = evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
+    where
+
+      -- for each x y position on viewPort, randomly sample pixels to construct a smooth edge
+      -- obviously this does 10x work for each every pixel, super slow
+
+      -- replicateM makes a random array of position offsets,
+      -- then we map rayColors, average and gammaCorrect it
+      pixelRenderer :: Int -> Int -> HittableList -> Rand StdGen Color
+      pixelRenderer x y world' =
+        sampleSquares
+          >>= ( fmap (gammaCorrected . averageColor)
+                  . traverse
+                    -- this here takes a sampled square and shoot rays with raycolor
+                    ( \(V3 offsetX offsetY _) ->
+                        rayColor
+                          ( Ray
+                              cameraCenter
+                              ( toV3 $
+                                  pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY)
+                                    <-> cameraCenter
+                              )
+                          )
+                          world'
+                          10
+                    )
+              )
+
+      sampleSquares = replicateM samplesPerPixel getSampleSquare
+      pixelCenter x' y' = evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
 
 rayColor :: Ray -> HittableList -> Int -> Rand StdGen Color
 rayColor r@(Ray _ direction) world depth =
-  if depth <= 0 then pure $ color 0 0 0 else
-  maybe (pure (p1 <+> p2)) diffuse hitRecord
+  if depth <= 0
+    then pure $ color 0 0 0
+    else
+      maybe (pure (p1 <+> p2)) trace hitRecord
   where
     p1 = white .^ (1.0 - a)
     p2 = lightBlue .^ a
     a = 0.5 * (toY (normalize direction) + 1)
     hitRecord = hit world r (I.Interval 0.001 (1 / 0))
-    -- normal = hitNormal <$> hitRecord
-    -- renderSurfaceNormal hr = let n = hitNormal hr in pure $ colorFromV3 (V3 (toX n + 1) (toY n + 1) (toZ n + 1) .^ 0.5)
-    diffuse hR = do
-                  let
-                    normal = hitNormal hR
-                    hitPt = hitP hR
-                  d <- getRandomOnHemisphere normal
-                  (.^ 0.5) <$> rayColor (Ray hitPt (d <+> normal)) world (depth - 1)
-                  -- d + normal for lambertian sphere
+    trace hR = do
+      -- let normal = hitNormal hR
+      --     hitPt = hitP hR
+      -- d <- getRandomOnHemisphere normal
+      -- (.^ 0.5) <$> rayColor (Ray hitPt (d <+> normal)) world (depth - 1)
+      let mat = hitMaterial hR
+          scatter = matScatter mat
+      scatterResult <-scatter mat r hR
+      maybe 
+        (pure $ color 0 0 0)
+        (\(attenuation, scattered) -> (attenuation `componentMul`) <$> rayColor scattered world (depth - 1))
+        scatterResult
+      -- d + normal for lambertian sphere
 
 -- colors for background
 white :: Color
@@ -135,24 +160,3 @@ lightBlue = color 0.5 0.7 1.0
 
 pink :: Color
 pink = color 1 0 0.906
-
--- Returns a vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square on viewport
--- per documentation, the range of random of Doubles lies in [0, 1)
-getSampleSquare :: Rand StdGen V3
-getSampleSquare = liftM3 V3 (getRandomR (-0.5, 0.5)) (getRandomR (-0.5, 0.5)) (pure 0)
-
--- returns a unit cube vector
-getRandomVec :: Double -> Double -> Rand StdGen V3
-getRandomVec min max = liftM3 V3 (getRandomR (min, max)) (getRandomR (min, max)) (getRandomR (min, max))
-
--- return a unit sphere vector, by rejection method
--- ie keep finding until the normalized vector is within sphere
-getRandomUnitBallVec :: Rand StdGen V3
-getRandomUnitBallVec = (\x -> x ./ sqrt (lengthSquared x)) <$> iterateUntil inUnitBall (getRandomVec (-1) 1)
-  where inUnitBall = I.contains (I.Interval 1e-160 1) . lengthSquared
-        -- ensure the vector has length at most one, and 1e-160 is a safe lower bound
-        -- to prevent funny underflowing which leads to catastrophic divide by zero
-
-getRandomOnHemisphere :: V3 -> Rand StdGen V3
-getRandomOnHemisphere normal = fmap orient getRandomUnitBallVec
-  where orient v = if (v .* normal) > 0 then v else invert v

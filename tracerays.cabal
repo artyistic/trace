@@ -84,6 +84,7 @@ executable tracerays
 library tracerays-lib
   hs-source-dirs:   src
   exposed-modules:
+    Graphics
     Graphics.Pixel
     Graphics.Ray
     Graphics.Vec3
@@ -93,7 +94,6 @@ library tracerays-lib
     Hittables
     Camera
     Interval
-    Graphics
 
   build-depends:
     , random ^>=1.3.1

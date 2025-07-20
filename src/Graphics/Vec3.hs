@@ -1,4 +1,7 @@
 module Graphics.Vec3 where
+import Control.Monad.Random
+import Control.Monad.Loops
+import qualified Interval as I
 
 class Vec3 v where
   fromXYZ :: Double -> Double -> Double -> v
@@ -6,6 +9,10 @@ class Vec3 v where
   origin :: v
   origin = fromXYZ 0 0 0
 
+  transform :: (Double -> Double) -> v -> v
+  transform f v = fromXYZ (f x) (f y) (f z)
+  
+    where (x, y , z) = toXYZ v
   -- vector operations
   zipV :: (Double -> Double -> Double) -> v -> v -> v
   zipV f v1 v2 = fromXYZ (f x1 x2) (f y1 y2) (f z1 z2)
@@ -75,6 +82,13 @@ class Vec3 v where
   invert :: v -> v
   invert v = origin <-> v
 
+  -- reflect v on normal n
+  reflect :: v -> v -> v
+  reflect v n = v <-> (n .^ (2*(v .* n)))
+
+  componentMul :: v -> v -> v
+  componentMul = zipV (*)
+
   toX :: v -> Double
   toX v = x'
     where
@@ -94,3 +108,33 @@ data V3 = V3 !Double !Double !Double
 instance Vec3 V3 where
   fromXYZ = V3
   toXYZ (V3 x y z) = (x, y, z)
+
+
+-- Returns a vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square on viewport
+-- per documentation, the range of random of Doubles lies in [0, 1)
+getSampleSquare :: Rand StdGen V3
+getSampleSquare = liftM3 V3 (getRandomR (-0.5, 0.5)) (getRandomR (-0.5, 0.5)) (pure 0)
+
+-- returns a unit cube vector
+getRandomVec :: Double -> Double -> Rand StdGen V3
+getRandomVec min max = liftM3 V3 (getRandomR (min, max)) (getRandomR (min, max)) (getRandomR (min, max))
+
+-- return a unit sphere vector, by rejection method
+-- ie keep finding until the normalized vector is within sphere
+getRandomUnitBallVec :: Rand StdGen V3
+getRandomUnitBallVec = (\x -> x ./ sqrt (lengthSquared x)) <$> iterateUntil inUnitBall (getRandomVec (-1) 1)
+  where
+    inUnitBall = I.contains (I.Interval 1e-160 1) . lengthSquared
+
+-- ensure the vector has length at most one, and 1e-160 is a safe lower bound
+-- to prevent funny underflowing which leads to catastrophic divide by zero
+
+getRandomOnHemisphere :: V3 -> Rand StdGen V3
+getRandomOnHemisphere normal = fmap orient getRandomUnitBallVec
+  where
+    orient v = if (v .* normal) > 0 then v else invert v
+
+nearZero :: V3 -> Bool
+nearZero v = abs x < s && abs y < s && abs z < s
+  where (x, y, z) = toXYZ v
+        s = 1e-8

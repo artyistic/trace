@@ -11,10 +11,10 @@ import qualified Interval as I
 -- A sphere is defined by its center point and a radius
 -- rn no color attribute, later maybe we could have a single color
 -- or even a color map, giving a color for any x, y points on the sphere
-data Sphere = Sphere Point Double
+data Sphere = Sphere Point Double Material 
 
 instance Hittable Sphere where
-  hit (Sphere center radius) r@(Ray ptOrigin ptdirection) tInterval = do
+  hit (Sphere center radius mat) r@(Ray ptOrigin ptdirection) tInterval = do
     -- no hit
     -- evaluates to nothing
     guard (discriminant >= 0)
@@ -26,7 +26,7 @@ instance Hittable Sphere where
     -- generate hit record
     let p = at r t
         outwardNormal = toV3 ((p <-> center) .^ (1 / radius))
-    return $ generateHitRecord r p t outwardNormal
+    return $ generateHitRecord r p t outwardNormal mat
     where
       oc = center <-> ptOrigin -- from origin to center of sphere
       a = lengthSquared ptdirection

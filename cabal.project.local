@@ -1,0 +1,3 @@
+package *
+    profiling: true
+    profiling-detail: late
