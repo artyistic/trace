@@ -14,7 +14,11 @@ main = do
   --     groundSphere = Sphere (fromCoord 0 (-100.5) (-1)) 100 (mkLambertian grey)
   let ground = Sphere (fromCoord 0.0 (-100.5) (-1.0)) 100.0 materialGround
       center = Sphere (fromCoord 0.0 0.0 (-1.2)) 0.5 materialCenter
+
+      -- left and the bubble represents a hollow glass sphere
       left = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.5 materialLeft
+      -- leftBubble =  Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.4 materialLeft
+
       right = Sphere (fromCoord 1.0 0.0 (-1.0)) 0.5 materialRight
       world = makeHittableList [ground, center, left, right]
       cam = camera (16.0 / 9.0) 1.0 400 100
@@ -40,7 +44,10 @@ materialCenter :: Material
 materialCenter = mkLambertian (color 0.1 0.2 0.5)
 
 materialLeft :: Material
-materialLeft = mkDielectric 1.50
+materialLeft = mkDielectric (1.0 / 1.33)
 
 materialRight :: Material
 materialRight = mkMetal (color 0.8 0.6 0.2) 1.0
+
+materialBubble :: Material
+materialBubble = mkDielectric (1.00 / 1.50)

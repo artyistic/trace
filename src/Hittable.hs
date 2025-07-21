@@ -79,8 +79,15 @@ mkDielectric refractiveIndex = Material {
                 else refractiveIndex
         unitInDirection = normalize inDirection
         refractedRay = refract unitInDirection normal ri
+        reflectedRay = reflect inDirection normal
+        
+        cosTheta = min (invert unitInDirection .* normal) 1.0 -- min 1.0 small angle floating pt errors
+        sinTheta = sqrt (1 - cosTheta * cosTheta)
+        cannotRefract = ri * sinTheta > 1.0        
     in
-    pure $ Just (attenuation, Ray hitPt refractedRay)
+    if cannotRefract -- logic for total internal refraction
+      then pure $ Just (attenuation, Ray hitPt reflectedRay)
+      else pure $ Just (attenuation, Ray hitPt refractedRay)
 
 }
 
