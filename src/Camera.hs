@@ -15,14 +15,14 @@ import qualified Interval as I
 import Shapes.Sphere
 import System.Random
 
--- camera is just defined by aspectRatio, imageWidth, focalLength and samplesPerPixel
+-- camera is just defined by aspectRatio, imageWidth, and samplesPerPixel
 data Camera = Camera
   { aspectRatio :: Double,
-    focalLength :: Double,
     imageWidth :: Int,
     samplesPerPixel :: Int,
-    -- convention will set it to be (0, 0, 0)
-    center :: Point,
+
+    -- when intialized, user will gve lookFrom lookAt and vup
+    center :: Point, -- will be lookFrom
     -- derived from above
     imageHeight :: Int,
     pixelDu :: V3,
@@ -31,11 +31,10 @@ data Camera = Camera
   }
 
 -- init a camera
-camera :: Double -> Double -> Int -> Int -> Double -> Camera
-camera aspectRatio focalLength imageWidth samplesPerPixel vfov =
+camera :: Double -> Int -> Int -> Double -> Point -> Point -> V3 -> Camera
+camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup =
   Camera
     aspectRatio
-    focalLength
     imageWidth
     samplesPerPixel
     cameraCenter
@@ -46,14 +45,25 @@ camera aspectRatio focalLength imageWidth samplesPerPixel vfov =
   where
     imageHeight = max (floor $ fromIntegral imageWidth / aspectRatio) 1
 
+    focalLength = distance lookFrom lookAt
+
+    -- vfov
     thetaRad = vfov * (pi / 180)
     h = tan $ thetaRad / 2
     viewportHeight = 2.0 * h * focalLength
     viewportWidth = viewportHeight * on (/) fromIntegral imageWidth imageHeight
-    cameraCenter = fromCoord 0 0 0
 
-    viewportU = V3 viewportWidth 0 0
-    viewportV = V3 0 (negate viewportHeight) 0
+    -- lookFrom is where the camera is positioned
+    cameraCenter = lookFrom
+
+    -- u v w are the basis vector for the camera coord frame
+    w = toV3 $ normalize (lookFrom <-> lookAt)
+    u = normalize (vup >< w)
+    v = w >< u
+
+
+    viewportU = u .^ viewportWidth
+    viewportV = invert v .^ viewportHeight
 
     pixelDu = viewportU .^ (1 / fromIntegral imageWidth)
     pixelDv = viewportV .^ (1 / fromIntegral imageHeight)
@@ -63,11 +73,9 @@ camera aspectRatio focalLength imageWidth samplesPerPixel vfov =
         cameraCenter
         ( \x ->
             x
-              <-> V3 0 0 focalLength
-              <-> viewportU
-              .^ 0.5
-              <-> viewportV
-              .^ 0.5
+              <-> (w .^ focalLength)
+              <-> viewportU .^ 0.5
+              <-> viewportV .^ 0.5
         )
     pixel00Loc = evalPoint viewportUpperLeft (<+> (pixelDu <+> pixelDv) .^ 0.5)
 
@@ -76,7 +84,6 @@ render
   fpath
   world
   ( Camera
-      _
       _
       imageWidth
       samplesPerPixel
