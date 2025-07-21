@@ -17,10 +17,10 @@ main = do
 
       -- left and the bubble represents a hollow glass sphere
       left = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.5 materialLeft
-      -- leftBubble =  Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.4 materialLeft
+      leftBubble = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.4 materialBubble
 
       right = Sphere (fromCoord 1.0 0.0 (-1.0)) 0.5 materialRight
-      world = makeHittableList [ground, center, left, right]
+      world = makeHittableList [ground, center, left, leftBubble, right]
       cam = camera (16.0 / 9.0) 1.0 400 100
   render "./output/test.ppm" world cam (mkStdGen 564128)
 
@@ -44,10 +44,10 @@ materialCenter :: Material
 materialCenter = mkLambertian (color 0.1 0.2 0.5)
 
 materialLeft :: Material
-materialLeft = mkDielectric (1.0 / 1.33)
+materialLeft = mkDielectric 1.5
 
 materialRight :: Material
-materialRight = mkMetal (color 0.8 0.6 0.2) 1.0
+materialRight = mkMetal (color 0.8 0.6 0.2) 1.5
 
 materialBubble :: Material
 materialBubble = mkDielectric (1.00 / 1.50)

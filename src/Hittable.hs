@@ -70,7 +70,7 @@ mkMetal c fuzz = Material {
 
 mkDielectric :: Double -> Material
 mkDielectric refractiveIndex = Material {
-  matScatter = \r@(Ray _ inDirection) hR ->
+  matScatter = \r@(Ray _ inDirection) hR -> do
     let normal = hitNormal hR
         attenuation = color 1.0 1.0 1.0
         hitPt = hitP hR
@@ -80,12 +80,15 @@ mkDielectric refractiveIndex = Material {
         unitInDirection = normalize inDirection
         refractedRay = refract unitInDirection normal ri
         reflectedRay = reflect inDirection normal
-        
+
         cosTheta = min (invert unitInDirection .* normal) 1.0 -- min 1.0 small angle floating pt errors
         sinTheta = sqrt (1 - cosTheta * cosTheta)
-        cannotRefract = ri * sinTheta > 1.0        
-    in
-    if cannotRefract -- logic for total internal refraction
+        cannotRefract = ri * sinTheta > 1.0
+        schlickReflectance cosine r =
+          let r0 = (1 -  r) / (1 + r) * (1 -  r) / (1 + r)
+          in r0 + (1 - r0) * ((1 - cosine) ** 5)
+    randomDouble <- getRandom :: Rand StdGen Double
+    if cannotRefract || schlickReflectance cosTheta ri > randomDouble -- logic for total internal refraction
       then pure $ Just (attenuation, Ray hitPt reflectedRay)
       else pure $ Just (attenuation, Ray hitPt refractedRay)
 
