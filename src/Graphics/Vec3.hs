@@ -1,6 +1,7 @@
 module Graphics.Vec3 where
-import Control.Monad.Random
+
 import Control.Monad.Loops
+import Control.Monad.Random
 import qualified Interval as I
 
 class Vec3 v where
@@ -11,8 +12,9 @@ class Vec3 v where
 
   transform :: (Double -> Double) -> v -> v
   transform f v = fromXYZ (f x) (f y) (f z)
-  
-    where (x, y , z) = toXYZ v
+    where
+      (x, y, z) = toXYZ v
+
   -- vector operations
   zipV :: (Double -> Double -> Double) -> v -> v -> v
   zipV f v1 v2 = fromXYZ (f x1 x2) (f y1 y2) (f z1 z2)
@@ -59,7 +61,7 @@ class Vec3 v where
   -- scalar division for conveninence
   -- div by zero NOT checked
   (./) :: v -> Double -> v
-  (./) v s = v .^ (1/s)
+  (./) v s = v .^ (1 / s)
 
   -- L2 norm
   norm :: v -> Double
@@ -74,7 +76,7 @@ class Vec3 v where
 
   -- length squared
   lengthSquared :: v -> Double
-  lengthSquared v = x*x + y*y + z*z
+  lengthSquared v = x * x + y * y + z * z
     where
       (x, y, z) = toXYZ v
 
@@ -84,7 +86,18 @@ class Vec3 v where
 
   -- reflect v on normal n
   reflect :: v -> v -> v
-  reflect v n = v <-> (n .^ (2*(v .* n)))
+  reflect v n = v <-> (n .^ (2 * (v .* n)))
+
+  -- refract :: incoming ray ->
+  -- normal vector on the point of contact ->
+  -- ratio of refractive index
+  refract :: v -> v -> Double -> v
+  refract uv n etaiOverEtat =
+    rayOutPerpen <+> rayOutPara
+    where
+      cosTheta = min (invert uv .* n) 1.0 -- min 1.0 small angle floating pt errors
+      rayOutPerpen = (uv <+> (n .^ cosTheta)) .^ etaiOverEtat
+      rayOutPara = n .^ sqrt (abs (1.0 - lengthSquared rayOutPerpen))
 
   componentMul :: v -> v -> v
   componentMul = zipV (*)
@@ -108,7 +121,6 @@ data V3 = V3 !Double !Double !Double
 instance Vec3 V3 where
   fromXYZ = V3
   toXYZ (V3 x y z) = (x, y, z)
-
 
 -- Returns a vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square on viewport
 -- per documentation, the range of random of Doubles lies in [0, 1)
@@ -136,5 +148,6 @@ getRandomOnHemisphere normal = fmap orient getRandomUnitBallVec
 
 nearZero :: V3 -> Bool
 nearZero v = abs x < s && abs y < s && abs z < s
-  where (x, y, z) = toXYZ v
-        s = 1e-8
+  where
+    (x, y, z) = toXYZ v
+    s = 1e-8

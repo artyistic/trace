@@ -30,7 +30,7 @@ data HitRecord = HitRecord
     hitMaterial :: Material
   }
 
-data Material = Material
+newtype Material = Material
   {
   {-
     scatter takes:
@@ -42,29 +42,31 @@ data Material = Material
       color known as attenuation
       scattered ray
   -}
-  matScatter :: Material -> Ray -> HitRecord -> Rand StdGen (Maybe (Color, Ray)),
-  matColor :: Color
+  matScatter :: Ray -> HitRecord -> Rand StdGen (Maybe (Color, Ray))
   }
 
 mkLambertian :: Color -> Material
 mkLambertian c = Material {
-  matColor = c,
-  matScatter = \(Material _ thisColor) r hR -> do
+  matScatter = \r hR -> do
     let normal = hitNormal hR
         hitPt = hitP hR
     d <- (\a -> if nearZero a then normal else a ) <$> getRandomUnitBallVec
-    return $ pure (thisColor, Ray hitPt (d <+> normal))
+    return $ pure (c, Ray hitPt (d <+> normal))
 }
 
-mkMetal :: Color -> Material
-mkMetal c = Material {
-  matColor = c,
-  matScatter = \(Material _ thisColor) r@(Ray _ inDirection) hR -> do
+mkMetal :: Color -> Double -> Material
+mkMetal c fuzz = Material {
+  matScatter = \r@(Ray _ inDirection) hR -> do
+    randomVec <- getRandomUnitBallVec
     let normal = hitNormal hR
         hitPt = hitP hR
         reflectedRay = reflect inDirection normal
-    return $ pure (thisColor, Ray hitPt reflectedRay)
+        fuzzedReflected = normalize reflectedRay <+> randomVec .^ fuzz
+        scattered@(Ray _ scatteredDir) = Ray hitPt fuzzedReflected
+
+    if scatteredDir .* normal > 0 then return $ pure (c, scattered) else pure Nothing
 }
+
 generateHitRecord :: Ray -> Point -> Double -> V3 -> Material -> HitRecord
 generateHitRecord (Ray _ direction) p t outwardNormal =
   HitRecord p normal t frontFacing

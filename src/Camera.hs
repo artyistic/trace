@@ -143,8 +143,7 @@ rayColor r@(Ray _ direction) world depth =
       -- d <- getRandomOnHemisphere normal
       -- (.^ 0.5) <$> rayColor (Ray hitPt (d <+> normal)) world (depth - 1)
       let mat = hitMaterial hR
-          scatter = matScatter mat
-      scatterResult <-scatter mat r hR
+      scatterResult <- matScatter mat r hR
       maybe 
         (pure $ color 0 0 0)
         (\(attenuation, scattered) -> (attenuation `componentMul`) <$> rayColor scattered world (depth - 1))

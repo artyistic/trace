@@ -40,7 +40,7 @@ materialCenter :: Material
 materialCenter = mkLambertian (color 0.1 0.2 0.5)
 
 materialLeft :: Material
-materialLeft = mkMetal (color 0.8 0.8 0.8)
+materialLeft = mkMetal (color 0.8 0.8 0.8) 0.3
 
 materialRight :: Material
-materialRight = mkMetal (color 0.8 0.6 0.2)
+materialRight = mkMetal (color 0.8 0.6 0.2) 1.0
