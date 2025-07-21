@@ -97,7 +97,7 @@ class Vec3 v where
     where
       cosTheta = min (invert uv .* n) 1.0 -- min 1.0 small angle floating pt errors
       rayOutPerpen = (uv <+> (n .^ cosTheta)) .^ etaiOverEtat
-      rayOutPara = n .^ sqrt (abs (1.0 - lengthSquared rayOutPerpen))
+      rayOutPara = invert $ n .^ sqrt (abs (1.0 - lengthSquared rayOutPerpen))
 
   componentMul :: v -> v -> v
   componentMul = zipV (*)

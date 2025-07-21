@@ -11,7 +11,8 @@ module Hittable
     Material,
     matScatter,
     mkLambertian,
-    mkMetal
+    mkMetal,
+    mkDielectric
   )
 where
 
@@ -65,6 +66,22 @@ mkMetal c fuzz = Material {
         scattered@(Ray _ scatteredDir) = Ray hitPt fuzzedReflected
 
     if scatteredDir .* normal > 0 then return $ pure (c, scattered) else pure Nothing
+}
+
+mkDielectric :: Double -> Material
+mkDielectric refractiveIndex = Material {
+  matScatter = \r@(Ray _ inDirection) hR ->
+    let normal = hitNormal hR
+        attenuation = color 1.0 1.0 1.0
+        hitPt = hitP hR
+        ri = if hitFrontFacing hR
+                then 1.0 / refractiveIndex
+                else refractiveIndex
+        unitInDirection = normalize inDirection
+        refractedRay = refract unitInDirection normal ri
+    in
+    pure $ Just (attenuation, Ray hitPt refractedRay)
+
 }
 
 generateHitRecord :: Ray -> Point -> Double -> V3 -> Material -> HitRecord

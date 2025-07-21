@@ -17,7 +17,7 @@ main = do
       left = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.5 materialLeft
       right = Sphere (fromCoord 1.0 0.0 (-1.0)) 0.5 materialRight
       world = makeHittableList [ground, center, left, right]
-      cam = camera (16.0 / 9.0) 1.0 400 10
+      cam = camera (16.0 / 9.0) 1.0 400 100
   render "./output/test.ppm" world cam (mkStdGen 564128)
 
 -- colors for background
@@ -40,7 +40,7 @@ materialCenter :: Material
 materialCenter = mkLambertian (color 0.1 0.2 0.5)
 
 materialLeft :: Material
-materialLeft = mkMetal (color 0.8 0.8 0.8) 0.3
+materialLeft = mkDielectric 1.50
 
 materialRight :: Material
 materialRight = mkMetal (color 0.8 0.6 0.2) 1.0
