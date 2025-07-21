@@ -9,45 +9,45 @@ import Graphics.Point
 import Control.Monad.Random
 
 main :: IO ()
-main = do
-  -- let redSphere = Sphere (fromCoord 0 0 (-1)) 0.5 (mkLambertian grey)
-  --     groundSphere = Sphere (fromCoord 0 (-100.5) (-1)) 100 (mkLambertian grey)
-  let ground = Sphere (fromCoord 0.0 (-100.5) (-1.0)) 100.0 materialGround
-      center = Sphere (fromCoord 0.0 0.0 (-1.2)) 0.5 materialCenter
-
-      -- left and the bubble represents a hollow glass sphere
-      left = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.5 materialLeft
-      leftBubble = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.4 materialBubble
-
-      right = Sphere (fromCoord 1.0 0.0 (-1.0)) 0.5 materialRight
-      world = makeHittableList [ground, center, left, leftBubble, right]
-      cam = camera (16.0 / 9.0) 1.0 400 100
+main =
+  let 
+      world = vfovTestWorld
+      cam = camera (16.0 / 9.0) 1.0 400 50 90
+  in
   render "./output/test.ppm" world cam (mkStdGen 564128)
 
--- colors for background
-white :: Color
-white = color 1 1 1
 
-lightBlue :: Color
-lightBlue = color 0.5 0.7 1.0
+dielectricTestWorld :: HittableList
+dielectricTestWorld =
+  let
+    materialGround = mkLambertian (color 0.8 0.8 0.0)
+    materialCenter = mkLambertian (color 0.1 0.2 0.5)
+    materialLeft = mkDielectric 1.5
+    materialRight = mkMetal (color 0.8 0.6 0.2) 1.5
+    materialBubble = mkDielectric (1.00 / 1.50)
 
-grey :: Color
-grey = color 0.5 0.5 0.5
+    ground = Sphere (fromCoord 0.0 (-100.5) (-1.0)) 100.0 materialGround
+    center = Sphere (fromCoord 0.0 0.0 (-1.2)) 0.5 materialCenter
+    right = Sphere (fromCoord 1.0 0.0 (-1.0)) 0.5 materialRight
 
-pink :: Color
-pink = color 1 0 0.906
 
-materialGround :: Material
-materialGround = mkLambertian (color 0.8 0.8 0.0)
+    -- left and the bubble represents a hollow glass sphere
+    left = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.5 materialLeft
+    leftBubble = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.4 materialBubble
 
-materialCenter :: Material
-materialCenter = mkLambertian (color 0.1 0.2 0.5)
+  in makeHittableList [ground, center, left, leftBubble, right]
 
-materialLeft :: Material
-materialLeft = mkDielectric 1.5
+vfovTestWorld :: HittableList
+vfovTestWorld =
+  let
+    r = cos $ pi / 4
+    matLeft = mkLambertian $ color 1 0 0
+    matRight = mkLambertian $ color 0 0 1
+    
+    left = Sphere (fromCoord (-r) 0 (-1)) r matLeft
+    right = Sphere (fromCoord r 0 (-1)) r matRight
 
-materialRight :: Material
-materialRight = mkMetal (color 0.8 0.6 0.2) 1.5
+  in makeHittableList [left, right]
 
-materialBubble :: Material
-materialBubble = mkDielectric (1.00 / 1.50)
+
+

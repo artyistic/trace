@@ -31,8 +31,8 @@ data Camera = Camera
   }
 
 -- init a camera
-camera :: Double -> Double -> Int -> Int -> Camera
-camera aspectRatio focalLength imageWidth samplesPerPixel =
+camera :: Double -> Double -> Int -> Int -> Double -> Camera
+camera aspectRatio focalLength imageWidth samplesPerPixel vfov =
   Camera
     aspectRatio
     focalLength
@@ -45,7 +45,10 @@ camera aspectRatio focalLength imageWidth samplesPerPixel =
     pixel00Loc
   where
     imageHeight = max (floor $ fromIntegral imageWidth / aspectRatio) 1
-    viewportHeight = 2.0
+
+    thetaRad = vfov * (pi / 180)
+    h = tan $ thetaRad / 2
+    viewportHeight = 2.0 * h * focalLength
     viewportWidth = viewportHeight * on (/) fromIntegral imageWidth imageHeight
     cameraCenter = fromCoord 0 0 0
 
@@ -84,8 +87,8 @@ render
       pixel00Loc
     )
   gen =
-    do      
-      let pixels = [pixelRenderer x y world| y <- [0 .. imageHeight - 1], x <- [0 .. imageWidth - 1]]
+    do
+      let pixels = [pixelRenderer x y world | y <- [0 .. imageHeight - 1], x <- [0 .. imageWidth - 1]]
       t <- evalRandIO (sequenceA pixels)
       writeFile fpath $
         "P3\n"
@@ -94,10 +97,7 @@ render
           ++ show imageHeight
           ++ "\n255\n"
           ++ foldr (\x y -> colorToRGBString x ++ "\n" ++ y) "" t
-      
-
     where
-
       -- for each x y position on viewPort, randomly sample pixels to construct a smooth edge
       -- obviously this does 10x work for each every pixel, super slow
 
@@ -144,11 +144,12 @@ rayColor r@(Ray _ direction) world depth =
       -- (.^ 0.5) <$> rayColor (Ray hitPt (d <+> normal)) world (depth - 1)
       let mat = hitMaterial hR
       scatterResult <- matScatter mat r hR
-      maybe 
+      maybe
         (pure $ color 0 0 0)
         (\(attenuation, scattered) -> (attenuation `componentMul`) <$> rayColor scattered world (depth - 1))
         scatterResult
-      -- d + normal for lambertian sphere
+
+-- d + normal for lambertian sphere
 
 -- colors for background
 white :: Color
