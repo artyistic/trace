@@ -1,19 +1,13 @@
-module Camera (Camera, camera, render, rayColor) where
+module Camera (Camera, camera, render) where
 
-import Codec.Picture as P
-import qualified Codec.Picture as P
-import Codec.Picture.Types
 import Control.Monad.Loops
 import Control.Monad.Random
-import Control.Monad.ST
 import Data.Bool (bool)
 import Data.Function
 import Graphics
 import Hittable
 import Hittables
 import qualified Interval as I
-import Shapes.Sphere
-import System.Random
 
 -- camera is just defined by aspectRatio, imageWidth, and samplesPerPixel
 data Camera = Camera
@@ -79,11 +73,11 @@ camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup =
         )
     pixel00Loc = evalPoint viewportUpperLeft (<+> (pixelDu <+> pixelDv) .^ 0.5)
 
-render :: FilePath -> HittableList -> Camera -> StdGen -> IO ()
+render :: FilePath -> HittableList -> Camera -> StdGen -> Int -> IO ()
 render
   fpath
   world
-  ( Camera
+  cam@( Camera
       _
       imageWidth
       samplesPerPixel
@@ -93,7 +87,8 @@ render
       pixelDv
       pixel00Loc
     )
-  gen =
+  gen
+  numBounces =
     do
       let pixels = [pixelRenderer x y world | y <- [0 .. imageHeight - 1], x <- [0 .. imageWidth - 1]]
       t <- evalRandIO (sequenceA pixels)
@@ -111,27 +106,25 @@ render
       -- replicateM makes a random array of position offsets,
       -- then we map rayColors, average and gammaCorrect it
       pixelRenderer :: Int -> Int -> HittableList -> Rand StdGen Color
-      pixelRenderer x y world' =
-        sampleSquares
-          >>= ( fmap (gammaCorrected . averageColor)
-                  . traverse
-                    -- this here takes a sampled square and shoot rays with raycolor
-                    ( \(V3 offsetX offsetY _) ->
-                        rayColor
-                          ( Ray
-                              cameraCenter
-                              ( toV3 $
-                                  pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY)
-                                    <-> cameraCenter
-                              )
-                          )
-                          world'
-                          10
-                    )
-              )
+      pixelRenderer x y world' = do
+        let sampleColor v = rayColor
+                    (shootRay cameraCenter x y v cam)
+                    world'
+                    numBounces -- this ray trace a particular sample
+        sampleSquares <- replicateM samplesPerPixel getSampleSquare
+        gammaCorrected . averageColor <$> traverse sampleColor sampleSquares
+      sampleSquares = replicateM samplesPerPixel getSampleSquare -- generate sample for each pixels
 
-      sampleSquares = replicateM samplesPerPixel getSampleSquare
-      pixelCenter x' y' = evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
+shootRay :: Point -> Int -> Int -> V3 -> Camera-> Ray
+shootRay cameraCenter x y (V3 offsetX offsetY _) cam =
+  let
+    rayOrigin = cameraCenter
+    rayDirection = toV3 $ pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
+                    <-> rayOrigin
+  in Ray rayOrigin rayDirection
+
+pixelCenter :: Double -> Double -> Camera -> Point
+pixelCenter x' y' (Camera _ _ _ _ _ pixelDu pixelDv pixel00Loc) = evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
 
 rayColor :: Ray -> HittableList -> Int -> Rand StdGen Color
 rayColor r@(Ray _ direction) world depth =

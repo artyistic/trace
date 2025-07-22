@@ -15,7 +15,7 @@ main =
       world = dielectricTestWorld
       cam = camera (16.0 / 9.0) 400 50 20 (fromCoord (-2) 2 1) (fromCoord 0 0 (-1)) (V3 0 1 0)
   in
-  render "./output/test.ppm" world cam (mkStdGen 564128)
+  render "./output/test.ppm" world cam (mkStdGen 564128) 10
 
 
 dielectricTestWorld :: HittableList

@@ -2,8 +2,6 @@ module Graphics.Ray where
 
 import Graphics.Vec3
 import Graphics.Point
-import Graphics.Pixel
-import qualified Codec.Picture as P
 
 data Ray = Ray Point V3
 
