@@ -138,6 +138,11 @@ getRandomUnitBallVec = (\x -> x ./ sqrt (lengthSquared x)) <$> iterateUntil inUn
   where
     inUnitBall = I.contains (I.Interval 1e-160 1) . lengthSquared
 
+getRandomInUnitDisk :: Rand StdGen V3
+getRandomInUnitDisk = iterateUntil inUnitDisk (liftM3 V3 (getRandomR (-1, 1)) (getRandomR (-1, 1)) (pure 0))
+  where
+    inUnitDisk = I.contains (I.Interval 1e-160 1) . lengthSquared
+
 -- ensure the vector has length at most one, and 1e-160 is a safe lower bound
 -- to prevent funny underflowing which leads to catastrophic divide by zero
 

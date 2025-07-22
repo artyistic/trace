@@ -14,6 +14,11 @@ data Camera = Camera
   { aspectRatio :: Double,
     imageWidth :: Int,
     samplesPerPixel :: Int,
+
+    defocusAngle :: Double,
+    focusDistance :: Double,
+    defocusDiskU :: V3,
+    defocusDiskV :: V3,
     -- when intialized, user will gve lookFrom lookAt and vup
     center :: Point, -- will be lookFrom
     -- derived from above
@@ -24,12 +29,16 @@ data Camera = Camera
   }
 
 -- init a camera
-camera :: Double -> Int -> Int -> Double -> Point -> Point -> V3 -> Camera
-camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup =
+camera :: Double -> Int -> Int -> Double -> Point -> Point -> V3 -> Double -> Double -> Camera
+camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup defocusAngle focusDistance =
   Camera
     aspectRatio
     imageWidth
     samplesPerPixel
+    defocusAngle
+    focusDistance
+    defocusDiskU
+    defocusDiskV
     cameraCenter
     imageHeight
     pixelDu
@@ -38,12 +47,10 @@ camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup =
   where
     imageHeight = max (floor $ fromIntegral imageWidth / aspectRatio) 1
 
-    focalLength = distance lookFrom lookAt
-
     -- vfov
     thetaRad = vfov * (pi / 180)
     h = tan $ thetaRad / 2
-    viewportHeight = 2.0 * h * focalLength
+    viewportHeight = 2.0 * h * focusDistance
     viewportWidth = viewportHeight * on (/) fromIntegral imageWidth imageHeight
 
     -- lookFrom is where the camera is positioned
@@ -65,13 +72,18 @@ camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup =
         cameraCenter
         ( \x ->
             x
-              <-> (w .^ focalLength)
+              <-> (w .^ focusDistance)
               <-> viewportU
               .^ 0.5
               <-> viewportV
               .^ 0.5
         )
     pixel00Loc = evalPoint viewportUpperLeft (<+> (pixelDu <+> pixelDv) .^ 0.5)
+
+    -- camera's defocus basis vectors
+    defocusRadius = focusDistance * tan ((defocusAngle / 2) * (pi / 180))
+    defocusDiskU = u .^ defocusRadius
+    defocusDiskV = v .^ defocusRadius
 
 render :: FilePath -> HittableList -> Camera -> StdGen -> Int -> IO ()
 render
@@ -81,6 +93,10 @@ render
           _
           imageWidth
           samplesPerPixel
+          defocusAngle
+          focusDistance
+          defocusDiskU
+          defocusDiskV
           cameraCenter
           imageHeight
           pixelDu
@@ -105,33 +121,44 @@ render
           ++ foldr (\x y -> colorToRGBString x ++ "\n" ++ y) "" t
     where
       -- for each x y position on viewPort, randomly sample pixels to construct a smooth edge
-      -- obviously this does 10x work for each every pixel, super slow
 
       -- replicateM makes a random array of position offsets,
       -- then we map rayColors, average and gammaCorrect it
       pixelRenderer :: Int -> Int -> HittableList -> Rand StdGen Color
       pixelRenderer x y world' = do
-        let sampleColor v =
+        sampleSquares <- replicateM samplesPerPixel getSampleSquare
+        d <- sampleDefocusDisk cam
+        let
+          sampleColor v = do
+              d <- sampleDefocusDisk cam
+              let rayOrigin = if defocusAngle <= 0 then cameraCenter else d
               rayColor
-                (shootRay cameraCenter x y v cam)
+                (shootRay rayOrigin x y v cam)
                 world'
                 numBounces -- this ray trace a particular sample
-        sampleSquares <- replicateM samplesPerPixel getSampleSquare
         gammaCorrected . averageColor <$> traverse sampleColor sampleSquares
 
 shootRay :: Point -> Int -> Int -> V3 -> Camera -> Ray
-shootRay cameraCenter x y (V3 offsetX offsetY _) cam =
-  let rayOrigin = cameraCenter
-      rayDirection =
+shootRay rayOrigin x y (V3 offsetX offsetY _) cam =
+  let rayDirection =
         toV3 $
           pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
             <-> rayOrigin
    in Ray rayOrigin rayDirection
 
 pixelCenter :: Double -> Double -> Camera -> Point
-pixelCenter x' y' (Camera _ _ _ _ _ pixelDu pixelDv pixel00Loc) =
+pixelCenter x' y' (Camera _ _ _ _ _ _ _ _ _ pixelDu pixelDv pixel00Loc) =
   evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
 
+sampleDefocusDisk :: Camera -> Rand StdGen Point
+sampleDefocusDisk cam = do
+  let 
+      diskU = defocusDiskU cam
+      diskV = defocusDiskV cam
+      c = center cam
+  (V3 pX pY _) <- getRandomInUnitDisk
+  return $ evalPoint c (\c -> c <+> diskU .^ pX <+> diskV .^ pY)
+  
 rayColor :: Ray -> HittableList -> Int -> Rand StdGen Color
 rayColor r@(Ray _ direction) world depth =
   if depth <= 0
@@ -156,8 +183,6 @@ rayColor r@(Ray _ direction) world depth =
             (attenuation `componentMul`) <$> rayColor scattered world (depth - 1)
         )
         scatterResult
-
--- d + normal for lambertian sphere
 
 -- colors for background
 white :: Color
