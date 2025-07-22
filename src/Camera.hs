@@ -14,7 +14,6 @@ data Camera = Camera
   { aspectRatio :: Double,
     imageWidth :: Int,
     samplesPerPixel :: Int,
-
     -- when intialized, user will gve lookFrom lookAt and vup
     center :: Point, -- will be lookFrom
     -- derived from above
@@ -55,7 +54,6 @@ camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup =
     u = normalize (vup >< w)
     v = w >< u
 
-
     viewportU = u .^ viewportWidth
     viewportV = invert v .^ viewportHeight
 
@@ -68,8 +66,10 @@ camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup =
         ( \x ->
             x
               <-> (w .^ focalLength)
-              <-> viewportU .^ 0.5
-              <-> viewportV .^ 0.5
+              <-> viewportU
+              .^ 0.5
+              <-> viewportV
+              .^ 0.5
         )
     pixel00Loc = evalPoint viewportUpperLeft (<+> (pixelDu <+> pixelDv) .^ 0.5)
 
@@ -78,19 +78,23 @@ render
   fpath
   world
   cam@( Camera
-      _
-      imageWidth
-      samplesPerPixel
-      cameraCenter
-      imageHeight
-      pixelDu
-      pixelDv
-      pixel00Loc
-    )
+          _
+          imageWidth
+          samplesPerPixel
+          cameraCenter
+          imageHeight
+          pixelDu
+          pixelDv
+          pixel00Loc
+        )
   gen
   numBounces =
     do
-      let pixels = [pixelRenderer x y world | y <- [0 .. imageHeight - 1], x <- [0 .. imageWidth - 1]]
+      let pixels =
+            [ pixelRenderer x y world
+              | y <- [0 .. imageHeight - 1],
+                x <- [0 .. imageWidth - 1]
+            ]
       t <- evalRandIO (sequenceA pixels)
       writeFile fpath $
         "P3\n"
@@ -107,24 +111,26 @@ render
       -- then we map rayColors, average and gammaCorrect it
       pixelRenderer :: Int -> Int -> HittableList -> Rand StdGen Color
       pixelRenderer x y world' = do
-        let sampleColor v = rayColor
-                    (shootRay cameraCenter x y v cam)
-                    world'
-                    numBounces -- this ray trace a particular sample
+        let sampleColor v =
+              rayColor
+                (shootRay cameraCenter x y v cam)
+                world'
+                numBounces -- this ray trace a particular sample
         sampleSquares <- replicateM samplesPerPixel getSampleSquare
         gammaCorrected . averageColor <$> traverse sampleColor sampleSquares
-      sampleSquares = replicateM samplesPerPixel getSampleSquare -- generate sample for each pixels
 
-shootRay :: Point -> Int -> Int -> V3 -> Camera-> Ray
+shootRay :: Point -> Int -> Int -> V3 -> Camera -> Ray
 shootRay cameraCenter x y (V3 offsetX offsetY _) cam =
-  let
-    rayOrigin = cameraCenter
-    rayDirection = toV3 $ pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
-                    <-> rayOrigin
-  in Ray rayOrigin rayDirection
+  let rayOrigin = cameraCenter
+      rayDirection =
+        toV3 $
+          pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
+            <-> rayOrigin
+   in Ray rayOrigin rayDirection
 
 pixelCenter :: Double -> Double -> Camera -> Point
-pixelCenter x' y' (Camera _ _ _ _ _ pixelDu pixelDv pixel00Loc) = evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
+pixelCenter x' y' (Camera _ _ _ _ _ pixelDu pixelDv pixel00Loc) =
+  evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
 
 rayColor :: Ray -> HittableList -> Int -> Rand StdGen Color
 rayColor r@(Ray _ direction) world depth =
@@ -146,7 +152,9 @@ rayColor r@(Ray _ direction) world depth =
       scatterResult <- matScatter mat r hR
       maybe
         (pure $ color 0 0 0)
-        (\(attenuation, scattered) -> (attenuation `componentMul`) <$> rayColor scattered world (depth - 1))
+        ( \(attenuation, scattered) ->
+            (attenuation `componentMul`) <$> rayColor scattered world (depth - 1)
+        )
         scatterResult
 
 -- d + normal for lambertian sphere
