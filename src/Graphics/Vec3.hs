@@ -22,6 +22,9 @@ class Vec3 v where
       (x1, y1, z1) = toXYZ v1
       (x2, y2, z2) = toXYZ v2
 
+  {-# INLINE zipV #-}
+
+
   -- addition
   (<+>) :: v -> v -> v
   (<+>) = zipV (+)

@@ -8,22 +8,58 @@ import Graphics.Vec3
 import Hittable
 import Hittables
 import Shapes.Sphere
+import Data.Maybe (catMaybes)
+
+
+
+aspectRatio :: Double
+aspectRatio = (16.0 / 9.0)
+
+imageWidth :: Int
+imageWidth = 400
+
+samplesPerPixel :: Int
+samplesPerPixel = 100
+
+vfov :: Double
+vfov = 20
+
+lookFrom :: Point
+lookFrom = fromCoord (-2) 2 1
+
+lookAt :: Point
+lookAt = fromCoord 0 0 (-1)
+
+vup :: V3
+vup = V3 0 1 0
+
+defocusAngle :: Double
+defocusAngle = 10.0
+
+focusDistance :: Double
+focusDistance = 3.4
+
+maxDepth :: Int
+maxDepth = 50
 
 main :: IO ()
-main =
-  let world = dielectricTestWorld
-      cam =
-        camera
-          (16.0 / 9.0)
-          400
-          100
-          20
-          (fromCoord (-2) 2 1)
-          (fromCoord 0 0 (-1))
-          (V3 0 1 0)
-          10.0
-          3.4
-   in render "./output/test.ppm" world cam (mkStdGen 564128) 50
+main = do
+  let
+    gen = mkStdGen 564128
+    -- world = evalRand bigWorld gen
+    world = dielectricTestWorld
+    cam =
+      camera
+      aspectRatio
+      imageWidth
+      samplesPerPixel
+      vfov
+      lookFrom
+      lookAt
+      vup
+      defocusAngle
+      focusDistance
+  render "./output/test.ppm" world cam gen maxDepth
 
 dielectricTestWorld :: HittableList
 dielectricTestWorld =
@@ -51,3 +87,48 @@ vfovTestWorld =
       left = Sphere (fromCoord (-r) 0 (-1)) r matLeft
       right = Sphere (fromCoord r 0 (-1)) r matRight
    in makeHittableList [left, right]
+
+bigWorld :: Rand StdGen HittableList
+bigWorld = do
+  let
+    matGround = mkLambertian $ color 0.5 0.5 0.5
+    matbS1 = mkDielectric 1.5
+    matbS2 = mkLambertian $ color 0.4 0.2 0.1
+    matbS3 = mkMetal (color 0.7 0.6 0.5) 0.0
+
+    ground = Sphere (fromCoord 0 (-1000) 0) 1000 matGround
+    bigSphere1 = Sphere (fromCoord 0 1 0) 1.0 matbS1
+    bigSphere2 = Sphere (fromCoord (-4) 1 0) 1.0 matbS2
+    bigSphere3 = Sphere (fromCoord 4 1 0) 1.0 matbS3
+  smallSpheres <- randomSpheres
+  pure $ makeHittableList ([ground, bigSphere1, bigSphere2, bigSphere3] ++ smallSpheres)
+
+randomSpheres :: Rand StdGen [Sphere]
+randomSpheres =
+  let rSphere = [genSpheres a b | a <- [-11..11], b <- [-11..11]]
+      t = sequenceA rSphere
+  in catMaybes <$> t
+
+genSpheres :: Int -> Int -> Rand StdGen (Maybe Sphere)
+genSpheres a b = do
+  offsetX <- getRandomR (0, 1) :: Rand StdGen Double
+  offsetZ <- getRandomR (0, 1) :: Rand StdGen Double
+  chooseMat <- getRandomR (0, 1) :: Rand StdGen Double
+
+  let center = V3 (fromIntegral a + 0.9 * offsetX) 0.2 (fromIntegral b + 0.9 * offsetZ)
+  if distance center (V3 4 0.2 0) <= 0.9
+    then pure Nothing
+    else Just <$> t chooseMat (fromV3 center)
+  where t :: Double -> Point -> Rand StdGen Sphere
+        t chooseMat center
+          | chooseMat < 0.8 = do
+            c <- colorFromV3 <$> getRandomVec 0 1
+            return $ Sphere center 0.2 (mkLambertian c)
+          | chooseMat < 0.95 = do
+            c <- colorFromV3 <$> getRandomVec 0.5 1
+            f <- getRandomR (0, 0.5) :: Rand StdGen Double
+            return $ Sphere center 0.2 (mkMetal c f)
+          | otherwise = do
+            return $ Sphere center 0.2 (mkDielectric 1.5)
+
+

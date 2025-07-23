@@ -8,6 +8,7 @@ import Graphics
 import Hittable
 import Hittables
 import qualified Interval as I
+import qualified Data.Massiv.Array as A
 
 -- camera is just defined by aspectRatio, imageWidth, and samplesPerPixel
 data Camera = Camera

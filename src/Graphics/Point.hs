@@ -6,7 +6,7 @@ import Graphics.Vec3
 
 -- a point is just a vec3
 newtype Point = Point V3
-  deriving (Vec3)
+  deriving (Vec3, Show)
 
 fromCoord :: Double -> Double -> Double -> Point
 fromCoord = ((Point .) .) . V3
