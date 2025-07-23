@@ -14,7 +14,7 @@ makeHittableList l = HittableList $ map SomeHittable l
 instance Hittable HittableList where
   hit (HittableList hl) r (Interval tMin tMax) = scan hl Nothing tMax
     where scan :: [SomeHittable] -> Maybe HitRecord -> Double -> Maybe HitRecord
-          scan [] closest _ = closest
+          scan [] closest _   = closest
           scan ((SomeHittable obj) : rest) closest tMax'
             = case hit obj r (Interval tMin tMax') of
               Just hr -> scan rest (Just hr) (hitT hr)

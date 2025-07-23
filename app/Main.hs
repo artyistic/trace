@@ -9,11 +9,11 @@ import Hittable
 import Hittables
 import Shapes.Sphere
 import Data.Maybe (catMaybes)
-
+import Render
 
 
 aspectRatio :: Double
-aspectRatio = (16.0 / 9.0)
+aspectRatio = 16.0 / 9.0
 
 imageWidth :: Int
 imageWidth = 400
@@ -42,10 +42,41 @@ focusDistance = 3.4
 maxDepth :: Int
 maxDepth = 50
 
+-- aspectRatio :: Double
+-- aspectRatio = 16.0 / 9.0
+
+-- imageWidth :: Int
+-- imageWidth = 400
+
+-- samplesPerPixel :: Int
+-- samplesPerPixel = 100
+
+-- vfov :: Double
+-- vfov = 20
+
+-- lookFrom :: Point
+-- lookFrom = fromCoord 13 2 3
+
+-- lookAt :: Point
+-- lookAt = fromCoord 0 0 0
+
+-- vup :: V3
+-- vup = V3 0 1 0
+
+-- defocusAngle :: Double
+-- defocusAngle = 0.6
+
+-- focusDistance :: Double
+-- focusDistance = 10.0
+
+-- maxDepth :: Int
+-- maxDepth = 10
+
 main :: IO ()
 main = do
   let
-    gen = mkStdGen 564128
+    -- gen = mkStdGen 564128
+    gen = mkStdGen 489713215
     -- world = evalRand bigWorld gen
     world = dielectricTestWorld
     cam =

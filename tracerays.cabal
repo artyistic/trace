@@ -94,6 +94,7 @@ library tracerays-lib
     Hittables
     Camera
     Interval
+    Render
 
   build-depends:
     , random ^>=1.3.1
