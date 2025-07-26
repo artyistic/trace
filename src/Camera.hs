@@ -20,7 +20,6 @@ import Control.Monad.Loops
 import Control.Monad.Random
 import Data.Bool (bool)
 import Data.Function
-import qualified Data.Massiv.Array as A
 import Graphics
 import Hittable
 import Hittables

@@ -46,10 +46,10 @@ maxDepth = 50
 -- aspectRatio = 16.0 / 9.0
 
 -- imageWidth :: Int
--- imageWidth = 400
+-- imageWidth = 1200
 
 -- samplesPerPixel :: Int
--- samplesPerPixel = 100
+-- samplesPerPixel = 500
 
 -- vfov :: Double
 -- vfov = 20
@@ -70,7 +70,9 @@ maxDepth = 50
 -- focusDistance = 10.0
 
 -- maxDepth :: Int
--- maxDepth = 10
+-- maxDepth = 50
+
+
 
 main :: IO ()
 main = do
@@ -107,7 +109,7 @@ dielectricTestWorld =
       -- left and the bubble represents a hollow glass sphere
       left = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.5 materialLeft
       leftBubble = Sphere (fromCoord (-1.0) 0.0 (-1.0)) 0.4 materialBubble
-   in makeHittableList [ground, center, left, leftBubble, right]
+   in makeHittableList $ map mkSphereHittable [ground, center, left, leftBubble, right]
 
 vfovTestWorld :: HittableList
 vfovTestWorld =
@@ -117,7 +119,7 @@ vfovTestWorld =
 
       left = Sphere (fromCoord (-r) 0 (-1)) r matLeft
       right = Sphere (fromCoord r 0 (-1)) r matRight
-   in makeHittableList [left, right]
+   in makeHittableList $ map mkSphereHittable [left, right]
 
 bigWorld :: Rand StdGen HittableList
 bigWorld = do
@@ -132,7 +134,7 @@ bigWorld = do
     bigSphere2 = Sphere (fromCoord (-4) 1 0) 1.0 matbS2
     bigSphere3 = Sphere (fromCoord 4 1 0) 1.0 matbS3
   smallSpheres <- randomSpheres
-  pure $ makeHittableList ([ground, bigSphere1, bigSphere2, bigSphere3] ++ smallSpheres)
+  pure $ makeHittableList $ map mkSphereHittable ([ground, bigSphere1, bigSphere2, bigSphere3] ++ smallSpheres)
 
 randomSpheres :: Rand StdGen [Sphere]
 randomSpheres =

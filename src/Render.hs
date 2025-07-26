@@ -6,6 +6,7 @@ import Graphics.Point
 import Graphics
 import Hittable
 import qualified Interval as I
+import qualified Data.Massiv.Array as A
 
 render :: FilePath -> HittableList -> Camera -> StdGen -> Int -> IO ()
 render
@@ -27,12 +28,22 @@ render
   gen
   numBounces =
     do
-      let pixels =
+      let
+        pixels =
             [ pixelRenderer x y world
               | y <- [0 .. imageHeight - 1],
                 x <- [0 .. imageWidth - 1]
             ]
+      --   pixels = A.makeArray A.Par (A.Sz (imageHeight A.:. imageWidth)) 
+      --             (\(i A.:. j) -> pixelRenderer i j world) :: A.Array A.D A.Ix2 (Rand StdGen Color)
+      --   test = A.mapIO evalRandIO pixels :: IO (A.Array A.B A.Ix2 Color)
+        
+      -- arrColor <- test
+
+      -- let t = A.toList arrColor
       t <- evalRandIO (sequenceA pixels)
+
+      print (length t)
       writeFile fpath $
         "P3\n"
           ++ show imageWidth
@@ -95,7 +106,8 @@ sampleDefocusDisk cam = do
       c = camCenter cam
   (V3 pX pY _) <- getRandomInUnitDisk
   return $ evalPoint c (\c -> c <+> diskU .^ pX <+> diskV .^ pY)
-  
+
+{-# INLINE rayColor #-}
 rayColor :: Ray -> HittableList -> Int -> Rand StdGen Color
 rayColor r@(Ray _ direction) world depth =
   if depth <= 0
@@ -106,7 +118,7 @@ rayColor r@(Ray _ direction) world depth =
     p1 = white .^ (1.0 - a)
     p2 = lightBlue .^ a
     a = 0.5 * (toY (normalize direction) + 1)
-    hitRecord = hit world r (I.Interval 0.001 (1 / 0))
+    hitRecord = hitWorld world r (I.Interval 0.001 (1 / 0))
     trace hR = do
       -- let normal = hitNormal hR
       --     hitPt = hitP hR

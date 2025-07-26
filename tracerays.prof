@@ -1,182 +1,166 @@
-	Wed Jul 23 19:39 2025 Time and Allocation Profiling Report  (Final)
+	Sat Jul 26 12:50 2025 Time and Allocation Profiling Report  (Final)
 
 	   tracerays +RTS -p -RTS
 
-	total time  =       32.23 secs   (32229 ticks @ 1000 us, 1 processor)
-	total alloc = 63,718,882,384 bytes  (excludes profiling overheads)
+	total time  =       30.22 secs   (30221 ticks @ 1000 us, 1 processor)
+	total alloc = 62,822,189,472 bytes  (excludes profiling overheads)
 
-COST CENTRE            MODULE                          SRC                                           %time %alloc
+COST CENTRE           MODULE                          SRC                                           %time %alloc
 
-$wrayColor             Render                          <no location info>                             14.1   14.2
-$w$chit                Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                    12.7   20.8
-$wgetRandomVec         Graphics.Vec3                   <no location info>                             12.1   16.5
-$fMonadRandT           Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52    9.6    3.1
-$fHittableSphere_$chit Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                     8.9    0.0
-$wmkDielectric         Hittable                        <no location info>                              6.1    8.8
-$wgetRandomUnitBallVec Graphics.Vec3                   <no location info>                              5.2    4.2
-$wrender               Render                          <no location info>                              5.2    7.8
-iterateUntilM          Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13             4.9    4.5
-getRandomInUnitDisk1   Graphics.Vec3                   <no location info>                              3.1    3.0
-$w$s$wreplicateM       Render                          <no location info>                              2.4    3.1
-$wmkLambertian         Hittable                        <no location info>                              2.2    2.8
-$wgetSampleSquare      Graphics.Vec3                   <no location info>                              2.2    3.7
-$wk                    Graphics.Vec3                   <no location info>                              2.0    3.2
-getRandomInUnitDisk8   Graphics.Vec3                   <no location info>                              1.1    0.0
-$wm1                   Graphics.Vec3                   <no location info>                              1.0    0.4
+$wmkSphereHittable    Shapes.Sphere                   <no location info>                             19.9   21.1
+$wrayColor            Render                          <no location info>                             11.9   19.0
+$fMonadRandT          Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52    9.6    3.1
+$wx2                  Hittable                        <no location info>                              9.0   12.0
+$wmkDielectric        Hittable                        <no location info>                              6.8    8.9
+iterateUntilM         Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13             5.7    4.5
+$wmkLambertian        Hittable                        <no location info>                              5.0    4.0
+$wrender              Render                          <no location info>                              4.9    5.5
+$wsampleDefocusDisk   Render                          <no location info>                              4.0    4.0
+$w$s$wreplicateM      Render                          <no location info>                              2.5    3.1
+$wlvl                 Render                          <no location info>                              2.4    3.8
+$wk4                  Render                          <no location info>                              2.3    3.2
+$wx1                  Hittable                        <no location info>                              1.9    2.8
+dielectricTestWorld9  Main                            <no location info>                              1.4    0.0
+dielectricTestWorld11 Main                            <no location info>                              1.1    0.0
+dielectricTestWorld5  Main                            <no location info>                              1.1    0.0
 
 
-                                                                                                                                   individual      inherited
-COST CENTRE                        MODULE                          SRC                                          no.     entries  %time %alloc   %time %alloc
+                                                                                                                                      individual      inherited
+COST CENTRE                           MODULE                          SRC                                          no.     entries  %time %alloc   %time %alloc
 
-MAIN                               MAIN                            <built-in>                                   239           0    0.0    0.0   100.0  100.0
- main                              Main                            app/Main.hs:76:1-4                           478           1    0.0    0.0   100.0  100.0
-  main5                            Main                            <no location info>                           479           1    0.0    0.0   100.0  100.0
-   main1                           Main                            <no location info>                           480           1    0.0    0.0   100.0  100.0
-    $wrender                       Render                          <no location info>                           481           1    5.2    7.8   100.0  100.0
-     $wrayColor                    Render                          <no location info>                           520    31893904   14.1   14.2    78.4   75.1
-      dielectricTestWorld11        Main                            <no location info>                           548           0    0.6    0.0     4.4    2.7
-       $fHittableSphere_$chit      Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  549    31893451    1.7    0.0     3.8    2.7
-        $w$chit                    Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  552    31893451    2.1    2.7     2.1    2.7
-      dielectricTestWorld12        Main                            <no location info>                           584           0    0.2    0.0     2.9    4.1
-       dielectricTestWorld13       Main                            <no location info>                           585     4673915    0.1    0.0     2.6    4.1
-        $wmkDielectric             Hittable                        <no location info>                           586     4673915    2.5    4.1     2.5    4.1
-      dielectricTestWorld16        Main                            <no location info>                           541           0    0.6    0.0     5.3    5.2
-       $fHittableSphere_$chit      Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  542    31893451    1.9    0.0     4.7    5.2
-        $w$chit                    Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  545    31893451    2.8    5.2     2.8    5.2
-      dielectricTestWorld17        Main                            <no location info>                           578           0    0.2    0.0     3.9    4.8
-       bigWorld13                  Main                            <no location info>                           579     5392926    0.1    0.0     3.7    4.8
-        $wmkDielectric             Hittable                        <no location info>                           580     5392926    3.5    4.8     3.5    4.8
-      dielectricTestWorld18        Main                            <no location info>                           533           0    0.5    0.0     4.4    2.6
-       $fHittableSphere_$chit      Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  534    31893451    1.6    0.0     3.8    2.6
-        $w$chit                    Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  538    31893451    2.2    2.6     2.2    2.6
-      dielectricTestWorld19        Main                            <no location info>                           591           0    0.2    0.0    10.0    9.6
-       dielectricTestWorld20       Main                            <no location info>                           592     4099498    0.2    0.4     9.8    9.6
-        $wmkLambertian             Hittable                        <no location info>                           593     4099498    0.8    1.0     9.6    9.2
-         $wgetRandomUnitBallVec    Graphics.Vec3                   <no location info>                           596     4099498    1.5    1.3     8.9    8.2
-          iterateUntilM            Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13          597     7829655    0.9    1.0     5.3    4.3
-           getRandomInUnitDisk8    Graphics.Vec3                   <no location info>                           598     7829655    0.2    0.0     0.2    0.0
-           $fMonadRandT            Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 600           0    2.3    0.7     4.1    3.2
-            getRandomOnHemisphere3 Graphics.Vec3                   <no location info>                           601     3730157    0.1    0.1     1.8    2.5
-             $wgetRandomVec        Graphics.Vec3                   <no location info>                           602     3730157    1.7    2.4     1.7    2.4
-          $wgetRandomVec           Graphics.Vec3                   <no location info>                           599     4099498    2.0    2.6     2.0    2.6
-      dielectricTestWorld22        Main                            <no location info>                           523           0    0.7    0.0     6.7    8.9
-       $fHittableSphere_$chit      Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  524    31893451    1.8    0.0     6.0    8.9
-        $w$chit                    Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  528    31893451    4.2    8.9     4.2    8.9
-      dielectricTestWorld23        Main                            <no location info>                           560           0    0.3    0.0    16.8   16.1
-       dielectricTestWorld24       Main                            <no location info>                           561     6858586    0.2    0.7    16.5   16.1
-        $wmkLambertian             Hittable                        <no location info>                           562     6858586    1.4    1.7    16.3   15.4
-         $wgetRandomUnitBallVec    Graphics.Vec3                   <no location info>                           565     6858586    2.7    2.2    14.8   13.7
-          iterateUntilM            Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13          566    13097097    1.8    1.8     8.8    7.2
-           getRandomInUnitDisk8    Graphics.Vec3                   <no location info>                           567    13097097    0.4    0.0     0.4    0.0
-           $fMonadRandT            Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 571           0    3.6    1.2     6.6    5.4
-            getRandomOnHemisphere3 Graphics.Vec3                   <no location info>                           572     6238511    0.2    0.2     3.0    4.2
-             $wgetRandomVec        Graphics.Vec3                   <no location info>                           573     6238511    2.8    4.0     2.8    4.0
-          $wgetRandomVec           Graphics.Vec3                   <no location info>                           568     6858586    3.3    4.4     3.3    4.4
-      dielectricTestWorld6         Main                            <no location info>                           555           0    0.7    0.0     4.0    1.4
-       $fHittableSphere_$chit      Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  556    31893451    1.8    0.0     3.3    1.4
-        $w$chit                    Shapes.Sphere                   src/Shapes/Sphere.hs:17:3-5                  559    31893451    1.5    1.4     1.5    1.4
-      dielectricTestWorld7         Main                            <no location info>                           603           0    0.1    0.0     6.0    5.5
-       dielectricTestWorld8        Main                            <no location info>                           604     2551056    0.4    0.4     5.9    5.5
-        $wgetRandomUnitBallVec     Graphics.Vec3                   <no location info>                           605     2551056    1.0    0.8     5.5    5.1
-         iterateUntilM             Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13          606     4870121    0.6    0.6     3.2    2.7
-          getRandomInUnitDisk8     Graphics.Vec3                   <no location info>                           607     4870121    0.2    0.0     0.2    0.0
-          $fMonadRandT             Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 609           0    1.4    0.4     2.5    2.0
-           getRandomOnHemisphere3  Graphics.Vec3                   <no location info>                           610     2319065    0.1    0.1     1.1    1.6
-            $wgetRandomVec         Graphics.Vec3                   <no location info>                           611     2319065    1.0    1.5     1.0    1.5
-         $wgetRandomVec            Graphics.Vec3                   <no location info>                           608     2551056    1.3    1.6     1.3    1.6
-     $wgo1                         Graphics.Pixel                  <no location info>                           492     9090000    0.7    0.9     0.7    0.9
-     getRandomInUnitDisk1          Graphics.Vec3                   <no location info>                           504     9090000    3.1    3.0    10.8    8.9
-      iterateUntilM                Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13          505    11577833    1.6    1.0     5.2    3.0
-       getRandomInUnitDisk8        Graphics.Vec3                   <no location info>                           506    11577833    0.3    0.0     0.3    0.0
-       $fMonadRandT                Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 515           0    2.2    0.7     3.2    2.0
-        getRandomInUnitDisk2       Graphics.Vec3                   <no location info>                           516     2487833    0.4    0.5     1.0    1.3
-         $wk                       Graphics.Vec3                   <no location info>                           517     2487833    0.4    0.7     0.4    0.7
-         $wm1                      Graphics.Vec3                   <no location info>                           518     2487833    0.2    0.1     0.2    0.1
-      $wk                          Graphics.Vec3                   <no location info>                           510     9090000    1.6    2.5     1.6    2.5
-      $wm1                         Graphics.Vec3                   <no location info>                           511     9090000    0.8    0.3     0.8    0.3
-     go1                           Render                          <no location info>                           489       90001    0.0    0.1     0.2    0.2
-      $wcolorToRGBString           Graphics.Pixel                  src/Graphics/Pixel.hs:41:1-16                588       90000    0.1    0.1     0.1    0.1
-       $wc                         Graphics.Pixel                  <no location info>                           589      270000    0.0    0.0     0.0    0.0
-     $w$s$wreplicateM              Render                          <no location info>                           491       90000    2.4    3.1     4.9    7.1
-      getSampleSquare1             Graphics.Vec3                   <no location info>                           496     9000000    0.2    0.3     2.4    4.1
-       $wgetSampleSquare           Graphics.Vec3                   <no location info>                           497     9000000    2.2    3.7     2.2    3.7
-     newStdGen2                    System.Random                   <no location info>                           483           1    0.0    0.0     0.0    0.0
- CAF                               GHC.Conc.Signal                 <entire-module>                              418           0    0.0    0.0     0.0    0.0
- CAF                               GHC.IO.Encoding                 <entire-module>                              383           0    0.0    0.0     0.0    0.0
- CAF                               GHC.IO.Encoding.Iconv           <entire-module>                              381           0    0.0    0.0     0.0    0.0
- CAF                               GHC.IO.FD                       <entire-module>                              374           0    0.0    0.0     0.0    0.0
- CAF                               GHC.IO.Handle.FD                <entire-module>                              372           0    0.0    0.0     0.0    0.0
- CAF                               Main                            <entire-module>                              282           0    0.0    0.0     0.0    0.0
-  aspectRatio                      Main                            app/Main.hs:16:1-11                          488           1    0.0    0.0     0.0    0.0
-  defocusAngle                     Main                            app/Main.hs:37:1-12                          503           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld1             Main                            <no location info>                           521           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld10            Main                            <no location info>                           558           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld11            Main                            <no location info>                           547           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld12            Main                            <no location info>                           550           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld14            Main                            <no location info>                           551           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld15            Main                            <no location info>                           544           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld16            Main                            <no location info>                           540           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld17            Main                            <no location info>                           543           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld18            Main                            <no location info>                           532           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld19            Main                            <no location info>                           535           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld2             Main                            <no location info>                           531           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld21            Main                            <no location info>                           536           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld22            Main                            <no location info>                           522           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld23            Main                            <no location info>                           525           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld25            Main                            <no location info>                           527           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld26            Main                            <no location info>                           526           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld3             Main                            <no location info>                           539           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld4             Main                            <no location info>                           546           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld5             Main                            <no location info>                           553           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld6             Main                            <no location info>                           554           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld7             Main                            <no location info>                           557           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld9             Main                            <no location info>                           537           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld_c            Main                            <no location info>                           612           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           613           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld_c1           Main                            <no location info>                           594           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           595           1    0.0    0.0     0.0    0.0
-  dielectricTestWorld_c2           Main                            <no location info>                           563           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           564           1    0.0    0.0     0.0    0.0
-  focusDistance                    Main                            app/Main.hs:40:1-13                          500           1    0.0    0.0     0.0    0.0
-  imageWidth                       Main                            app/Main.hs:19:1-10                          487           1    0.0    0.0     0.0    0.0
-  lookAt1                          Main                            <no location info>                           499           1    0.0    0.0     0.0    0.0
-  lookFrom1                        Main                            <no location info>                           498           1    0.0    0.0     0.0    0.0
-  lvl                              Main                            <no location info>                           581           1    0.0    0.0     0.0    0.0
-  lvl1                             Main                            <no location info>                           587           1    0.0    0.0     0.0    0.0
-  main2                            Main                            <no location info>                           485           1    0.0    0.0     0.0    0.0
-   camera                          Camera                          src/Camera.hs:49:1-6                         486           1    0.0    0.0     0.0    0.0
-    $fVec3V3_$c.^                  Graphics.Vec3                   src/Graphics/Vec3.hs:124:10-16               519           2    0.0    0.0     0.0    0.0
-  main3                            Main                            <no location info>                           484           1    0.0    0.0     0.0    0.0
-  maxDepth                         Main                            app/Main.hs:43:1-8                           495           1    0.0    0.0     0.0    0.0
-  samplesPerPixel                  Main                            app/Main.hs:22:1-15                          490           1    0.0    0.0     0.0    0.0
-  vfov                             Main                            app/Main.hs:25:1-4                           502           1    0.0    0.0     0.0    0.0
-  vup                              Main                            app/Main.hs:34:1-3                           501           1    0.0    0.0     0.0    0.0
- CAF                               Graphics.Pixel                  <entire-module>                              281           0    0.0    0.0     0.0    0.0
-  averageColor1                    Graphics.Pixel                  <no location info>                           493           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           494           1    0.0    0.0     0.0    0.0
-  colorToRGBString1                Graphics.Pixel                  <no location info>                           590           1    0.0    0.0     0.0    0.0
- CAF                               Graphics.Vec3                   <entire-module>                              279           0    0.0    0.0     0.0    0.0
-  $fApplicativeRandT               Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:22-32 514           1    0.0    0.0     0.0    0.0
-  $fMonadRandT                     Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 513           1    0.0    0.0     0.0    0.0
-  getRandomInUnitDisk10            Graphics.Vec3                   <no location info>                           509           1    0.0    0.0     0.0    0.0
-  getRandomInUnitDisk11            Graphics.Vec3                   <no location info>                           508           1    0.0    0.0     0.0    0.0
-  getRandomInUnitDisk12            Graphics.Vec3                   <no location info>                           512           1    0.0    0.0     0.0    0.0
-  getRandomInUnitDisk4             Graphics.Vec3                   <no location info>                           569           1    0.0    0.0     0.0    0.0
-  getRandomInUnitDisk5             Graphics.Vec3                   <no location info>                           570           1    0.0    0.0     0.0    0.0
-  getRandomInUnitDisk9             Graphics.Vec3                   <no location info>                           507           1    0.0    0.0     0.0    0.0
- CAF                               Hittable                        <entire-module>                              276           0    0.0    0.0     0.0    0.0
-  mkDielectric3                    Hittable                        <no location info>                           582           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           583           1    0.0    0.0     0.0    0.0
- CAF                               Render                          <entire-module>                              272           0    0.0    0.0     0.0    0.0
-  eta                              Render                          <no location info>                           616           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           617           1    0.0    0.0     0.0    0.0
-  lightBlue                        Render                          <no location info>                           576           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           577           1    0.0    0.0     0.0    0.0
-  lvl                              Render                          <no location info>                           530           1    0.0    0.0     0.0    0.0
-  lvl1                             Render                          <no location info>                           529           1    0.0    0.0     0.0    0.0
-  lvl2                             Render                          <no location info>                           614           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           615           1    0.0    0.0     0.0    0.0
-  white                            Render                          <no location info>                           574           1    0.0    0.0     0.0    0.0
-   $wcolor                         Graphics.Pixel                  <no location info>                           575           1    0.0    0.0     0.0    0.0
- CAF                               System.Random.Internal          <entire-module>                              266           0    0.0    0.0     0.0    0.0
-  theStdGen                        System.Random.Internal          src/System/Random/Internal.hs:801:1-9        482           1    0.0    0.0     0.0    0.0
+MAIN                                  MAIN                            <built-in>                                   244           0    0.0    0.0   100.0  100.0
+ main                                 Main                            app/Main.hs:78:1-4                           488           1    0.0    0.0   100.0  100.0
+  main5                               Main                            <no location info>                           489           1    0.0    0.0   100.0  100.0
+   main1                              Main                            <no location info>                           490           1    0.0    0.0   100.0  100.0
+    $wrender                          Render                          <no location info>                           491           1    4.9    5.5   100.0  100.0
+     $wrayColor                       Render                          <no location info>                           527    31901410   11.9   19.0    76.9   76.2
+      dielectricTestWorld2            Main                            <no location info>                           535           0    0.8    0.0    23.0   23.0
+       dielectricTestWorld14          Main                            <no location info>                           536    31900948    0.6    0.0    22.2   23.0
+        $wmkSphereHittable            Shapes.Sphere                   <no location info>                           537    31900948    5.9    9.0    21.5   23.0
+         dielectricTestWorld15        Main                            <no location info>                           552     6863209    0.2    0.7    15.6   14.0
+          $wmkLambertian              Hittable                        <no location info>                           553     6863209    3.2    2.5    15.4   13.3
+           iterateUntilM              Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13          556    13106745    1.9    1.8     9.2    6.8
+            mkLambertian3             Hittable                        <no location info>                           557    13106745    0.5    0.0     0.5    0.0
+            $fMonadRandT              Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 562           0    3.8    1.2     6.7    5.0
+             mkLambertian2            Hittable                        <no location info>                           567     6243536    0.1    0.0     2.9    3.8
+              mkLambertian_x2         Hittable                        <no location info>                           568     6243536    0.2    0.2     2.8    3.8
+               $wx2                   Hittable                        <no location info>                           569     6243536    2.6    3.6     2.6    3.6
+           $wx2                       Hittable                        <no location info>                           561     6863209    3.0    3.9     3.0    3.9
+      dielectricTestWorld3            Main                            <no location info>                           540           0    0.5    0.0    13.6   11.0
+       dielectricTestWorld12          Main                            <no location info>                           541    31900948    0.6    0.0    13.0   11.0
+        $wmkSphereHittable            Shapes.Sphere                   <no location info>                           542    31900948    3.2    2.7    12.4   11.0
+         dielectricTestWorld13        Main                            <no location info>                           573     4101098    0.1    0.4     9.2    8.4
+          $wmkLambertian              Hittable                        <no location info>                           574     4101098    1.8    1.5     9.1    7.9
+           iterateUntilM              Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13          577     7835318    1.1    1.1     5.3    4.1
+            mkLambertian3             Hittable                        <no location info>                           578     7835318    0.3    0.0     0.3    0.0
+            $fMonadRandT              Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 580           0    2.3    0.7     3.9    3.0
+             mkLambertian2            Hittable                        <no location info>                           581     3734220    0.1    0.0     1.6    2.3
+              mkLambertian_x2         Hittable                        <no location info>                           582     3734220    0.1    0.1     1.6    2.3
+               $wx2                   Hittable                        <no location info>                           583     3734220    1.5    2.1     1.5    2.1
+           $wx2                       Hittable                        <no location info>                           579     4101098    1.9    2.4     1.9    2.4
+      dielectricTestWorld4            Main                            <no location info>                           543           0    0.6    0.0    10.5   10.1
+       dielectricTestWorld11          Main                            <no location info>                           544    31900948    1.1    0.0     9.9   10.1
+        $wmkSphereHittable            Shapes.Sphere                   <no location info>                           545    31900948    4.9    5.3     8.8   10.1
+         bigWorld9                    Main                            <no location info>                           587     5393243    0.1    0.0     3.9    4.8
+          $wmkDielectric              Hittable                        <no location info>                           588     5393243    3.8    4.8     3.8    4.8
+      dielectricTestWorld5            Main                            <no location info>                           546           0    1.1    0.0     9.1    6.8
+       dielectricTestWorld9           Main                            <no location info>                           547    31900948    1.4    0.0     8.1    6.8
+        $wmkSphereHittable            Shapes.Sphere                   <no location info>                           548    31900948    3.5    2.7     6.7    6.8
+         dielectricTestWorld10        Main                            <no location info>                           592     4673198    0.1    0.0     3.2    4.1
+          $wmkDielectric              Hittable                        <no location info>                           593     4673198    3.0    4.1     3.0    4.1
+      dielectricTestWorld6            Main                            <no location info>                           549           0    0.6    0.0     8.8    6.2
+       dielectricTestWorld7           Main                            <no location info>                           550    31900948    0.6    0.0     8.2    6.2
+        $wmkSphereHittable            Shapes.Sphere                   <no location info>                           551    31900948    2.4    1.4     7.6    6.2
+         dielectricTestWorld8         Main                            <no location info>                           595     2551260    0.1    0.1     5.2    4.8
+          $wmkMetal                   Hittable                        <no location info>                           596     2551260    0.9    0.7     5.1    4.7
+           iterateUntilM              Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13          597     4869276    0.7    0.7     3.1    2.5
+            mkLambertian3             Hittable                        <no location info>                           598     4869276    0.1    0.0     0.1    0.0
+            $fMonadRandT              Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 600           0    1.3    0.5     2.3    1.9
+             mkMetal2                 Hittable                        <no location info>                           605     2318016    0.1    0.0     0.9    1.4
+              mkMetal_x2              Hittable                        <no location info>                           606     2318016    0.1    0.1     0.9    1.4
+               $wx1                   Hittable                        <no location info>                           607     2318016    0.8    1.3     0.8    1.3
+           $wx1                       Hittable                        <no location info>                           599     2551260    1.1    1.5     1.1    1.5
+     $wgo1                            Graphics.Pixel                  <no location info>                           502     9090000    0.7    0.9     0.7    0.9
+     $wsampleDefocusDisk              Render                          <no location info>                           514     9090000    4.0    4.0    12.2   10.0
+      iterateUntilM                   Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13          515    11572992    2.0    1.0     5.6    3.1
+       lvl3                           Render                          <no location info>                           516    11572992    0.4    0.0     0.4    0.0
+       $fMonadRandT                   Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 525           0    2.1    0.7     3.3    2.1
+        lvl4                          Render                          <no location info>                           570     2482992    0.5    0.5     1.2    1.3
+         $wk4                         Render                          <no location info>                           571     2482992    0.5    0.7     0.5    0.7
+         $wm2                         Render                          <no location info>                           572     2482992    0.2    0.1     0.2    0.1
+      $wk4                            Render                          <no location info>                           520     9090000    1.8    2.5     1.8    2.5
+      $wm2                            Render                          <no location info>                           521     9090000    0.8    0.3     0.8    0.3
+     go1                              Render                          <no location info>                           499       90001    0.1    0.1     0.2    0.2
+      $wcolorToRGBString              Graphics.Pixel                  src/Graphics/Pixel.hs:41:1-16                584       90000    0.1    0.1     0.1    0.1
+       $wc                            Graphics.Pixel                  <no location info>                           585      270000    0.0    0.0     0.0    0.0
+     $w$s$wreplicateM                 Render                          <no location info>                           501       90000    2.5    3.1     5.1    7.2
+      lvl6                            Render                          <no location info>                           506     9000000    0.2    0.3     2.6    4.1
+       $wlvl                          Render                          <no location info>                           507     9000000    2.4    3.8     2.4    3.8
+     newStdGen2                       System.Random                   <no location info>                           493           1    0.0    0.0     0.0    0.0
+ CAF                                  GHC.Conc.Signal                 <entire-module>                              428           0    0.0    0.0     0.0    0.0
+ CAF                                  GHC.Event.Poll                  <entire-module>                              413           0    0.0    0.0     0.0    0.0
+ CAF                                  GHC.Event.Thread                <entire-module>                              412           0    0.0    0.0     0.0    0.0
+ CAF                                  GHC.IO.Encoding                 <entire-module>                              393           0    0.0    0.0     0.0    0.0
+ CAF                                  GHC.IO.Encoding.Iconv           <entire-module>                              391           0    0.0    0.0     0.0    0.0
+ CAF                                  GHC.IO.FD                       <entire-module>                              384           0    0.0    0.0     0.0    0.0
+ CAF                                  GHC.IO.Handle.FD                <entire-module>                              382           0    0.0    0.0     0.0    0.0
+ CAF                                  Main                            <entire-module>                              291           0    0.0    0.0     0.0    0.0
+  aspectRatio                         Main                            app/Main.hs:16:1-11                          497           1    0.0    0.0     0.0    0.0
+  bigWorld_refractiveIndex            Main                            <no location info>                           589           1    0.0    0.0     0.0    0.0
+  defocusAngle                        Main                            app/Main.hs:37:1-12                          513           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld1                Main                            <no location info>                           528           1    0.0    0.0     0.0    0.0
+   $wfoldlM_loop                      Hittables                       <no location info>                           530           6    0.0    0.0     0.0    0.0
+  dielectricTestWorld2                Main                            <no location info>                           529           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld3                Main                            <no location info>                           531           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld4                Main                            <no location info>                           532           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld5                Main                            <no location info>                           533           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld6                Main                            <no location info>                           534           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld_c               Main                            <no location info>                           601           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           602           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld_c1              Main                            <no location info>                           575           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           576           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld_c2              Main                            <no location info>                           554           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           555           1    0.0    0.0     0.0    0.0
+  dielectricTestWorld_refractiveIndex Main                            <no location info>                           594           1    0.0    0.0     0.0    0.0
+  focusDistance                       Main                            app/Main.hs:40:1-13                          510           1    0.0    0.0     0.0    0.0
+  imageWidth                          Main                            app/Main.hs:19:1-10                          496           1    0.0    0.0     0.0    0.0
+  lookAt1                             Main                            <no location info>                           509           1    0.0    0.0     0.0    0.0
+  lookFrom1                           Main                            <no location info>                           508           1    0.0    0.0     0.0    0.0
+  main2                               Main                            <no location info>                           494           1    0.0    0.0     0.0    0.0
+   camera                             Camera                          src/Camera.hs:48:1-6                         495           1    0.0    0.0     0.0    0.0
+    $fVec3V3_$c.^                     Graphics.Vec3                   src/Graphics/Vec3.hs:124:10-16               526           2    0.0    0.0     0.0    0.0
+  main3                               Main                            <no location info>                           498           1    0.0    0.0     0.0    0.0
+  maxDepth                            Main                            app/Main.hs:43:1-8                           505           1    0.0    0.0     0.0    0.0
+  samplesPerPixel                     Main                            app/Main.hs:22:1-15                          500           1    0.0    0.0     0.0    0.0
+  vfov                                Main                            app/Main.hs:25:1-4                           512           1    0.0    0.0     0.0    0.0
+  vup                                 Main                            app/Main.hs:34:1-3                           511           1    0.0    0.0     0.0    0.0
+ CAF                                  Graphics.Pixel                  <entire-module>                              290           0    0.0    0.0     0.0    0.0
+  averageColor1                       Graphics.Pixel                  <no location info>                           503           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           504           1    0.0    0.0     0.0    0.0
+  colorToRGBString1                   Graphics.Pixel                  <no location info>                           586           1    0.0    0.0     0.0    0.0
+ CAF                                  Graphics.Vec3                   <entire-module>                              289           0    0.0    0.0     0.0    0.0
+  $fApplicativeRandT                  Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:22-32 524           1    0.0    0.0     0.0    0.0
+  $fMonadRandT                        Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52 523           1    0.0    0.0     0.0    0.0
+  getRandomInUnitDisk1                Graphics.Vec3                   <no location info>                           522           1    0.0    0.0     0.0    0.0
+ CAF                                  Hittable                        <entire-module>                              287           0    0.0    0.0     0.0    0.0
+  mkDielectric3                       Hittable                        <no location info>                           590           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           591           1    0.0    0.0     0.0    0.0
+  mkLambertian4                       Hittable                        <no location info>                           560           1    0.0    0.0     0.0    0.0
+  mkLambertian5                       Hittable                        <no location info>                           559           1    0.0    0.0     0.0    0.0
+  mkLambertian_ds2                    Hittable                        <no location info>                           558           1    0.0    0.0     0.0    0.0
+ CAF                                  Render                          <entire-module>                              283           0    0.0    0.0     0.0    0.0
+  ds2                                 Render                          <no location info>                           517           1    0.0    0.0     0.0    0.0
+  eta                                 Render                          <no location info>                           608           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           609           1    0.0    0.0     0.0    0.0
+  lightBlue                           Render                          <no location info>                           565           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           566           1    0.0    0.0     0.0    0.0
+  lvl1                                Render                          <no location info>                           518           1    0.0    0.0     0.0    0.0
+  lvl2                                Render                          <no location info>                           519           1    0.0    0.0     0.0    0.0
+  lvl5                                Render                          <no location info>                           603           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           604           1    0.0    0.0     0.0    0.0
+  tMax                                Render                          <no location info>                           539           1    0.0    0.0     0.0    0.0
+  tMin                                Render                          <no location info>                           538           1    0.0    0.0     0.0    0.0
+  white                               Render                          <no location info>                           563           1    0.0    0.0     0.0    0.0
+   $wcolor                            Graphics.Pixel                  <no location info>                           564           1    0.0    0.0     0.0    0.0
+ CAF                                  System.Random.Internal          <entire-module>                              275           0    0.0    0.0     0.0    0.0
+  theStdGen                           System.Random.Internal          src/System/Random/Internal.hs:801:1-9        492           1    0.0    0.0     0.0    0.0

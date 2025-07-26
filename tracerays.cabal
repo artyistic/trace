@@ -53,7 +53,7 @@ extra-doc-files: CHANGELOG.md
 -- extra-source-files:
 
 common warnings
-  ghc-options: -Wall -O2
+  ghc-options: -Wall -O2 -threaded
 
 executable tracerays
   -- Import common warning flags.
@@ -102,6 +102,7 @@ library tracerays-lib
     , JuicyPixels
     , MonadRandom ^>=0.6.2
     , monad-loops >= 0.4
-    , massiv ^>= 1.0.5.0 
+    , massiv ^>= 1.0.5.0
+    , vector
 
   default-language: Haskell2010

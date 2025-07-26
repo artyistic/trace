@@ -6,8 +6,7 @@ module Hittable
     hitFrontFacing,
     hitMaterial,
     generateHitRecord,
-    Hittable,
-    hit,
+    Hittable(..),
     Material,
     matScatter,
     mkLambertian,
@@ -101,14 +100,18 @@ generateHitRecord (Ray _ direction) p t outwardNormal =
     frontFacing = (direction .* outwardNormal) < 0
     normal = if frontFacing then outwardNormal else invert outwardNormal
 
-class Hittable a where
-  {-
-    hit takes
-      a: parametrized type
-      ray that might hit the objects
-      tMax and tMin for an interval that matters
-    returns
-      Just HitRecord if the ray did hit object
-      Nothing if no hit
-  -}
-  hit :: a -> Ray -> Interval -> Maybe HitRecord
+-- class Hittable a where
+--   {-
+--     hit takes
+--       a: parametrized type
+--       ray that might hit the objects
+--       tMax and tMin for an interval that matters
+--     returns
+--       Just HitRecord if the ray did hit object
+--       Nothing if no hit
+--   -}
+--   hit :: a -> Ray -> Interval -> Maybe HitRecord
+
+newtype Hittable = Hittable {
+  hit :: Ray -> Interval -> Maybe HitRecord
+}
