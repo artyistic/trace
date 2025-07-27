@@ -21,12 +21,13 @@ import Graphics.Vec3
 import Interval (Interval)
 import Graphics
 import Control.Monad.Random
+import Random
 
 data HitRecord = HitRecord
-  { hitP :: Point,
-    hitNormal :: V3,
-    hitT :: Double,
-    hitFrontFacing :: Bool
+  { hitP :: !Point,
+    hitNormal :: !V3,
+    hitT :: !Double,
+    hitFrontFacing :: !Bool
   }
 
 newtype Material = Material
@@ -46,29 +47,29 @@ newtype Material = Material
 
 mkLambertian :: Color -> Material
 mkLambertian c = Material {
-  scatter = \xr hR -> do
+  scatter = \(Ray _ _ inTime) hR -> do
     let normal = hitNormal hR
         hitPt = hitP hR
     d <- (\a -> if nearZero a then normal else a ) <$> getRandomUnitBallVec
-    return $ pure (c, Ray hitPt (d <+> normal))
+    return $ pure (c, Ray hitPt (d <+> normal) inTime)
 }
 
 mkMetal :: Color -> Double -> Material
 mkMetal c fuzz = Material {
-  scatter = \r@(Ray _ inDirection) hR -> do
+  scatter = \r@(Ray _ inDirection inTime) hR -> do
     randomVec <- getRandomUnitBallVec
     let normal = hitNormal hR
         hitPt = hitP hR
         reflectedRay = reflect inDirection normal
         fuzzedReflected = normalize reflectedRay <+> randomVec .^ fuzz
-        scattered@(Ray _ scatteredDir) = Ray hitPt fuzzedReflected
+        scattered@(Ray _ scatteredDir _adobeDctVersion) = Ray hitPt fuzzedReflected inTime
 
     if scatteredDir .* normal > 0 then return $ pure (c, scattered) else pure Nothing
 }
 
 mkDielectric :: Double -> Material
 mkDielectric refractiveIndex = Material {
-  scatter = \r@(Ray _ inDirection) hR -> do
+  scatter = \r@(Ray _ inDirection inTime) hR -> do
     let normal = hitNormal hR
         attenuation = color 1.0 1.0 1.0
         hitPt = hitP hR
@@ -87,13 +88,13 @@ mkDielectric refractiveIndex = Material {
           in r0 + (1 - r0) * ((1 - cosine) ** 5)
     randomDouble <- getRandom :: Rand StdGen Double
     if cannotRefract || schlickReflectance cosTheta ri > randomDouble -- logic for total internal refraction
-      then pure $ Just (attenuation, Ray hitPt reflectedRay)
-      else pure $ Just (attenuation, Ray hitPt refractedRay)
+      then pure $ Just (attenuation, Ray hitPt reflectedRay inTime)
+      else pure $ Just (attenuation, Ray hitPt refractedRay inTime)
 
 }
 
 generateHitRecord :: Ray -> Point -> Double -> V3 -> HitRecord
-generateHitRecord (Ray _ direction) p t outwardNormal =
+generateHitRecord (Ray _ direction _) p t outwardNormal =
   HitRecord p normal t frontFacing
   where
     frontFacing = (direction .* outwardNormal) < 0

@@ -6,6 +6,7 @@ import Graphics.Point
 import Graphics
 import Hittable
 import qualified Interval as I
+import Random
 
 render :: FilePath -> HittableList -> Camera -> StdGen -> Int -> IO ()
 render
@@ -54,19 +55,21 @@ render
           sampleColor v = do
               d <- sampleDefocusDisk cam
               let rayOrigin = if defocusAngle <= 0 then cameraCenter else d
+              rayIn <- shootRay rayOrigin x y v cam -- a randomTime for moving spheres (random)
               rayColor
-                (shootRay rayOrigin x y v cam)
+                rayIn
                 world'
                 numBounces -- this ray trace a particular sample
         gammaCorrected . averageColor <$> traverse sampleColor sampleSquares
 
-shootRay :: Point -> Int -> Int -> V3 -> Camera -> Ray
-shootRay rayOrigin x y (V3 offsetX offsetY _) cam =
+shootRay :: Point -> Int -> Int -> V3 -> Camera -> Rand StdGen Ray
+shootRay rayOrigin x y (V3 offsetX offsetY _) cam = do
   let rayDirection =
         toV3 $
           pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
             <-> rayOrigin
-  in Ray rayOrigin rayDirection
+      randomRayTime = getRandomR (0, 1) :: Rand StdGen Double
+  Ray rayOrigin rayDirection <$> randomRayTime
 
 pixelCenter :: Double -> Double -> Camera -> Point
 pixelCenter x' y' cam =
@@ -79,7 +82,7 @@ pixelCenter x' y' cam =
 
 sampleDefocusDisk :: Camera -> Rand StdGen Point
 sampleDefocusDisk cam = do
-  let 
+  let
       diskU = camDefocusDiskU cam
       diskV = camDefocusDiskV cam
       c = camCenter cam
@@ -88,7 +91,7 @@ sampleDefocusDisk cam = do
 
 {-# INLINE rayColor #-}
 rayColor :: Ray -> HittableList -> Int -> Rand StdGen Color
-rayColor r@(Ray _ direction) world depth =
+rayColor r@(Ray _ direction _) world depth =
   if depth <= 0
     then pure $ color 0 0 0
     else

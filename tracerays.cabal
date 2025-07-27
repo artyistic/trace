@@ -95,6 +95,8 @@ library tracerays-lib
     Camera
     Interval
     Render
+    Random
+    Scenes
 
   build-depends:
     , random ^>=1.3.1

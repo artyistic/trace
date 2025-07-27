@@ -1,4 +1,4 @@
-module Shapes.Sphere (Sphere(..), mkSphereHittable) where
+module Shapes.Sphere (Sphere(..), mkSphereHittable, movingSphere, stationarySphere) where
 
 import Control.Applicative ((<|>))
 import Control.Monad (guard)
@@ -11,17 +11,26 @@ import qualified Interval as I
 -- A sphere is defined by its center point and a radius
 -- rn no color attribute, later maybe we could have a single color
 -- or even a color map, giving a color for any x, y points on the sphere
-data Sphere = Sphere !Point !Double !Material 
+data Sphere = Sphere !Ray !Double !Material
+
+movingSphere :: V3 -> V3 -> Double -> Material -> Sphere
+movingSphere centerFrom centerTo =
+  Sphere (Ray (fromV3 centerFrom) (centerTo <-> centerFrom) 0)
+
+stationarySphere :: Point -> Double -> Material -> Sphere
+stationarySphere staticCenter =
+  Sphere (Ray  staticCenter (V3 0 0 0) 0)
 
 {-# INLINE mkSphereHittable #-}
 mkSphereHittable :: Sphere -> Hittable
 mkSphereHittable (Sphere center radius mat) = Hittable {
-  hit = \r@(Ray ptOrigin ptdirection) tInterval ->
+  hit = \r@(Ray inOrigin inDirection inTime) tInterval ->
     do
       let
-        oc = center <-> ptOrigin -- from origin to center of sphere
-        a = lengthSquared ptdirection
-        h = toV3 oc .* ptdirection
+        currCenter = at center inTime
+        oc = currCenter <-> inOrigin -- from origin to center of sphere
+        a = lengthSquared inDirection
+        h = toV3 oc .* inDirection
         c = lengthSquared oc - radius * radius
         discriminant = h * h - a * c
         sqrtDiscriminant = sqrt discriminant
@@ -38,6 +47,6 @@ mkSphereHittable (Sphere center radius mat) = Hittable {
 
       -- generate hit record
       let p = at r t
-          outwardNormal = toV3 ((p <-> center) .^ (1 / radius))
+          outwardNormal = toV3 ((p <-> currCenter) .^ (1 / radius))
       return (generateHitRecord r p t outwardNormal, mat)
 }
