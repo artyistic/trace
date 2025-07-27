@@ -4,11 +4,11 @@ module Hittable
     hitNormal,
     hitT,
     hitFrontFacing,
-    hitMaterial,
+    -- hitMaterial,
     generateHitRecord,
     Hittable(..),
     Material,
-    matScatter,
+    scatter,
     mkLambertian,
     mkMetal,
     mkDielectric
@@ -26,8 +26,7 @@ data HitRecord = HitRecord
   { hitP :: Point,
     hitNormal :: V3,
     hitT :: Double,
-    hitFrontFacing :: Bool,
-    hitMaterial :: Material
+    hitFrontFacing :: Bool
   }
 
 newtype Material = Material
@@ -38,16 +37,16 @@ newtype Material = Material
     ray that hits
     hitrecord
     returns
-    maybe of tuple of
+    rand stdgen of maybe of tuple of
       color known as attenuation
       scattered ray
   -}
-  matScatter :: Ray -> HitRecord -> Rand StdGen (Maybe (Color, Ray))
+  scatter :: Ray -> HitRecord -> Rand StdGen (Maybe (Color, Ray))
   }
 
 mkLambertian :: Color -> Material
 mkLambertian c = Material {
-  matScatter = \r hR -> do
+  scatter = \xr hR -> do
     let normal = hitNormal hR
         hitPt = hitP hR
     d <- (\a -> if nearZero a then normal else a ) <$> getRandomUnitBallVec
@@ -56,7 +55,7 @@ mkLambertian c = Material {
 
 mkMetal :: Color -> Double -> Material
 mkMetal c fuzz = Material {
-  matScatter = \r@(Ray _ inDirection) hR -> do
+  scatter = \r@(Ray _ inDirection) hR -> do
     randomVec <- getRandomUnitBallVec
     let normal = hitNormal hR
         hitPt = hitP hR
@@ -69,7 +68,7 @@ mkMetal c fuzz = Material {
 
 mkDielectric :: Double -> Material
 mkDielectric refractiveIndex = Material {
-  matScatter = \r@(Ray _ inDirection) hR -> do
+  scatter = \r@(Ray _ inDirection) hR -> do
     let normal = hitNormal hR
         attenuation = color 1.0 1.0 1.0
         hitPt = hitP hR
@@ -93,7 +92,7 @@ mkDielectric refractiveIndex = Material {
 
 }
 
-generateHitRecord :: Ray -> Point -> Double -> V3 -> Material -> HitRecord
+generateHitRecord :: Ray -> Point -> Double -> V3 -> HitRecord
 generateHitRecord (Ray _ direction) p t outwardNormal =
   HitRecord p normal t frontFacing
   where
@@ -107,11 +106,11 @@ generateHitRecord (Ray _ direction) p t outwardNormal =
 --       ray that might hit the objects
 --       tMax and tMin for an interval that matters
 --     returns
---       Just HitRecord if the ray did hit object
+--       Just HitRecord, and the corresponding Material if the ray did hit object
 --       Nothing if no hit
 --   -}
 --   hit :: a -> Ray -> Interval -> Maybe HitRecord
 
 newtype Hittable = Hittable {
-  hit :: Ray -> Interval -> Maybe HitRecord
+  hit :: Ray -> Interval -> Maybe (HitRecord, Material)
 }

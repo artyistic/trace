@@ -76,9 +76,8 @@ maxDepth = 50
 
 main :: IO ()
 main = do
+  gen <- getStdGen
   let
-    -- gen = mkStdGen 564128
-    gen = mkStdGen 489713215
     -- world = evalRand bigWorld gen
     world = dielectricTestWorld
     cam =

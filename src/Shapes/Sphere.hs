@@ -1,4 +1,4 @@
-module Shapes.Sphere where
+module Shapes.Sphere (Sphere(..), mkSphereHittable) where
 
 import Control.Applicative ((<|>))
 import Control.Monad (guard)
@@ -13,6 +13,7 @@ import qualified Interval as I
 -- or even a color map, giving a color for any x, y points on the sphere
 data Sphere = Sphere !Point !Double !Material 
 
+{-# INLINE mkSphereHittable #-}
 mkSphereHittable :: Sphere -> Hittable
 mkSphereHittable (Sphere center radius mat) = Hittable {
   hit = \r@(Ray ptOrigin ptdirection) tInterval ->
@@ -38,5 +39,5 @@ mkSphereHittable (Sphere center radius mat) = Hittable {
       -- generate hit record
       let p = at r t
           outwardNormal = toV3 ((p <-> center) .^ (1 / radius))
-      return $ generateHitRecord r p t outwardNormal mat
+      return (generateHitRecord r p t outwardNormal, mat)
 }
