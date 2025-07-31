@@ -88,7 +88,6 @@ library tracerays-lib
     Graphics.Pixel
     Graphics.Ray
     Graphics.Vec3
-    Graphics.Point
     Shapes.Sphere
     Hittable
     Hittables
@@ -97,8 +96,12 @@ library tracerays-lib
     Render
     Random
     Scenes
+    AABB
+    BVH
 
   build-depends:
+    , transformers ^>=0.6.1.0
+    , mtl ^>=2.3.1
     , random ^>=1.3.1
     , base         ^>=4.18.3.0
     , JuicyPixels
@@ -106,5 +109,7 @@ library tracerays-lib
     , monad-loops >= 0.4
     , massiv ^>= 1.0.5.0
     , vector
+    , containers
+    , vector-algorithms
 
   default-language: Haskell2010

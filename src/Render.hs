@@ -1,14 +1,15 @@
+{-# LANGUAGE BangPatterns #-}
 module Render (render) where
-import Hittables
+-- import Hittables
 import Camera
 import Control.Monad.Random
-import Graphics.Point
 import Graphics
 import Hittable
 import qualified Interval as I
 import Random
+import BVH
 
-render :: FilePath -> HittableList -> Camera -> StdGen -> Int -> IO ()
+render :: FilePath -> [Hittable] -> Camera -> StdGen -> Int -> IO ()
 render
   fpath
   world
@@ -18,7 +19,7 @@ render
     do
       let
         pixels =
-            [ pixelRenderer x y world
+            [ pixelRenderer x y bvhWorld
               | y <- [0 .. imageHeight - 1],
                 x <- [0 .. imageWidth - 1]
             ]
@@ -32,6 +33,7 @@ render
           ++ "\n255\n"
           ++ foldr (\x y -> colorToRGBString x ++ "\n" ++ y) "" t
     where
+      !bvhWorld = bvhFromList world
       -- for each x y position on viewPort, randomly sample pixels to construct a smooth edge
 
       -- replicateM makes a random array of position offsets,
@@ -48,7 +50,7 @@ render
       pixelDv = camPixelDv cam
       pixel00Loc = camPixel00Loc cam
 
-      pixelRenderer :: Int -> Int -> HittableList -> Rand StdGen Color
+      pixelRenderer :: Int -> Int -> BVHNode -> Rand StdGen Color
       pixelRenderer x y world' = do
         sampleSquares <- replicateM samplesPerPixel getSampleSquare
         let
@@ -62,35 +64,34 @@ render
                 numBounces -- this ray trace a particular sample
         gammaCorrected . averageColor <$> traverse sampleColor sampleSquares
 
-shootRay :: Point -> Int -> Int -> V3 -> Camera -> Rand StdGen Ray
+shootRay :: V3 -> Int -> Int -> V3 -> Camera -> Rand StdGen Ray
 shootRay rayOrigin x y (V3 offsetX offsetY _) cam = do
   let rayDirection =
-        toV3 $
-          pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
-            <-> rayOrigin
+        pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
+          <-> rayOrigin
       randomRayTime = getRandomR (0, 1) :: Rand StdGen Double
   Ray rayOrigin rayDirection <$> randomRayTime
 
-pixelCenter :: Double -> Double -> Camera -> Point
+pixelCenter :: Double -> Double -> Camera -> V3
 pixelCenter x' y' cam =
   let
     pixelDu = camPixelDu cam
     pixelDv = camPixelDv cam
     pixel00Loc = camPixel00Loc cam
   in
-  evalPoint pixel00Loc (\p -> p <+> pixelDu .^ x' <+> pixelDv .^ y')
+  pixel00Loc <+> pixelDu .^ x' <+> pixelDv .^ y'
 
-sampleDefocusDisk :: Camera -> Rand StdGen Point
+sampleDefocusDisk :: Camera -> Rand StdGen V3
 sampleDefocusDisk cam = do
   let
       diskU = camDefocusDiskU cam
       diskV = camDefocusDiskV cam
       c = camCenter cam
   (V3 pX pY _) <- getRandomInUnitDisk
-  return $ evalPoint c (\c -> c <+> diskU .^ pX <+> diskV .^ pY)
+  return $ c <+> diskU .^ pX <+> diskV .^ pY
 
 {-# INLINE rayColor #-}
-rayColor :: Ray -> HittableList -> Int -> Rand StdGen Color
+rayColor :: Ray -> BVHNode -> Int -> Rand StdGen Color
 rayColor r@(Ray _ direction _) world depth =
   if depth <= 0
     then pure $ color 0 0 0
@@ -100,7 +101,7 @@ rayColor r@(Ray _ direction _) world depth =
     p1 = white .^ (1.0 - a)
     p2 = lightBlue .^ a
     a = 0.5 * (toY (normalize direction) + 1)
-    hitResult = hitWorld world r (I.Interval 0.001 (1 / 0))
+    hitResult = hitBVH world r (I.Interval 0.001 (1 / 0))
     trace hR = do
       let mat = snd hR
           hitRecord = fst hR

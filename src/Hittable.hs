@@ -11,20 +11,21 @@ module Hittable
     scatter,
     mkLambertian,
     mkMetal,
-    mkDielectric
+    mkDielectric,
+    HitFun
   )
 where
 
-import Graphics.Point
 import Graphics.Ray
 import Graphics.Vec3
 import Interval (Interval)
 import Graphics
 import Control.Monad.Random
 import Random
+import AABB
 
 data HitRecord = HitRecord
-  { hitP :: !Point,
+  { hitP :: !V3,
     hitNormal :: !V3,
     hitT :: !Double,
     hitFrontFacing :: !Bool
@@ -93,7 +94,7 @@ mkDielectric refractiveIndex = Material {
 
 }
 
-generateHitRecord :: Ray -> Point -> Double -> V3 -> HitRecord
+generateHitRecord :: Ray -> V3 -> Double -> V3 -> HitRecord
 generateHitRecord (Ray _ direction _) p t outwardNormal =
   HitRecord p normal t frontFacing
   where
@@ -112,6 +113,9 @@ generateHitRecord (Ray _ direction _) p t outwardNormal =
 --   -}
 --   hit :: a -> Ray -> Interval -> Maybe HitRecord
 
-newtype Hittable = Hittable {
-  hit :: Ray -> Interval -> Maybe (HitRecord, Material)
+type HitFun = (Ray -> Interval -> Maybe (HitRecord, Material))
+
+data Hittable = Hittable {
+  hit :: HitFun,
+  bounding_box :: AABB
 }

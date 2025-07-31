@@ -1,4 +1,3 @@
-{-# LANGUAGE ExistentialQuantification #-}
 module Hittables where
 
 import Hittable
@@ -17,6 +16,6 @@ hitWorld :: HittableList -> Ray -> Interval -> Maybe (HitRecord, Material)
 hitWorld (HittableList hl) r (Interval tMin tMax) = V.foldl' step Nothing hl
   where
     step :: Maybe (HitRecord, Material) -> Hittable -> Maybe (HitRecord, Material)
-    step closest (Hittable hit) =
+    step closest (Hittable hit _) =
       let currTMax = maybe tMax (hitT . fst) closest
       in hit r (Interval tMin currTMax ) <|> closest

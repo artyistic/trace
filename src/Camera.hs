@@ -35,16 +35,16 @@ data Camera = Camera
     camDefocusDiskU :: V3,
     camDefocusDiskV :: V3,
     -- when intialized, user will gve lookFrom lookAt and vup
-    camCenter :: Point, -- will be lookFrom
+    camCenter :: V3, -- will be lookFrom
     -- derived from above
     camImageHeight :: Int,
     camPixelDu :: V3,
     camPixelDv :: V3,
-    camPixel00Loc :: Point
+    camPixel00Loc :: V3
   }
 
 -- init a camera
-camera :: Double -> Int -> Int -> Double -> Point -> Point -> V3 -> Double -> Double -> Camera
+camera :: Double -> Int -> Int -> Double -> V3 -> V3 -> V3 -> Double -> Double -> Camera
 camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup defocusAngle focusDistance =
   Camera
     aspectRatio
@@ -72,7 +72,7 @@ camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup defocusAn
     cameraCenter = lookFrom
 
     -- u v w are the basis vector for the camera coord frame
-    w = toV3 $ normalize (lookFrom <-> lookAt)
+    w = normalize (lookFrom <-> lookAt)
     u = normalize (vup >< w)
     v = w >< u
 
@@ -83,17 +83,15 @@ camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup defocusAn
     pixelDv = viewportV .^ (1 / fromIntegral imageHeight)
 
     viewportUpperLeft =
-      evalPoint
         cameraCenter
-        ( \x ->
-            x
+        
               <-> (w .^ focusDistance)
               <-> viewportU
               .^ 0.5
               <-> viewportV
               .^ 0.5
-        )
-    pixel00Loc = evalPoint viewportUpperLeft (<+> (pixelDu <+> pixelDv) .^ 0.5)
+
+    pixel00Loc = viewportUpperLeft <+> (pixelDu <+> pixelDv) .^ 0.5
 
     -- camera's defocus basis vectors
     defocusRadius = focusDistance * tan ((defocusAngle / 2) * (pi / 180))

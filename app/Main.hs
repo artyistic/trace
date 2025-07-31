@@ -6,7 +6,6 @@ import Graphics
 import Render
 import Control.Monad.Random
 
-
 dielectricCamera :: Camera
 dielectricCamera = camera
       aspectRatio
@@ -23,8 +22,8 @@ dielectricCamera = camera
 
     vfov = 20
 
-    lookFrom = fromCoord (-2) 2 1
-    lookAt = fromCoord 0 0 (-1)
+    lookFrom = V3 (-2) 2 1
+    lookAt = V3 0 0 (-1)
 
     vup = V3 0 1 0
 
@@ -50,8 +49,8 @@ bigWorldCamera = camera
 
     vfov = 20
 
-    lookFrom = fromCoord 13 2 3
-    lookAt = fromCoord 0 0 0
+    lookFrom = V3 13 2 3
+    lookAt = V3 0 0 0
 
     vup = V3 0 1 0
 
@@ -71,5 +70,5 @@ main = do
     -- world = dielectricTestWorld
     -- cam = dielectricCamera
 
-  render "./output/test.ppm" world cam gen 10
+  render "./output/test.ppm" world cam gen 50
 

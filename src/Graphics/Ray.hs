@@ -1,14 +1,12 @@
 module Graphics.Ray where
 
 import Graphics.Vec3
-import Graphics.Point
 
 data Ray = Ray {
-  rayOrigin :: !Point,
+  rayOrigin :: !V3,
   rayDirection :: !V3,
-  rayTime :: !Double}
+  rayTime :: !Double
+}
 
-at :: Ray -> Double -> Point
-at (Ray a r _) t = evalPoint a (<+> r .^ t)
-
-
+at :: Ray -> Double -> V3
+at (Ray a r _) t = a <+> r .^ t
