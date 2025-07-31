@@ -70,5 +70,5 @@ main = do
     -- world = dielectricTestWorld
     -- cam = dielectricCamera
 
-  render "./output/test.ppm" world cam gen 50
+  render "./output/test.ppm" world cam gen 10
 

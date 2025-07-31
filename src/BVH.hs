@@ -10,7 +10,7 @@ import Interval
 import Graphics (Ray)
 import Control.Applicative ((<|>))
 
-type HittableList = (V.Vector Hittable)
+type Hittables = (V.Vector Hittable)
 
 data BVHNode = InternalNode !AABB !BVHNode !BVHNode
              | LeafNode !Hittable
@@ -20,28 +20,27 @@ instance Show BVHNode where
   show bvh = case bvh of
     Empty -> ""
     LeafNode _ -> "Leaf"
-    InternalNode b l r -> show b ++ show l ++ show r 
+    InternalNode b l r -> "(" ++ "Internal" ++ show l ++ show r ++ ")" 
   
 
-buildBoundingBox :: HittableList -> AABB
+buildBoundingBox :: Hittables -> AABB
 buildBoundingBox = foldr (aabbFromBoxes . bounding_box) aabbEmpty
 
 bvhFromList :: [Hittable] -> BVHNode
-bvhFromList l = fromHittableList $ V.fromList l
+bvhFromList l = fromHittables $ V.fromList l
 
-fromHittableList :: HittableList -> BVHNode
-fromHittableList l =
+fromHittables :: Hittables -> BVHNode
+fromHittables l =
   case length l of
     0 -> Empty
     1 -> LeafNode (l V.! 0) 
     _ ->
-      let sortedHittableList = sortVectorBy comparator l
+      let sortedHittables = sortVectorBy comparator l
           midPt = length l `div` 2
-          (fstHalf, sndHalf) = V.splitAt midPt sortedHittableList
-      in InternalNode bvhAABB (fromHittableList fstHalf) (fromHittableList sndHalf)
+          (fstHalf, sndHalf) = V.splitAt midPt sortedHittables
+      in InternalNode bvhAABB (fromHittables fstHalf) (fromHittables sndHalf)
   where bvhAABB = buildBoundingBox l
         comparator = compareOnLongestAxis bvhAABB `on` bounding_box
-        sortedHittableList = sortBy comparator
 
 sortVectorBy :: (a -> a -> Ordering) -> V.Vector a -> V.Vector a
 sortVectorBy cmp vec = runST $ do

@@ -61,8 +61,8 @@ collision AABB {..} (Ray rO rD _) rI =
                 t1 = (axisMax - rOrigAxis) * rDirAxisInv
                 newTMin = max tMin (min t0 t1) -- min t0 t1 to ensure t0 is the min
                 newTMax = min tMax (max t0 t1) -- max is same idea as before
-             in if tMin < tMax
-                  then Just ((), Interval tMin tMax)
+             in if newTMin < newTMax
+                  then Just ((), Interval newTMin newTMax)
                   -- () is the result, ie no result
                   -- Interval tMin tMax is the new Interval we care about,
                   -- this is passed as the state
