@@ -10,6 +10,7 @@ import Graphics.Vec3
 import Interval
 import Data.Function
 import Data.Foldable (maximumBy)
+import Control.Monad.Random
 
 -- An AABB (Axis-Aligned Bounding Box) is three intervals on xyz planes
 data AABB = AABB
@@ -47,20 +48,20 @@ aabbFromBoxes (AABB boxAx boxAy boxAz) (AABB boxBx boxBy boxBz) =
 
 -- hit gets a ray and the corresponding interval where such ray is considered
 -- ie the ray r is a ray from r at tMin to r at tMax
+{-# INLINE collision #-}
 collision :: AABB -> Ray -> Interval -> Bool
 collision AABB {..} (Ray rO rD _) rI =
   isJust (evalStateT (mapM_ (liesInAxis rO) l) rI) -- ignoring result since there is no result, ()
   where
-    -- liesInAxis :: V3 -> (Interval, Double, Double) -> Bool
     liesInAxis :: V3 -> (Interval, Double, Double) -> StateT Interval Maybe ()
     liesInAxis rOrigin (Interval axisMin axisMax, rDirAxis, rOrigAxis) =
       StateT
         ( \(Interval tMin tMax) ->
-            let rDirAxisInv = 1.0 / rDirAxis
-                t0 = (axisMin - rOrigAxis) * rDirAxisInv
-                t1 = (axisMax - rOrigAxis) * rDirAxisInv
-                newTMin = max tMin (min t0 t1) -- min t0 t1 to ensure t0 is the min
-                newTMax = min tMax (max t0 t1) -- max is same idea as before
+            let !rDirAxisInv = 1.0 / rDirAxis
+                !t0 = (axisMin - rOrigAxis) * rDirAxisInv
+                !t1 = (axisMax - rOrigAxis) * rDirAxisInv
+                !newTMin = max tMin (min t0 t1) -- min t0 t1 to ensure t0 is the min
+                !newTMax = min tMax (max t0 t1) -- max is same idea as before
              in if newTMin < newTMax
                   then Just ((), Interval newTMin newTMax)
                   -- () is the result, ie no result
@@ -79,7 +80,16 @@ compareOnLongestAxis :: AABB -> (AABB -> AABB -> Ordering)
 compareOnLongestAxis (AABB x y z) =
   snd $ maximumBy (compare `on` fst) l
   where
-    compareBy f a b = compare (f a) (f b)
+    compareBy f = compare `on` f
     l = zip [x, y, z] [compareBy aabbX, compareBy aabbY, compareBy aabbZ]
 
 
+randAxisCompare :: Rand StdGen (AABB -> AABB -> Ordering)
+randAxisCompare = do
+  randAxis <- fromList (zip [0,1,2] [1,1,1]) :: Rand StdGen Int
+  case randAxis of
+    0 -> return $ compareBy aabbX
+    1 -> return $ compareBy aabbY
+    2 -> return $ compareBy aabbZ
+  where 
+    compareBy f a b = compare (f a) (f b)

@@ -1,3 +1,5 @@
+-- {-# LANGUAGE Strict #-}
+{-# LANGUAGE BangPatterns #-}
 module BVH where
 import Hittable
 import AABB
@@ -9,6 +11,7 @@ import qualified Data.Vector.Algorithms.Intro as Intro
 import Interval
 import Graphics (Ray)
 import Control.Applicative ((<|>))
+import Control.Monad.Random
 
 type Hittables = (V.Vector Hittable)
 
@@ -20,8 +23,8 @@ instance Show BVHNode where
   show bvh = case bvh of
     Empty -> ""
     LeafNode _ -> "Leaf"
-    InternalNode b l r -> "(" ++ "Internal" ++ show l ++ show r ++ ")" 
-  
+    InternalNode b l r -> "(" ++ "Internal" ++ show l ++ show r ++ ")"
+
 
 buildBoundingBox :: Hittables -> AABB
 buildBoundingBox = foldr (aabbFromBoxes . bounding_box) aabbEmpty
@@ -30,12 +33,13 @@ bvhFromList :: [Hittable] -> BVHNode
 bvhFromList l = fromHittables $ V.fromList l
 
 fromHittables :: Hittables -> BVHNode
-fromHittables l =
+fromHittables l = do
   case length l of
     0 -> Empty
-    1 -> LeafNode (l V.! 0) 
+    1 -> LeafNode (l V.! 0)
     _ ->
-      let sortedHittables = sortVectorBy comparator l
+      let
+          sortedHittables = sortVectorBy comparator l
           midPt = length l `div` 2
           (fstHalf, sndHalf) = V.splitAt midPt sortedHittables
       in InternalNode bvhAABB (fromHittables fstHalf) (fromHittables sndHalf)
@@ -54,9 +58,9 @@ hitBVH bvh r i@(Interval tMin tMax) = case bvh of
   InternalNode box left right ->
     if collision box r i
       then
-        let hitLeft = hitBVH left r i
-            hitRightTMax = maybe tMax (hitT . fst) hitLeft
-            hitRight = hitBVH right r (Interval tMin hitRightTMax)
+        let !hitLeft = hitBVH left r i
+            !hitRightTMax = maybe tMax (hitT . fst) hitLeft
+            !hitRight = hitBVH right r (Interval tMin hitRightTMax)
         in hitRight <|> hitLeft
       else Nothing
   LeafNode h -> hit h r i

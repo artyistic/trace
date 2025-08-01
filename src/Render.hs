@@ -17,6 +17,7 @@ render
   gen
   numBounces =
     do
+      -- bvhWorld <- evalRandIO (bvhFromList world)
       let
         pixels =
             [ pixelRenderer x y bvhWorld

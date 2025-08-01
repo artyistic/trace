@@ -4,8 +4,8 @@ module Interval where
 -- THIS ASSUMES NAN WONT HAPPEN AND INF IS 1/0
 -- Represents a closed interval [min, max]
 data Interval = Interval
-  { minVal :: Double
-  , maxVal :: Double
+  { minVal :: !Double
+  , maxVal :: !Double
   } deriving (Eq, Show)
 
 instance Ord Interval where
