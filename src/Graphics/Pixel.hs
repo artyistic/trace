@@ -1,11 +1,11 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 
-module Graphics.Pixel (Color, color, toRGB8, colorFromV3, averageColor, colorToRGBString, gammaCorrected) where
+module Graphics.Pixel (Color, color, colorFromV3, averageColor, colorToRGBString, gammaCorrected) where
 
 import Graphics.Vec3
 import Data.Word (Word8)
-import qualified Codec.Picture as P
+-- import qualified Codec.Picture as P
 import Data.Bool
 
 -- Color are represented by [0,1] range
@@ -26,9 +26,9 @@ colorFromV3 v = color r g b
 toWord8 :: Double -> Word8
 toWord8 x = fromIntegral (floor (x * 255.99))
 
--- exposed conversion
-toRGB8 :: Color -> P.PixelRGB8
-toRGB8 (Color v) = let (r, g, b) = toXYZ v in P.PixelRGB8 (toWord8 r) (toWord8 g) (toWord8 b)
+-- -- exposed conversion
+-- toRGB8 :: Color -> P.PixelRGB8
+-- toRGB8 (Color v) = let (r, g, b) = toXYZ v in P.PixelRGB8 (toWord8 r) (toWord8 g) (toWord8 b)
 
 -- a function to average Colors from list
 -- here bc color smart constructor clamps
