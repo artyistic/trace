@@ -1,120 +1,114 @@
 {-# LANGUAGE BangPatterns #-}
+
 module Render (render) where
--- import Hittables
+
+import BVH
 import Camera
 import Control.Monad.Random
+import Control.Parallel.Strategies
+import Data.ByteString.Builder (Builder, intDec, string7, toLazyByteString)
+import qualified Data.ByteString.Lazy as BL
 import Graphics
 import Hittable
 import qualified Interval as I
 import Random
-import BVH
+import System.Random.SplitMix (SMGen, initSMGen, splitSMGen, nextWord64)
 
-render :: FilePath -> [Hittable] -> Camera -> StdGen -> Int -> IO ()
-render
-  fpath
-  world
-  cam
-  gen
-  numBounces =
-    do
-      -- bvhWorld <- evalRandIO (bvhFromList world)
-      let
-        pixels =
-            [ pixelRenderer x y bvhWorld
-              | y <- [0 .. imageHeight - 1],
-                x <- [0 .. imageWidth - 1]
-            ]
-      t <- evalRandIO (sequenceA pixels)
+-- | Render a scene to a PPM file.
+render :: FilePath -> [Hittable] -> Camera -> Int -> IO ()
+render fpath world cam numBounces = do
+  gen <- initSMGen
+  let rowGens = take imageHeight $ iterate (snd . splitSMGen) gen
+      rowResults =
+        [ evalRand (renderRow y bvh cam numBounces) (mkStdGen (fromIntegral (fst (nextWord64 g))))
+          | (y, g) <- zip [0 .. imageHeight - 1] rowGens
+        ] `using` parList rdeepseq
 
-      writeFile fpath $
-        "P3\n"
-          ++ show imageWidth
-          ++ " "
-          ++ show imageHeight
-          ++ "\n255\n"
-          ++ foldr (\x y -> colorToRGBString x ++ "\n" ++ y) "" t
-    where
-      !bvhWorld = bvhFromList world
-      -- for each x y position on viewPort, randomly sample pixels to construct a smooth edge
+  BL.writeFile fpath $ toPPM imageWidth imageHeight (concat rowResults)
+  where
+    !bvh        = bvhFromList world
+    imageWidth  = cfgImageWidth . camConfig $ cam
+    imageHeight = camImageHeight cam
 
-      -- replicateM makes a random array of position offsets,
-      -- then we map rayColors, average and gammaCorrect it
-      imageWidth = camImageWidth cam
-      samplesPerPixel = camSamplesPerPixel cam
-      defocusAngle = camDefocusAngle cam
-      focusDistance = camFocusDistance cam
-      defocusDiskU = camDefocusDiskU cam
-      defocusDiskV = camDefocusDiskV cam
-      cameraCenter = camCenter cam
-      imageHeight = camImageHeight cam
-      pixelDu = camPixelDu cam
-      pixelDv = camPixelDv cam
-      pixel00Loc = camPixel00Loc cam
+-- | Render all pixels in a single row.
+renderRow :: Int -> BVHNode -> Camera -> Int -> Rand StdGen [Color]
+renderRow y bvh cam numBounces =
+  forM [0 .. imageWidth - 1] $ \x ->
+    samplePixel x y bvh cam numBounces
+  where
+    imageWidth = cfgImageWidth . camConfig $ cam
 
-      pixelRenderer :: Int -> Int -> BVHNode -> Rand StdGen Color
-      pixelRenderer x y world' = do
-        sampleSquares <- replicateM samplesPerPixel getSampleSquare
-        let
-          sampleColor v = do
-              d <- sampleDefocusDisk cam
-              let rayOrigin = if defocusAngle <= 0 then cameraCenter else d
-              rayIn <- shootRay rayOrigin x y v cam -- a randomTime for moving spheres (random)
-              rayColor
-                rayIn
-                world'
-                numBounces -- this ray trace a particular sample
-        gammaCorrected . averageColor <$> traverse sampleColor sampleSquares
+-- | Sample a pixel at (x, y) by averaging multiple random rays.
+samplePixel :: Int -> Int -> BVHNode -> Camera -> Int -> Rand StdGen Color
+samplePixel x y bvh cam numBounces = do
+  offsets <- replicateM samplesPerPixel getSampleSquare
+  colors  <- traverse (sampleRay x y bvh cam numBounces defocusAngle) offsets
+  return . gammaCorrected . averageColor $ colors
+  where
+    samplesPerPixel = cfgSamplesPerPixel . camConfig $ cam
+    defocusAngle    = cfgDefocusAngle    . camConfig $ cam
 
+-- | Shoot one ray through pixel (x, y) with a random sub-pixel offset.
+sampleRay :: Int -> Int -> BVHNode -> Camera -> Int -> Double -> V3 -> Rand StdGen Color
+sampleRay x y bvh cam numBounces defocusAngle offset = do
+  origin <- if defocusAngle <= 0
+              then pure (camCenter cam)
+              else sampleDefocusDisk cam
+  ray    <- shootRay origin x y offset cam
+  rayColor ray bvh numBounces
+
+-- | Construct a ray from an origin through pixel (x, y) with a sub-pixel offset.
 shootRay :: V3 -> Int -> Int -> V3 -> Camera -> Rand StdGen Ray
-shootRay rayOrigin x y (V3 offsetX offsetY _) cam = do
-  let rayDirection =
-        pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
-          <-> rayOrigin
-      randomRayTime = getRandomR (0, 1) :: Rand StdGen Double
-  Ray rayOrigin rayDirection <$> randomRayTime
+shootRay origin x y (V3 offsetX offsetY _) cam = do
+  let direction = pixelCenter (fromIntegral x + offsetX) (fromIntegral y + offsetY) cam
+                    <-> origin
+  time <- getRandomR (0, 1)
+  return $ Ray origin direction time
 
+-- | World-space position of a (possibly fractional) pixel coordinate.
 pixelCenter :: Double -> Double -> Camera -> V3
-pixelCenter x' y' cam =
-  let
-    pixelDu = camPixelDu cam
-    pixelDv = camPixelDv cam
-    pixel00Loc = camPixel00Loc cam
-  in
-  pixel00Loc <+> pixelDu .^ x' <+> pixelDv .^ y'
+pixelCenter x y cam =
+  camPixel00Loc cam <+> camPixelDu cam .^ x <+> camPixelDv cam .^ y
 
+-- | Sample a random point on the defocus disk.
 sampleDefocusDisk :: Camera -> Rand StdGen V3
 sampleDefocusDisk cam = do
-  let
-      diskU = camDefocusDiskU cam
-      diskV = camDefocusDiskV cam
-      c = camCenter cam
-  (V3 pX pY _) <- getRandomInUnitDisk
-  return $ c <+> diskU .^ pX <+> diskV .^ pY
+  (V3 px py _) <- getRandomInUnitDisk
+  return $ camCenter cam
+        <+> camDefocusDiskU cam .^ px
+        <+> camDefocusDiskV cam .^ py
 
+-- | Trace a ray through the scene, returning its color.
 {-# INLINE rayColor #-}
 rayColor :: Ray -> BVHNode -> Int -> Rand StdGen Color
-rayColor r@(Ray _ direction _) world depth =
-  if depth <= 0
-    then pure $ color 0 0 0
-    else
-      maybe (pure (p1 <+> p2)) trace hitResult
+rayColor _ _ 0 = pure $ color 0 0 0
+rayColor r@(Ray _ direction _) bvh depth =
+  case hitBVH bvh r (I.Interval 0.001 (1 / 0)) of
+    Nothing              -> pure background
+    Just (hitRec, mat)   -> do
+      result <- scatter mat r hitRec
+      case result of
+        Nothing                       -> pure $ color 0 0 0
+        Just (attenuation, scattered) ->
+          (attenuation `componentMul`) <$> rayColor scattered bvh (depth - 1)
   where
-    p1 = white .^ (1.0 - a)
-    p2 = lightBlue .^ a
-    a = 0.5 * (toY (normalize direction) + 1)
-    hitResult = hitBVH world r (I.Interval 0.001 (1 / 0))
-    trace hR = do
-      let mat = snd hR
-          hitRecord = fst hR
-      scatterResult <- scatter mat r hitRecord
-      maybe
-        (pure $ color 0 0 0)
-        ( \(attenuation, scattered) ->
-            (attenuation `componentMul`) <$> rayColor scattered world (depth - 1)
-        )
-        scatterResult
-
-    -- colors for background
-    white = color 1 1 1
+    background =
+      let a = 0.5 * (toY (normalize direction) + 1)
+      in white .^ (1 - a) <+> lightBlue .^ a
+    white     = color 1.0 1.0 1.0
     lightBlue = color 0.5 0.7 1.0
-    pink = color 1 0 0.906
+
+-- | Serialize pixels to PPM format using ByteString.Builder.
+toPPM :: Int -> Int -> [Color] -> BL.ByteString
+toPPM w h pixels = toLazyByteString $
+  header <> foldMap pixelLine pixels
+  where
+    header    = string7 "P3\n"
+             <> intDec w <> string7 " " <> intDec h <> string7 "\n"
+             <> string7 "255\n"
+    pixelLine c = colorToBuilder c <> string7 "\n"
+
+colorToBuilder :: Color -> Builder
+colorToBuilder c =
+  let (r, g, b) = colorToRGB c
+  in intDec r <> string7 " " <> intDec g <> string7 " " <> intDec b

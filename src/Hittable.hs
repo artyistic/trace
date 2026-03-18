@@ -51,14 +51,14 @@ mkLambertian c = Material {
   scatter = \(Ray _ _ inTime) hR -> do
     let normal = hitNormal hR
         hitPt = hitP hR
-    d <- (\a -> if nearZero a then normal else a ) <$> getRandomUnitBallVec
-    return $ pure (c, Ray hitPt (d <+> normal) inTime)
+    d <- (\a -> if nearZero a then normal else a ) <$> getRandomUnitVec
+    return $ Just (c, Ray hitPt (d <+> normal) inTime)
 }
 
 mkMetal :: Color -> Double -> Material
 mkMetal c fuzz = Material {
   scatter = \r@(Ray _ inDirection inTime) hR -> do
-    randomVec <- getRandomUnitBallVec
+    randomVec <- getRandomUnitVec
     let normal = hitNormal hR
         hitPt = hitP hR
         reflectedRay = reflect inDirection normal

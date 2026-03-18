@@ -8,39 +8,39 @@ data Interval = Interval
   , maxVal :: !Double
   } deriving (Eq, Show)
 
+-- Ordered by lower bound only, used for BVH axis sorting
 instance Ord Interval where
   compare (Interval aMin _) (Interval bMin _) = compare aMin bMin
 
-
--- Default: empty interval [∞, -∞]
+-- | Default: empty interval [∞, -∞]
 empty :: Interval
-empty = Interval (1 / 0) (- (1 / 0))
+empty = Interval (1 / 0) (-(1 / 0))
 
--- Universe: [-∞, ∞]
+-- | Universe: [-∞, ∞]
 universe :: Interval
-universe = Interval (- (1 / 0)) (1 / 0)
+universe = Interval (-(1 / 0)) (1 / 0)
 
--- Size of the interval (can be negative for empty)
+-- | Size of the interval (can be negative for empty)
 size :: Interval -> Double
 size (Interval lo hi) = hi - lo
 
--- Inclusive containment: x ∈ [min, max]
+-- | Inclusive containment: x ∈ [min, max]
 contains :: Interval -> Double -> Bool
 contains (Interval lo hi) x = lo <= x && x <= hi
 
--- Exclusive containment: x ∈ (min, max)
+-- | Exclusive containment: x ∈ (min, max)
 surrounds :: Interval -> Double -> Bool
 surrounds (Interval lo hi) x = lo < x && x < hi
 
--- pads an interval by delta
+-- | Pads an interval symmetrically by delta
 expands :: Interval -> Double -> Interval
-expands (Interval min max) delta = Interval (min - padding) (max + padding)
+expands (Interval lo hi) delta = Interval (lo - padding) (hi + padding)
   where padding = delta / 2
 
--- Create the interval tightly enclosing the two input intervals.
+-- | Create the interval tightly enclosing two input intervals
 combineIntervals :: Interval -> Interval -> Interval
 combineIntervals (Interval aMin aMax) (Interval bMin bMax) =
-  Interval {
-    minVal = min aMin bMin,
-    maxVal = max aMax bMax
-  }
+  Interval
+    { minVal = min aMin bMin
+    , maxVal = max aMax bMax
+    }

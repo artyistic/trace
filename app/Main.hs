@@ -7,68 +7,38 @@ import Render
 import Control.Monad.Random
 
 dielectricCamera :: Camera
-dielectricCamera = camera
-      aspectRatio
-      imageWidth
-      samplesPerPixel
-      vfov
-      lookFrom
-      lookAt
-      vup
-      defocusAngle
-      focusDistance
-  where
-    aspectRatio = 16.0 / 9.0
-
-    vfov = 20
-
-    lookFrom = V3 (-2) 2 1
-    lookAt = V3 0 0 (-1)
-
-    vup = V3 0 1 0
-
-    defocusAngle = 10.0
-    focusDistance = 3.4
-
-    imageWidth = 400
-    samplesPerPixel = 100
+dielectricCamera = makeCamera defaultCameraConfig
+  { cfgAspectRatio     = 16.0 / 9.0,
+    cfgVfov            = 20,
+    cfgLookFrom        = V3 (-2) 2 1,
+    cfgLookAt          = V3 0 0 (-1),
+    cfgVup             = V3 0 1 0,
+    cfgDefocusAngle    = 10.0,
+    cfgFocusDistance   = 3.4,
+    cfgImageWidth      = 400,
+    cfgSamplesPerPixel = 100
+  }
 
 bigWorldCamera :: Camera
-bigWorldCamera = camera
-      aspectRatio
-      imageWidth
-      samplesPerPixel
-      vfov
-      lookFrom
-      lookAt
-      vup
-      defocusAngle
-      focusDistance
-  where
-    aspectRatio = 16.0 / 9.0
-
-    vfov = 20
-
-    lookFrom = V3 13 2 3
-    lookAt = V3 0 0 0
-
-    vup = V3 0 1 0
-
-    defocusAngle = 0.6
-    focusDistance = 10.0
-
-    imageWidth = 400
-    samplesPerPixel = 100
-
+bigWorldCamera = makeCamera defaultCameraConfig
+  { cfgAspectRatio     = 16.0 / 9.0,
+    cfgVfov            = 20,
+    cfgLookFrom        = V3 13 2 3,
+    cfgLookAt          = V3 0 0 0,
+    cfgVup             = V3 0 1 0,
+    cfgDefocusAngle    = 0.6,
+    cfgFocusDistance   = 10.0,
+    cfgImageWidth      = 400,
+    cfgSamplesPerPixel = 100
+  }
 
 main :: IO ()
 main = do
   gen <- getStdGen
   let
     world = evalRand bigWorld gen
-    cam = bigWorldCamera
-    -- world = dielectricTestWorld
-    -- cam = dielectricCamera
+    cam   = bigWorldCamera
+    -- world = evalRand dielectricTestWorld gen
+    -- cam   = dielectricCamera
 
-  render "./output/test.ppm" world cam gen 20
-
+  render "./output/test50.ppm" world cam 50

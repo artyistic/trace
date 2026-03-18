@@ -1,278 +1,268 @@
-	Sat Aug  2 23:00 2025 Time and Allocation Profiling Report  (Final)
+	Wed Mar 18 00:46 2026 Time and Allocation Profiling Report  (Final)
 
-	   tracerays +RTS -p -RTS
+	   tracerays +RTS -N -p -RTS
 
-	total time  =      135.06 secs   (135058 ticks @ 1000 us, 1 processor)
-	total alloc = 438,202,865,856 bytes  (excludes profiling overheads)
+	total time  =      193.23 secs   (715920 ticks @ 1000 us, 8 processors)
+	total alloc = 52,941,635,392 bytes  (excludes profiling overheads)
 
-COST CENTRE    MODULE                          SRC                                           %time %alloc
+COST CENTRE       MODULE                          SRC                                             %time %alloc
 
-collision1     AABB                            <no location info>                             39.9   15.9
-hitBVH         BVH                             src/BVH.hs:57:1-6                              39.7   74.4
-$wsphereHit    Shapes.Sphere                   src/Shapes/Sphere.hs:67:1-9                     3.0    1.3
-$wrender       Render                          <no location info>                              2.6    1.7
-$fMonadRandT   Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:157:48-52    2.3    0.4
-$wx2           Hittable                        <no location info>                              2.0    1.7
-$wmovingSphere Shapes.Sphere                   src/Shapes/Sphere.hs:26:1-12                    1.6    0.0
-$wrayColor     Render                          <no location info>                              1.6    0.7
-iterateUntilM  Control.Monad.Loops             src/Control/Monad/Loops.hs:171:1-13             1.4    0.6
-$wmkLambertian Hittable                        <no location info>                              1.1    0.6
+evalRandT         Control.Monad.Trans.Random.Lazy Control/Monad/Trans/Random/Lazy.hs:184:1-42      92.9   31.6
+iterateUntilM     Control.Monad.Loops             src/Control/Monad/Loops.hs:(171,1)-(173,43)       1.5   17.1
+movingSphere      Shapes.Sphere                   src/Shapes/Sphere.hs:(26,1)-(40,55)               1.3    2.0
+stationarySphere  Shapes.Sphere                   src/Shapes/Sphere.hs:(44,1)-(57,42)               1.3    5.5
+iterateUntil      Control.Monad.Loops             src/Control/Monad/Loops.hs:178:1-50               1.1   15.6
+mkLambertian      Hittable                        src/Hittable.hs:(50,1)-(56,1)                     0.5    6.1
+nextWord64        System.Random.SplitMix          src/System/Random/SplitMix.hs:(115,1)-(117,29)    0.3   15.3
+mkMetal           Hittable                        src/Hittable.hs:(59,1)-(69,1)                     0.1    1.1
+mkDielectric      Hittable                        src/Hittable.hs:(72,1)-(95,1)                     0.1    1.4
+averageColor      Graphics.Pixel                  src/Graphics/Pixel.hs:(33,1)-(34,64)              0.1    1.1
+generateHitRecord Hittable                        src/Hittable.hs:(98,1)-(102,72)                   0.1    3.0
 
 
-                                                                                                                                                      individual      inherited
-COST CENTRE                                       MODULE                           SRC                                             no.     entries  %time %alloc   %time %alloc
+                                                                                                                                         individual      inherited
+COST CENTRE                  MODULE                            SRC                                                    no.     entries  %time %alloc   %time %alloc
 
-MAIN                                              MAIN                             <built-in>                                      249           0    0.0    0.0   100.0  100.0
- main                                             Main                             app/Main.hs:65:1-4                              498           1    0.0    0.0   100.0  100.0
-  main5                                           Main                             <no location info>                              499           1    0.0    0.0   100.0  100.0
-   main1                                          Main                             <no location info>                              500           1    0.0    0.0   100.0  100.0
-    $wbigWorld                                    Scenes                           <no location info>                              502           1    0.0    0.0     0.0    0.0
-     extractHittable                              Shapes.Sphere                    src/Shapes/Sphere.hs:22:1-15                    525         526    0.0    0.0     0.0    0.0
-     $wgo3                                        Scenes                           <no location info>                              506          23    0.0    0.0     0.0    0.0
-      $wgenSpheres                                Scenes                           <no location info>                              507         529    0.0    0.0     0.0    0.0
-       $wcolor                                    Graphics.Pixel                   <no location info>                              695         504    0.0    0.0     0.0    0.0
-       $wmovingSphere                             Shapes.Sphere                    src/Shapes/Sphere.hs:26:1-12                    526         439    0.0    0.0     0.0    0.0
-        $waabbFromBoxes                           AABB                             src/AABB.hs:41:1-13                             527         439    0.0    0.0     0.0    0.0
-       $wstationarySphere                         Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    528          87    0.0    0.0     0.0    0.0
-    $wrender                                      Render                           <no location info>                              503           1    2.6    1.7   100.0  100.0
-     $wrayColor                                   Render                           <no location info>                              622    23667567    1.6    0.7    94.1   96.3
-      hitBVH                                      BVH                              src/BVH.hs:57:1-6                               623  1512673760   39.7   74.4    84.9   91.6
-       collision1                                 AABB                             <no location info>                              626  4123530817   39.9   15.9    39.9   15.9
-       $wbigWorld                                 Scenes                           <no location info>                              638           0    0.0    0.0     4.2    0.4
-        $wgo3                                     Scenes                           <no location info>                              639           0    0.0    0.0     4.2    0.4
-         $wgenSpheres                             Scenes                           <no location info>                              640           0    0.0    0.0     4.2    0.4
-          $wmovingSphere                          Shapes.Sphere                    src/Shapes/Sphere.hs:26:1-12                    641           0    1.5    0.0     3.7    0.3
-           $wsphereHit                            Shapes.Sphere                    src/Shapes/Sphere.hs:67:1-9                     642   227623382    2.1    0.3     2.1    0.3
-          $wstationarySphere                      Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    668           0    0.3    0.0     0.5    0.1
-           $wsphereHit                            Shapes.Sphere                    src/Shapes/Sphere.hs:67:1-9                     669    28047452    0.2    0.1     0.2    0.1
-       bigWorld_bigSphere1                        Scenes                           src/Scenes.hs:45:5-14                           649           0    0.0    0.0     0.1    0.1
-        $wstationarySphere                        Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    650           0    0.0    0.0     0.1    0.1
-         $wsphereHit                              Shapes.Sphere                    src/Shapes/Sphere.hs:67:1-9                     651     3379642    0.1    0.1     0.1    0.1
-       bigWorld_bigSphere2                        Scenes                           src/Scenes.hs:46:5-14                           646           0    0.0    0.0     0.1    0.0
-        $wstationarySphere                        Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    647           0    0.0    0.0     0.1    0.0
-         $wsphereHit                              Shapes.Sphere                    src/Shapes/Sphere.hs:67:1-9                     648     3379642    0.0    0.0     0.0    0.0
-       bigWorld_bigSphere3                        Scenes                           src/Scenes.hs:47:5-14                           643           0    0.0    0.0     0.2    0.1
-        $wstationarySphere                        Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    644           0    0.1    0.0     0.2    0.1
-         $wsphereHit                              Shapes.Sphere                    src/Shapes/Sphere.hs:67:1-9                     645     9019017    0.1    0.1     0.1    0.1
-       bigWorld_ground                            Scenes                           src/Scenes.hs:44:5-10                           634           0    0.0    0.0     0.7    0.7
-        $wstationarySphere                        Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    635           0    0.2    0.0     0.7    0.7
-         $wsphereHit                              Shapes.Sphere                    src/Shapes/Sphere.hs:67:1-9                     637    20645399    0.5    0.7     0.5    0.7
-      $wbigWorld                                  Scenes                           <no location info>                              690           0    0.0    0.0     2.9    1.5
-       $wgo3                                      Scenes                           <no location info>                              691           0    0.0    0.0     2.9    1.5
-        $wgenSpheres                              Scenes                           <no location info>                              692           0    0.0    0.1     2.9    1.5
-         $wmkLambertian                           Hittable                         <no location info>                              694     4600265    0.5    0.3     2.4    1.3
-          iterateUntilM                           Control.Monad.Loops              src/Control/Monad/Loops.hs:171:1-13             696     8789706    0.4    0.2     1.5    0.7
-           mkLambertian3                          Hittable                         <no location info>                              697     8789706    0.1    0.0     0.1    0.0
-           $fMonadRandT                           Control.Monad.Trans.Random.Lazy  Control/Monad/Trans/Random/Lazy.hs:157:48-52    699           0    0.6    0.1     1.1    0.5
-            mkLambertian2                         Hittable                         <no location info>                              700     4189441    0.0    0.0     0.5    0.4
-             mkLambertian_x2                      Hittable                         <no location info>                              701     4189441    0.0    0.0     0.4    0.4
-              $wx2                                Hittable                         <no location info>                              702     4189441    0.4    0.3     0.4    0.3
-          $wx2                                    Hittable                         <no location info>                              698     4600265    0.5    0.4     0.5    0.4
-         $wmkMetal                                Hittable                         <no location info>                              721      398001    0.0    0.0     0.3    0.1
-          iterateUntilM                           Control.Monad.Loops              src/Control/Monad/Loops.hs:171:1-13             722      760316    0.0    0.0     0.2    0.1
-           mkLambertian3                          Hittable                         <no location info>                              723      760316    0.0    0.0     0.0    0.0
-           $fMonadRandT                           Control.Monad.Trans.Random.Lazy  Control/Monad/Trans/Random/Lazy.hs:157:48-52    725           0    0.1    0.0     0.1    0.0
-            mkMetal2                              Hittable                         <no location info>                              726      362315    0.0    0.0     0.1    0.0
-             mkMetal_x2                           Hittable                         <no location info>                              727      362315    0.0    0.0     0.1    0.0
-              $wx1                                Hittable                         <no location info>                              728      362315    0.0    0.0     0.0    0.0
-          $wx1                                    Hittable                         <no location info>                              724      398001    0.1    0.0     0.1    0.0
-         $wmovingSphere                           Shapes.Sphere                    src/Shapes/Sphere.hs:26:1-12                    693           0    0.0    0.0     0.0    0.0
-         $wstationarySphere                       Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    705           0    0.0    0.0     0.2    0.1
-          bigWorld9                               Scenes                           <no location info>                              706      534423    0.0    0.0     0.1    0.1
-           $wmkDielectric                         Hittable                         <no location info>                              707      534423    0.1    0.1     0.1    0.1
-      bigWorld_bigSphere1                         Scenes                           src/Scenes.hs:45:5-14                           683           0    0.0    0.0     0.2    0.1
-       $wstationarySphere                         Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    684           0    0.0    0.0     0.2    0.1
-        bigWorld9                                 Scenes                           <no location info>                              685     1027935    0.0    0.0     0.2    0.1
-         $wmkDielectric                           Hittable                         <no location info>                              686     1027935    0.2    0.1     0.2    0.1
-      bigWorld_bigSphere2                         Scenes                           src/Scenes.hs:46:5-14                           652           0    0.0    0.0     0.1    0.1
-       $wstationarySphere                         Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    653           0    0.0    0.0     0.1    0.1
-        bigWorld6                                 Scenes                           <no location info>                              654      234271    0.0    0.0     0.1    0.1
-         $wmkLambertian                           Hittable                         <no location info>                              655      234271    0.0    0.0     0.1    0.1
-          iterateUntilM                           Control.Monad.Loops              src/Control/Monad/Loops.hs:171:1-13             658      448299    0.0    0.0     0.1    0.0
-           mkLambertian3                          Hittable                         <no location info>                              659      448299    0.0    0.0     0.0    0.0
-           $fMonadRandT                           Control.Monad.Trans.Random.Lazy  Control/Monad/Trans/Random/Lazy.hs:157:48-52    664           0    0.0    0.0     0.1    0.0
-            mkLambertian2                         Hittable                         <no location info>                              665      214028    0.0    0.0     0.0    0.0
-             mkLambertian_x2                      Hittable                         <no location info>                              666      214028    0.0    0.0     0.0    0.0
-              $wx2                                Hittable                         <no location info>                              667      214028    0.0    0.0     0.0    0.0
-          $wx2                                    Hittable                         <no location info>                              663      234271    0.0    0.0     0.0    0.0
-      bigWorld_bigSphere3                         Scenes                           src/Scenes.hs:47:5-14                           708           0    0.0    0.0     1.2    0.6
-       $wstationarySphere                         Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    709           0    0.0    0.0     1.2    0.6
-        bigWorld3                                 Scenes                           <no location info>                              710     2076337    0.0    0.0     1.1    0.6
-         $wmkMetal                                Hittable                         <no location info>                              711     2076337    0.2    0.1     1.1    0.6
-          iterateUntilM                           Control.Monad.Loops              src/Control/Monad/Loops.hs:171:1-13             712     3968084    0.1    0.1     0.7    0.3
-           mkLambertian3                          Hittable                         <no location info>                              713     3968084    0.0    0.0     0.0    0.0
-           $fMonadRandT                           Control.Monad.Trans.Random.Lazy  Control/Monad/Trans/Random/Lazy.hs:157:48-52    715           0    0.3    0.1     0.5    0.2
-            mkMetal2                              Hittable                         <no location info>                              716     1891747    0.0    0.0     0.2    0.2
-             mkMetal_x2                           Hittable                         <no location info>                              717     1891747    0.0    0.0     0.2    0.2
-              $wx1                                Hittable                         <no location info>                              718     1891747    0.2    0.2     0.2    0.2
-          $wx1                                    Hittable                         <no location info>                              714     2076337    0.2    0.2     0.2    0.2
-      bigWorld_ground                             Scenes                           src/Scenes.hs:44:5-10                           670           0    0.0    0.0     3.2    1.7
-       $wstationarySphere                         Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    671           0    0.1    0.0     3.2    1.7
-        bigWorld12                                Scenes                           <no location info>                              672     5799670    0.1    0.1     3.1    1.7
-         $wmkLambertian                           Hittable                         <no location info>                              673     5799670    0.6    0.3     3.0    1.6
-          iterateUntilM                           Control.Monad.Loops              src/Control/Monad/Loops.hs:171:1-13             676    11075963    0.4    0.2     1.9    0.8
-           mkLambertian3                          Hittable                         <no location info>                              677    11075963    0.1    0.0     0.1    0.0
-           $fMonadRandT                           Control.Monad.Trans.Random.Lazy  Control/Monad/Trans/Random/Lazy.hs:157:48-52    679           0    0.8    0.2     1.4    0.6
-            mkLambertian2                         Hittable                         <no location info>                              680     5276293    0.0    0.0     0.6    0.5
-             mkLambertian_x2                      Hittable                         <no location info>                              681     5276293    0.0    0.0     0.6    0.5
-              $wx2                                Hittable                         <no location info>                              682     5276293    0.5    0.4     0.5    0.4
-          $wx2                                    Hittable                         <no location info>                              678     5799670    0.6    0.5     0.6    0.5
-     iterateUntilM                                Control.Monad.Loops              src/Control/Monad/Loops.hs:171:1-13             600    11458002    0.4    0.1     1.3    0.4
-      lvl9                                        Render                           <no location info>                              601    11458002    0.1    0.0     0.1    0.0
-      $fMonadRandT                                Control.Monad.Trans.Random.Lazy  Control/Monad/Trans/Random/Lazy.hs:157:48-52    610           0    0.5    0.1     0.8    0.3
-       lvl10                                      Render                           <no location info>                              611     2458002    0.1    0.1     0.3    0.2
-        $wk4                                      Render                           <no location info>                              612     2458002    0.1    0.1     0.1    0.1
-        $wm2                                      Render                           <no location info>                              613     2458002    0.0    0.0     0.0    0.0
-     $wgo1                                        Graphics.Pixel                   <no location info>                              595     9090000    0.1    0.1     0.1    0.1
-     $wk4                                         Render                           <no location info>                              605     9000000    0.4    0.4     0.4    0.4
-     $wm2                                         Render                           <no location info>                              606     9000000    0.2    0.0     0.2    0.0
-     go1                                          Render                           <no location info>                              592       90001    0.0    0.0     0.1    0.0
-      $wcolorToRGBString                          Graphics.Pixel                   src/Graphics/Pixel.hs:41:1-16                   631       90000    0.0    0.0     0.0    0.0
-       $wc                                        Graphics.Pixel                   <no location info>                              632      270000    0.0    0.0     0.0    0.0
-     $w$s$wreplicateM                             Render                           <no location info>                              594       90000    0.5    0.4     1.2    1.0
-      lvl6                                        Render                           <no location info>                              598     9000000    0.1    0.0     0.7    0.6
-       $wlvl                                      Render                           <no location info>                              599     9000000    0.6    0.5     0.6    0.5
-     bvhFromList                                  BVH                              src/BVH.hs:33:1-11                              504           1    0.0    0.0     0.0    0.0
-      $wfoldlM_loop                               BVH                              <no location info>                              505         531    0.0    0.0     0.0    0.0
-       $wfromHittables                            BVH                              src/BVH.hs:36:1-13                              508        1059    0.0    0.0     0.0    0.0
-        $waabbFromBoxes                           AABB                             src/AABB.hs:41:1-13                             534        4806    0.0    0.0     0.0    0.0
-        $smaximumBy                               AABB                             <no location info>                              547         529    0.0    0.0     0.0    0.0
-         compareOnLongestAxis4                    AABB                             <no location info>                              548        1058    0.0    0.0     0.0    0.0
-        $wsortVectorBy                            BVH                              src/BVH.hs:50:1-12                              535         529    0.0    0.0     0.0    0.0
-         compareOnLongestAxis1                    AABB                             <no location info>                              553       11423    0.0    0.0     0.0    0.0
-         compareOnLongestAxis2                    AABB                             <no location info>                              578        1850    0.0    0.0     0.0    0.0
-         $wloop                                   Data.Vector.Algorithms.Intro     src/Data/Vector/Algorithms/Intro.hs:257:2-5     536         827    0.0    0.0     0.0    0.0
-         sort2ByIndex                             Data.Vector.Algorithms.Optimal   src/Data/Vector/Algorithms/Optimal.hs:64:1-12   568         256    0.0    0.0     0.0    0.0
-          primitive                               Control.Monad.Primitive          Control/Monad/Primitive.hs:86:3-77              570         538    0.0    0.0     0.0    0.0
-           $fPrimMonadST1                         Control.Monad.Primitive          <no location info>                              571         538    0.0    0.0     0.0    0.0
-            basicUnsafeRead                       Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:67:3-44 573           0    0.0    0.0     0.0    0.0
-             $fMVectorMVectora_$cbasicUnsafeRead  Data.Vector.Mutable              src/Data/Vector/Mutable.hs:145:3-17             574         512    0.0    0.0     0.0    0.0
-            basicUnsafeWrite                      Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:71:3-50 581           0    0.0    0.0     0.0    0.0
-             $fMVectorMVectora_$cbasicUnsafeWrite Data.Vector.Mutable              src/Data/Vector/Mutable.hs:148:3-18             582          26    0.0    0.0     0.0    0.0
-          basicUnsafeRead                         Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:67:3-44 572         512    0.0    0.0     0.0    0.0
-          $p1PrimMonad                            Control.Monad.Primitive          Control/Monad/Primitive.hs:(81,1)-(86,77)       569         256    0.0    0.0     0.0    0.0
-          compareOnLongestAxis1                   AABB                             <no location info>                              575         120    0.0    0.0     0.0    0.0
-          compareOnLongestAxis2                   AABB                             <no location info>                              576          98    0.0    0.0     0.0    0.0
-          compareOnLongestAxis3                   AABB                             <no location info>                              579          38    0.0    0.0     0.0    0.0
-          basicUnsafeWrite                        Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:71:3-50 580          26    0.0    0.0     0.0    0.0
-         sort4ByIndex                             Data.Vector.Algorithms.Optimal   src/Data/Vector/Algorithms/Optimal.hs:124:1-12  554         255    0.0    0.0     0.0    0.0
-          primitive                               Control.Monad.Primitive          Control/Monad/Primitive.hs:86:3-77              556        1031    0.0    0.0     0.0    0.0
-           $fPrimMonadST1                         Control.Monad.Primitive          <no location info>                              557        1031    0.0    0.0     0.0    0.0
-            basicUnsafeRead                       Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:67:3-44 559           0    0.0    0.0     0.0    0.0
-             $fMVectorMVectora_$cbasicUnsafeRead  Data.Vector.Mutable              src/Data/Vector/Mutable.hs:145:3-17             560        1020    0.0    0.0     0.0    0.0
-            basicUnsafeWrite                      Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:71:3-50 566           0    0.0    0.0     0.0    0.0
-             $fMVectorMVectora_$cbasicUnsafeWrite Data.Vector.Mutable              src/Data/Vector/Mutable.hs:148:3-18             567          11    0.0    0.0     0.0    0.0
-          basicUnsafeRead                         Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:67:3-44 558        1020    0.0    0.0     0.0    0.0
-          compareOnLongestAxis1                   AABB                             <no location info>                              564         540    0.0    0.0     0.0    0.0
-          compareOnLongestAxis2                   AABB                             <no location info>                              577         472    0.0    0.0     0.0    0.0
-          $p1PrimMonad                            Control.Monad.Primitive          Control/Monad/Primitive.hs:(81,1)-(86,77)       555         255    0.0    0.0     0.0    0.0
-          basicUnsafeWrite                        Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:71:3-50 565          11    0.0    0.0     0.0    0.0
-          compareOnLongestAxis3                   AABB                             <no location info>                              584          10    0.0    0.0     0.0    0.0
-         sort3ByIndex                             Data.Vector.Algorithms.Optimal   src/Data/Vector/Algorithms/Optimal.hs:85:1-12   538         163    0.0    0.0     0.0    0.0
-          primitive                               Control.Monad.Primitive          Control/Monad/Primitive.hs:86:3-77              541         742    0.0    0.0     0.0    0.0
-           $fPrimMonadST1                         Control.Monad.Primitive          <no location info>                              542         742    0.0    0.0     0.0    0.0
-            basicUnsafeRead                       Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:67:3-44 545           0    0.0    0.0     0.0    0.0
-             $fMVectorMVectora_$cbasicUnsafeRead  Data.Vector.Mutable              src/Data/Vector/Mutable.hs:145:3-17             546         489    0.0    0.0     0.0    0.0
-            basicUnsafeWrite                      Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:71:3-50 551           0    0.0    0.0     0.0    0.0
-             $fMVectorMVectora_$cbasicUnsafeWrite Data.Vector.Mutable              src/Data/Vector/Mutable.hs:148:3-18             552         253    0.0    0.0     0.0    0.0
-          basicUnsafeRead                         Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:67:3-44 543         489    0.0    0.0     0.0    0.0
-          compareOnLongestAxis1                   AABB                             <no location info>                              549         295    0.0    0.0     0.0    0.0
-          basicUnsafeWrite                        Data.Vector.Generic.Mutable.Base src/Data/Vector/Generic/Mutable/Base.hs:71:3-50 550         253    0.0    0.0     0.0    0.0
-          $p1PrimMonad                            Control.Monad.Primitive          Control/Monad/Primitive.hs:(81,1)-(86,77)       539         163    0.0    0.0     0.0    0.0
-          compareOnLongestAxis2                   AABB                             <no location info>                              583          62    0.0    0.0     0.0    0.0
-          compareOnLongestAxis3                   AABB                             <no location info>                              585           3    0.0    0.0     0.0    0.0
-     newStdGen2                                   System.Random                    <no location info>                              586           1    0.0    0.0     0.0    0.0
- CAF                                              GHC.Conc.Signal                  <entire-module>                                 438           0    0.0    0.0     0.0    0.0
- CAF                                              GHC.Event.Poll                   <entire-module>                                 423           0    0.0    0.0     0.0    0.0
- CAF                                              GHC.Event.Thread                 <entire-module>                                 422           0    0.0    0.0     0.0    0.0
- CAF                                              GHC.IO.Encoding                  <entire-module>                                 403           0    0.0    0.0     0.0    0.0
- CAF                                              GHC.IO.Encoding.Iconv            <entire-module>                                 401           0    0.0    0.0     0.0    0.0
- CAF                                              GHC.IO.FD                        <entire-module>                                 394           0    0.0    0.0     0.0    0.0
- CAF                                              GHC.IO.Handle.FD                 <entire-module>                                 392           0    0.0    0.0     0.0    0.0
- CAF                                              Main                             <entire-module>                                 301           0    0.0    0.0     0.0    0.0
-  bigWorldCamera                                  Main                             app/Main.hs:37:1-14                             588           1    0.0    0.0     0.0    0.0
-   camera                                         Camera                           src/Camera.hs:48:1-6                            589           1    0.0    0.0     0.0    0.0
-    $fVec3V3_$c.^                                 Graphics.Vec3                    src/Graphics/Vec3.hs:124:10-16                  621           2    0.0    0.0     0.0    0.0
-  bigWorldCamera1                                 Main                             <no location info>                              617           1    0.0    0.0     0.0    0.0
-  bigWorldCamera2                                 Main                             <no location info>                              620           1    0.0    0.0     0.0    0.0
-  bigWorldCamera3                                 Main                             <no location info>                              618           1    0.0    0.0     0.0    0.0
-  bigWorldCamera4                                 Main                             <no location info>                              616           1    0.0    0.0     0.0    0.0
-  bigWorldCamera5                                 Main                             <no location info>                              615           1    0.0    0.0     0.0    0.0
-  bigWorldCamera6                                 Main                             <no location info>                              619           1    0.0    0.0     0.0    0.0
-  bigWorldCamera7                                 Main                             <no location info>                              593           1    0.0    0.0     0.0    0.0
-  bigWorldCamera8                                 Main                             <no location info>                              590           1    0.0    0.0     0.0    0.0
-  bigWorldCamera9                                 Main                             <no location info>                              591           1    0.0    0.0     0.0    0.0
-  main2                                           Main                             <no location info>                              614           1    0.0    0.0     0.0    0.0
-  main3                                           Main                             <no location info>                              587           1    0.0    0.0     0.0    0.0
- CAF                                              Render                           <entire-module>                                 298           0    0.0    0.0     0.0    0.0
-  ds2                                             Render                           <no location info>                              602           1    0.0    0.0     0.0    0.0
-  eta                                             Render                           <no location info>                              703           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              704           1    0.0    0.0     0.0    0.0
-  lvl                                             Render                           <no location info>                              625           1    0.0    0.0     0.0    0.0
-  lvl1                                            Render                           <no location info>                              624           1    0.0    0.0     0.0    0.0
-  lvl2                                            Render                           <no location info>                              629           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              630           1    0.0    0.0     0.0    0.0
-  lvl3                                            Render                           <no location info>                              627           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              628           1    0.0    0.0     0.0    0.0
-  lvl4                                            Render                           <no location info>                              729           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              730           1    0.0    0.0     0.0    0.0
-  lvl7                                            Render                           <no location info>                              603           1    0.0    0.0     0.0    0.0
-  lvl8                                            Render                           <no location info>                              604           1    0.0    0.0     0.0    0.0
- CAF                                              Random                           <entire-module>                                 297           0    0.0    0.0     0.0    0.0
-  $fApplicativeRandT                              Control.Monad.Trans.Random.Lazy  Control/Monad/Trans/Random/Lazy.hs:157:22-32    609           1    0.0    0.0     0.0    0.0
-  $fMonadRandT                                    Control.Monad.Trans.Random.Lazy  Control/Monad/Trans/Random/Lazy.hs:157:48-52    608           1    0.0    0.0     0.0    0.0
-  getRandomInUnitDisk1                            Random                           <no location info>                              607           1    0.0    0.0     0.0    0.0
- CAF                                              Scenes                           <entire-module>                                 296           0    0.0    0.0     0.0    0.0
-  bigWorld10                                      Scenes                           <no location info>                              515           1    0.0    0.0     0.0    0.0
-  bigWorld11                                      Scenes                           <no location info>                              509           1    0.0    0.0     0.0    0.0
-  bigWorld13                                      Scenes                           <no location info>                              511           1    0.0    0.0     0.0    0.0
-  bigWorld2                                       Scenes                           <no location info>                              521           1    0.0    0.0     0.0    0.0
-  bigWorld4                                       Scenes                           <no location info>                              523           1    0.0    0.0     0.0    0.0
-  bigWorld5                                       Scenes                           <no location info>                              517           1    0.0    0.0     0.0    0.0
-  bigWorld7                                       Scenes                           <no location info>                              519           1    0.0    0.0     0.0    0.0
-  bigWorld8                                       Scenes                           <no location info>                              513           1    0.0    0.0     0.0    0.0
-  bigWorld_bigSphere1                             Scenes                           src/Scenes.hs:45:5-14                           514           1    0.0    0.0     0.0    0.0
-   $wstationarySphere                             Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    516           1    0.0    0.0     0.0    0.0
-  bigWorld_bigSphere2                             Scenes                           src/Scenes.hs:46:5-14                           518           1    0.0    0.0     0.0    0.0
-   $wstationarySphere                             Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    520           1    0.0    0.0     0.0    0.0
-  bigWorld_bigSphere3                             Scenes                           src/Scenes.hs:47:5-14                           522           1    0.0    0.0     0.0    0.0
-   $wstationarySphere                             Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    524           1    0.0    0.0     0.0    0.0
-  bigWorld_c                                      Scenes                           <no location info>                              719           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              720           1    0.0    0.0     0.0    0.0
-  bigWorld_c1                                     Scenes                           <no location info>                              656           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              657           1    0.0    0.0     0.0    0.0
-  bigWorld_c2                                     Scenes                           <no location info>                              674           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              675           1    0.0    0.0     0.0    0.0
-  bigWorld_ground                                 Scenes                           src/Scenes.hs:44:5-10                           510           1    0.0    0.0     0.0    0.0
-   $wstationarySphere                             Shapes.Sphere                    src/Shapes/Sphere.hs:44:1-16                    512           1    0.0    0.0     0.0    0.0
-  bigWorld_refractiveIndex                        Scenes                           <no location info>                              687           1    0.0    0.0     0.0    0.0
- CAF                                              BVH                              <entire-module>                                 295           0    0.0    0.0     0.0    0.0
-  lvl                                             BVH                              <no location info>                              537           1    0.0    0.0     0.0    0.0
-  lvl36                                           BVH                              <no location info>                              561           1    0.0    0.0     0.0    0.0
-  lvl37                                           BVH                              <no location info>                              562           1    0.0    0.0     0.0    0.0
-  lvl38                                           BVH                              <no location info>                              563           1    0.0    0.0     0.0    0.0
- CAF                                              Graphics.Pixel                   <entire-module>                                 294           0    0.0    0.0     0.0    0.0
-  averageColor1                                   Graphics.Pixel                   <no location info>                              596           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              597           1    0.0    0.0     0.0    0.0
-  colorToRGBString1                               Graphics.Pixel                   <no location info>                              633           1    0.0    0.0     0.0    0.0
- CAF                                              Shapes.Sphere                    <entire-module>                                 292           0    0.0    0.0     0.0    0.0
-  stationarySphere1                               Shapes.Sphere                    <no location info>                              636           1    0.0    0.0     0.0    0.0
- CAF                                              Hittable                         <entire-module>                                 291           0    0.0    0.0     0.0    0.0
-  mkDielectric3                                   Hittable                         <no location info>                              688           1    0.0    0.0     0.0    0.0
-   $wcolor                                        Graphics.Pixel                   <no location info>                              689           1    0.0    0.0     0.0    0.0
-  mkLambertian4                                   Hittable                         <no location info>                              662           1    0.0    0.0     0.0    0.0
-  mkLambertian5                                   Hittable                         <no location info>                              661           1    0.0    0.0     0.0    0.0
-  mkLambertian_ds2                                Hittable                         <no location info>                              660           1    0.0    0.0     0.0    0.0
- CAF                                              Interval                         <entire-module>                                 290           0    0.0    0.0     0.0    0.0
-  empty                                           Interval                         src/Interval.hs:17:1-5                          533           1    0.0    0.0     0.0    0.0
-  empty1                                          Interval                         <no location info>                              531           1    0.0    0.0     0.0    0.0
-  empty2                                          Interval                         <no location info>                              530           1    0.0    0.0     0.0    0.0
- CAF                                              AABB                             <entire-module>                                 289           0    0.0    0.0     0.0    0.0
-  aabbEmpty                                       AABB                             src/AABB.hs:24:1-9                              529           1    0.0    0.0     0.0    0.0
-  aabbEmpty1                                      AABB                             <no location info>                              532           1    0.0    0.0     0.0    0.0
- CAF                                              System.Random.Internal           <entire-module>                                 280           0    0.0    0.0     0.0    0.0
-  theStdGen                                       System.Random.Internal           src/System/Random/Internal.hs:801:1-9           501           1    0.0    0.0     0.0    0.0
- CAF                                              Data.Vector.Mutable              <entire-module>                                 266           0    0.0    0.0     0.0    0.0
-  $fMVectorMVectora                               Data.Vector.Mutable              src/Data/Vector/Mutable.hs:114:10-28            544           1    0.0    0.0     0.0    0.0
- CAF                                              Control.Monad.Primitive          <entire-module>                                 259           0    0.0    0.0     0.0    0.0
-  $fPrimMonadST0                                  Control.Monad.Primitive          Control/Monad/Primitive.hs:218:10-25            540           1    0.0    0.0     0.0    0.0
+MAIN                         MAIN                              <built-in>                                             257           0    0.0    0.0   100.0  100.0
+ CAF                         GHC.Conc.Signal                   <entire-module>                                        454           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.Event.Poll                    <entire-module>                                        439           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.Event.Thread                  <entire-module>                                        438           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.IO.Encoding                   <entire-module>                                        419           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.IO.Encoding.Iconv             <entire-module>                                        417           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.IO.FD                         <entire-module>                                        410           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.IO.Handle.FD                  <entire-module>                                        408           0    0.0    0.0     0.0    0.0
+ CAF                         Main                              <entire-module>                                        311           0    0.0    0.0     0.0    0.0
+  bigWorldCamera             Main                              app/Main.hs:(23,1)-(33,3)                              612           1    0.0    0.0     0.0    0.0
+   makeCamera                Camera                            src/Camera.hs:(67,1)-(111,38)                          614           1    0.0    0.0     0.0    0.0
+  main                       Main                              app/Main.hs:(36,1)-(44,41)                             514           1    0.0    0.0     0.0    0.0
+ CAF                         Camera                            <entire-module>                                        309           0    0.0    0.0     0.0    0.0
+  defaultCameraConfig        Camera                            src/Camera.hs:(40,1)-(50,3)                            613           1    0.0    0.0     0.0    0.0
+ CAF                         Render                            <entire-module>                                        308           0    0.0    0.0     0.0    0.0
+  color                      Graphics.Pixel                    src/Graphics/Pixel.hs:(17,1)-(18,35)                   661           4    0.0    0.0     0.0    0.0
+  render                     Render                            src/Render.hs:(19,1)-(31,36)                           620           0    0.0    0.0     0.0    0.0
+   iterateUntil              Control.Monad.Loops               src/Control/Monad/Loops.hs:178:1-50                    651           1    0.0    0.0     0.0    0.0
+   parList                   Control.Parallel.Strategies       Control/Parallel/Strategies.hs:552:1-24                622           0    0.0    0.0     0.0    0.0
+    rparWith                 Control.Parallel.Strategies       Control/Parallel/Strategies.hs:494:1-32                624           1    0.0    0.0     0.0    0.0
+ CAF                         Random                            <entire-module>                                        307           0    0.0    0.0     0.0    0.0
+ CAF                         Scenes                            <entire-module>                                        306           0    0.0    0.0     0.0    0.0
+  bigWorld                   Scenes                            src/Scenes.hs:(37,1)-(49,91)                           523           1    0.0    0.0     0.0    0.0
+   stationarySphere          Shapes.Sphere                     src/Shapes/Sphere.hs:(44,1)-(57,42)                    549           4    0.0    0.0     0.0    0.0
+    aabbFromPoints           AABB                              src/AABB.hs:(30,1)-(38,70)                             550           4    0.0    0.0     0.0    0.0
+   color                     Graphics.Pixel                    src/Graphics/Pixel.hs:(17,1)-(18,35)                   679           3    0.0    0.0     0.0    0.0
+   mkLambertian              Hittable                          src/Hittable.hs:(50,1)-(56,1)                          548           2    0.0    0.0     0.0    0.0
+   mkDielectric              Hittable                          src/Hittable.hs:(72,1)-(95,1)                          551           1    0.0    0.0     0.0    0.0
+   mkMetal                   Hittable                          src/Hittable.hs:(59,1)-(69,1)                          552           1    0.0    0.0     0.0    0.0
+   extractHittable           Shapes.Sphere                     src/Shapes/Sphere.hs:22:1-36                           547           0    0.0    0.0     0.0    0.0
+  randomSpheres              Scenes                            src/Scenes.hs:(52,1)-(55,20)                           532           1    0.0    0.0     0.0    0.0
+   genSpheres                Scenes                            src/Scenes.hs:(58,1)-(78,67)                           534         529    0.0    0.0     0.0    0.0
+  genSpheres                 Scenes                            src/Scenes.hs:(58,1)-(78,67)                           559           0    0.0    0.0     0.0    0.0
+   mkDielectric              Hittable                          src/Hittable.hs:(72,1)-(95,1)                          560           1    0.0    0.0     0.0    0.0
+ CAF                         BVH                               <entire-module>                                        305           0    0.0    0.0     0.0    0.0
+  buildBoundingBox           BVH                               src/BVH.hs:30:1-65                                     540           1    0.0    0.0     0.0    0.0
+ CAF                         Graphics.Pixel                    <entire-module>                                        304           0    0.0    0.0     0.0    0.0
+  gammaCorrected             Graphics.Pixel                    src/Graphics/Pixel.hs:45:1-62                          633           1    0.0    0.0     0.0    0.0
+  averageColor               Graphics.Pixel                    src/Graphics/Pixel.hs:(33,1)-(34,64)                   637           0    0.0    0.0     0.0    0.0
+   color                     Graphics.Pixel                    src/Graphics/Pixel.hs:(17,1)-(18,35)                   638           1    0.0    0.0     0.0    0.0
+ CAF                         Hittable                          <entire-module>                                        301           0    0.0    0.0     0.0    0.0
+  mkDielectric               Hittable                          src/Hittable.hs:(72,1)-(95,1)                          693           0    0.0    0.0     0.0    0.0
+   color                     Graphics.Pixel                    src/Graphics/Pixel.hs:(17,1)-(18,35)                   694           1    0.0    0.0     0.0    0.0
+  mkLambertian               Hittable                          src/Hittable.hs:(50,1)-(56,1)                          685           0    0.0    0.0     0.0    0.0
+  mkMetal                    Hittable                          src/Hittable.hs:(59,1)-(69,1)                          720           0    0.0    0.0     0.0    0.0
+ CAF                         Interval                          <entire-module>                                        300           0    0.0    0.0     0.0    0.0
+  empty                      Interval                          src/Interval.hs:17:1-36                                565           1    0.0    0.0     0.0    0.0
+ CAF                         AABB                              <entire-module>                                        299           0    0.0    0.0     0.0    0.0
+  aabbEmpty                  AABB                              src/AABB.hs:24:1-34                                    564           1    0.0    0.0     0.0    0.0
+ CAF                         Control.Parallel.Strategies       <entire-module>                                        283           0    0.0    0.0     0.0    0.0
+  parList                    Control.Parallel.Strategies       Control/Parallel/Strategies.hs:552:1-24                621           1    0.0    0.0     0.0    0.0
+  runEval                    Control.Parallel.Strategies       Control/Parallel/Strategies.hs:219:1-42                618           1    0.0    0.0     0.0    0.0
+ CAF                         System.Random.Internal            <entire-module>                                        276           0    0.0    0.0     0.0    0.0
+  mkStdGen                   System.Random.Internal            src/System/Random/Internal.hs:787:1-36                 640           1    0.0    0.0     0.0    0.0
+  mkStdGen64                 System.Random.Internal            src/System/Random/Internal.hs:797:1-32                 642           1    0.0    0.0     0.0    0.0
+  theStdGen                  System.Random.Internal            src/System/Random/Internal.hs:801:1-64                 517           1    0.0    0.0     0.0    0.0
+   initSMGen                 System.Random.SplitMix            src/System/Random/SplitMix.hs:375:1-36                 519           0    0.0    0.0     0.0    0.0
+    mkSMGen                  System.Random.SplitMix            src/System/Random/SplitMix.hs:371:1-61                 537           1    0.0    0.0     0.0    0.0
+ CAF                         System.Random.SplitMix            <entire-module>                                        271           0    0.0    0.0     0.0    0.0
+  initSMGen                  System.Random.SplitMix            src/System/Random/SplitMix.hs:375:1-36                 518           1    0.0    0.0     0.0    0.0
+ CAF                         System.Random.SplitMix.Init       <entire-module>                                        269           0    0.0    0.0     0.0    0.0
+  initialSeed                System.Random.SplitMix.Init       src/System/Random/SplitMix/Init.hs:40:1-26             520           1    0.0    0.0     0.0    0.0
+ main                        Main                              app/Main.hs:(36,1)-(44,41)                             515           0    0.0    0.0   100.0  100.0
+  evalRand                   Control.Monad.Trans.Random.Lazy   Control/Monad/Trans/Random/Lazy.hs:119:1-38            521           1    0.0    0.0     0.0    0.0
+   evalRandT                 Control.Monad.Trans.Random.Lazy   Control/Monad/Trans/Random/Lazy.hs:184:1-42            522           1    0.0    0.0     0.0    0.0
+    bigWorld                 Scenes                            src/Scenes.hs:(37,1)-(49,91)                           524           0    0.0    0.0     0.0    0.0
+     extractHittable         Shapes.Sphere                     src/Shapes/Sphere.hs:22:1-36                           546         531    0.0    0.0     0.0    0.0
+     randomSpheres           Scenes                            src/Scenes.hs:(52,1)-(55,20)                           533           0    0.0    0.0     0.0    0.0
+      genSpheres             Scenes                            src/Scenes.hs:(58,1)-(78,67)                           535           0    0.0    0.0     0.0    0.0
+       nextWord64            System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         536        3559    0.0    0.0     0.0    0.0
+       colorFromV3           Graphics.Pixel                    src/Graphics/Pixel.hs:(22,1)-(23,27)                   701         493    0.0    0.0     0.0    0.0
+        color                Graphics.Pixel                    src/Graphics/Pixel.hs:(17,1)-(18,35)                   702         493    0.0    0.0     0.0    0.0
+       mkLambertian          Hittable                          src/Hittable.hs:(50,1)-(56,1)                          553         416    0.0    0.0     0.0    0.0
+       movingSphere          Shapes.Sphere                     src/Shapes/Sphere.hs:(26,1)-(40,55)                    554         416    0.0    0.0     0.0    0.0
+        at                   Graphics.Ray                      src/Graphics/Ray.hs:12:1-31                            555        1664    0.0    0.0     0.0    0.0
+        aabbFromPoints       AABB                              src/AABB.hs:(30,1)-(38,70)                             556         832    0.0    0.0     0.0    0.0
+        aabbFromBoxes        AABB                              src/AABB.hs:(41,1)-(45,34)                             557         416    0.0    0.0     0.0    0.0
+         combineIntervals    Interval                          src/Interval.hs:(42,1)-(46,3)                          558        1248    0.0    0.0     0.0    0.0
+       stationarySphere      Shapes.Sphere                     src/Shapes/Sphere.hs:(44,1)-(57,42)                    561         111    0.0    0.0     0.0    0.0
+        aabbFromPoints       AABB                              src/AABB.hs:(30,1)-(38,70)                             562         111    0.0    0.0     0.0    0.0
+       mkMetal               Hittable                          src/Hittable.hs:(59,1)-(69,1)                          563          77    0.0    0.0     0.0    0.0
+  getStdGen                  System.Random                     src/System/Random.hs:700:1-40                          516           1    0.0    0.0     0.0    0.0
+  render                     Render                            src/Render.hs:(19,1)-(31,36)                           525           1    0.0    0.1   100.0  100.0
+   colorToRGB                Graphics.Pixel                    src/Graphics/Pixel.hs:(37,1)-(42,49)                   673       90000    0.0    0.0     0.0    0.0
+   camConfig                 Camera                            src/Camera.hs:55:5-13                                  611         228    0.0    0.0     0.0    0.0
+   cfgImageWidth             Camera                            src/Camera.hs:29:5-17                                  615         226    0.0    0.0     0.0    0.0
+   evalRand                  Control.Monad.Trans.Random.Lazy   Control/Monad/Trans/Random/Lazy.hs:119:1-38            631         225    0.0    0.0    99.2   87.7
+    evalRandT                Control.Monad.Trans.Random.Lazy   Control/Monad/Trans/Random/Lazy.hs:184:1-42            632         225   92.9   31.6    99.2   87.7
+     minVal                  Interval                          src/Interval.hs:7:5-10                                 659  2349935737    0.0    0.0     0.0    0.0
+     maxVal                  Interval                          src/Interval.hs:8:5-10                                 660  2165940538    0.0    0.0     0.0    0.0
+     hit                     Hittable                          src/Hittable.hs:119:3-5                                664   150570838    0.6    0.0     1.7    7.1
+      bigWorld               Scenes                            src/Scenes.hs:(37,1)-(49,91)                           665           0    0.0    0.0     1.1    7.1
+       stationarySphere      Shapes.Sphere                     src/Shapes/Sphere.hs:(44,1)-(57,42)                    666           0    1.1    5.0     1.1    7.1
+        at                   Graphics.Ray                      src/Graphics/Ray.hs:12:1-31                            667    47667446    0.0    0.0     0.0    0.0
+        surrounds            Interval                          src/Interval.hs:33:1-47                                674    37544340    0.0    0.0     0.0    0.0
+        generateHitRecord    Hittable                          src/Hittable.hs:(98,1)-(102,72)                        676    15050346    0.0    2.0     0.0    2.0
+     hitT                    Hittable                          src/Hittable.hs:30:5-8                                 675   126563697    0.0    0.0     0.0    0.0
+     nextWord64              System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         639    26955924    0.0    3.2     0.0    3.2
+     scatter                 Hittable                          src/Hittable.hs:46:3-9                                 677    14314283    0.0    0.0     0.0    0.0
+     camDefocusDiskV         Camera                            src/Camera.hs:62:5-19                                  658     8992628    0.0    0.0     0.0    0.0
+     camPixelDv              Camera                            src/Camera.hs:59:5-14                                  649     8984163    0.0    0.0     0.0    0.0
+     camDefocusDiskU         Camera                            src/Camera.hs:61:5-19                                  657     8972107    0.0    0.0     0.0    0.0
+     camPixelDu              Camera                            src/Camera.hs:58:5-14                                  648     8963944    0.0    0.0     0.0    0.0
+     averageColor            Graphics.Pixel                    src/Graphics/Pixel.hs:(33,1)-(34,64)                   636       89997    0.1    1.1     0.1    1.1
+     bigWorld                Scenes                            src/Scenes.hs:(37,1)-(49,91)                           668           0    0.1    0.1     4.4   44.8
+      mkDielectric           Hittable                          src/Hittable.hs:(72,1)-(95,1)                          689           0    0.1    1.2     0.1    1.3
+       hitNormal             Hittable                          src/Hittable.hs:29:5-13                                691      948211    0.0    0.0     0.0    0.0
+       hitFrontFacing        Hittable                          src/Hittable.hs:31:5-18                                690      948198    0.0    0.0     0.0    0.0
+       nextWord64            System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         692      948133    0.0    0.1     0.0    0.1
+       hitP                  Hittable                          src/Hittable.hs:28:5-8                                 695      947360    0.0    0.0     0.0    0.0
+      mkLambertian           Hittable                          src/Hittable.hs:(50,1)-(56,1)                          678           0    0.3    3.6     1.3   18.8
+       hitNormal             Hittable                          src/Hittable.hs:29:5-13                                686     6183043    0.0    0.0     0.0    0.0
+       hitP                  Hittable                          src/Hittable.hs:28:5-8                                 687     6182060    0.0    0.0     0.0    0.0
+       iterateUntil          Control.Monad.Loops               src/Control/Monad/Loops.hs:178:1-50                    681     6181041    0.4    4.5     1.0   15.1
+        nextWord64           System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         683    18546172    0.1    2.2     0.1    2.2
+        iterateUntilM        Control.Monad.Loops               src/Control/Monad/Loops.hs:(171,1)-(173,43)            682    11805445    0.5    6.4     0.6    8.4
+         nextWord64          System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         688    16887796    0.0    2.0     0.0    2.0
+         contains            Interval                          src/Interval.hs:29:1-48                                684    11813646    0.0    0.0     0.0    0.0
+       nearZero              Graphics.Vec3                     src/Graphics/Vec3.hs:(133,1)-(136,12)                  680     6179383    0.0    0.0     0.0    0.0
+      mkMetal                Hittable                          src/Hittable.hs:(59,1)-(69,1)                          722           0    0.1    0.8     0.4    6.0
+       iterateUntil          Control.Monad.Loops               src/Control/Monad/Loops.hs:178:1-50                    725     2122009    0.1    1.5     0.3    5.2
+        nextWord64           System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         727     6365213    0.0    0.8     0.0    0.8
+        iterateUntilM        Control.Monad.Loops               src/Control/Monad/Loops.hs:(171,1)-(173,43)            726     4051028    0.2    2.2     0.2    2.9
+         nextWord64          System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         729     5788744    0.0    0.7     0.0    0.7
+         contains            Interval                          src/Interval.hs:29:1-48                                728     4051416    0.0    0.0     0.0    0.0
+       hitP                  Hittable                          src/Hittable.hs:28:5-8                                 723     2121774    0.0    0.0     0.0    0.0
+       hitNormal             Hittable                          src/Hittable.hs:29:5-13                                724     2121613    0.0    0.0     0.0    0.0
+      randomSpheres          Scenes                            src/Scenes.hs:(52,1)-(55,20)                           669           0    0.0    0.0     2.6   18.6
+       genSpheres            Scenes                            src/Scenes.hs:(58,1)-(78,67)                           670           0    0.0    0.0     2.6   18.6
+        mkDielectric         Hittable                          src/Hittable.hs:(72,1)-(95,1)                          730           0    0.0    0.2     0.0    0.2
+         hitNormal           Hittable                          src/Hittable.hs:29:5-13                                732      134314    0.0    0.0     0.0    0.0
+         nextWord64          System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         733      134310    0.0    0.0     0.0    0.0
+         hitFrontFacing      Hittable                          src/Hittable.hs:31:5-18                                731      134307    0.0    0.0     0.0    0.0
+         hitP                Hittable                          src/Hittable.hs:28:5-8                                 734      134135    0.0    0.0     0.0    0.0
+        mkLambertian         Hittable                          src/Hittable.hs:(50,1)-(56,1)                          700           0    0.2    2.5     0.8   12.9
+         nearZero            Graphics.Vec3                     src/Graphics/Vec3.hs:(133,1)-(136,12)                  703     4254148    0.0    0.0     0.0    0.0
+         hitNormal           Hittable                          src/Hittable.hs:29:5-13                                709     4253590    0.0    0.0     0.0    0.0
+         hitP                Hittable                          src/Hittable.hs:28:5-8                                 710     4253278    0.0    0.0     0.0    0.0
+         iterateUntil        Control.Monad.Loops               src/Control/Monad/Loops.hs:178:1-50                    704     4248589    0.2    3.1     0.6   10.4
+          nextWord64         System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         706    12762104    0.0    1.5     0.0    1.5
+          iterateUntilM      Control.Monad.Loops               src/Control/Monad/Loops.hs:(171,1)-(173,43)            705     8118872    0.4    4.4     0.4    5.8
+           nextWord64        System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         708    11611298    0.0    1.4     0.0    1.4
+           contains          Interval                          src/Interval.hs:29:1-48                                707     8125252    0.0    0.0     0.0    0.0
+        mkMetal              Hittable                          src/Hittable.hs:(59,1)-(69,1)                          713           0    0.0    0.3     0.2    2.0
+         iterateUntil        Control.Monad.Loops               src/Control/Monad/Loops.hs:178:1-50                    716      714705    0.0    0.5     0.1    1.8
+          nextWord64         System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         718     2143934    0.0    0.3     0.0    0.3
+          iterateUntilM      Control.Monad.Loops               src/Control/Monad/Loops.hs:(171,1)-(173,43)            717     1364937    0.1    0.7     0.1    1.0
+           nextWord64        System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         721     1951035    0.0    0.2     0.0    0.2
+           contains          Interval                          src/Interval.hs:29:1-48                                719     1365019    0.0    0.0     0.0    0.0
+         hitP                Hittable                          src/Hittable.hs:28:5-8                                 714      714664    0.0    0.0     0.0    0.0
+         hitNormal           Hittable                          src/Hittable.hs:29:5-13                                715      714596    0.0    0.0     0.0    0.0
+        movingSphere         Shapes.Sphere                     src/Shapes/Sphere.hs:(26,1)-(40,55)                    671           0    1.3    2.0     1.3    2.8
+         at                  Graphics.Ray                      src/Graphics/Ray.hs:12:1-31                            672   116135086    0.0    0.0     0.0    0.0
+         surrounds           Interval                          src/Interval.hs:33:1-47                                698    14785504    0.0    0.0     0.0    0.0
+         generateHitRecord   Hittable                          src/Hittable.hs:(98,1)-(102,72)                        699     5946806    0.0    0.8     0.0    0.8
+        stationarySphere     Shapes.Sphere                     src/Shapes/Sphere.hs:(44,1)-(57,42)                    696           0    0.2    0.5     0.2    0.6
+         at                  Graphics.Ray                      src/Graphics/Ray.hs:12:1-31                            697    11915553    0.0    0.0     0.0    0.0
+         surrounds           Interval                          src/Interval.hs:33:1-47                                711     3037499    0.0    0.0     0.0    0.0
+         generateHitRecord   Hittable                          src/Hittable.hs:(98,1)-(102,72)                        712     1375683    0.0    0.2     0.0    0.2
+     gammaCorrected          Graphics.Pixel                    src/Graphics/Pixel.hs:45:1-62                          634           0    0.0    0.0     0.0    0.0
+   nextWord64                System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         645         225    0.0    0.0     0.0    0.0
+   splitSMGen                System.Random.SplitMix            src/System/Random/SplitMix.hs:(219,1)-(223,31)         663         225    0.0    0.0     0.0    0.0
+   bvhFromList               BVH                               src/BVH.hs:33:1-44                                     526           1    0.0    0.0     0.0    0.0
+    fromHittables            BVH                               src/BVH.hs:(36,1)-(47,67)                              538        1061    0.0    0.0     0.0    0.0
+     unId                    Data.Vector.Fusion.Util           src/Data/Vector/Fusion/Util.hs:25:21-24                539        2652    0.0    0.0     0.0    0.0
+     array#                  Data.Primitive.Array              Data/Primitive/Array.hs:66:5-10                        594         531    0.0    0.0     0.0    0.0
+     unBox                   Data.Stream.Monadic               src/Data/Stream/Monadic.hs:116:20-24                   593         531    0.0    0.0     0.0    0.0
+     compareOnLongestAxis    AABB                              src/AABB.hs:(106,1)-(113,18)                           572         530    0.0    0.0     0.0    0.0
+      size                   Interval                          src/Interval.hs:25:1-31                                573        1590    0.0    0.0     0.0    0.0
+     sortVectorBy            BVH                               src/BVH.hs:(50,1)-(53,15)                              568         530    0.0    0.0     0.0    0.0
+      marray#                Data.Primitive.Array              Data/Primitive/Array.hs:109:5-11                       577       41747    0.0    0.0     0.0    0.0
+      bounding_box           Hittable                          src/Hittable.hs:120:3-14                               580       34930    0.0    0.0     0.0    0.0
+      unId                   Data.Vector.Fusion.Util           src/Data/Vector/Fusion/Util.hs:25:21-24                569         530    0.0    0.0     0.0    0.0
+      sort2ByOffset          Data.Vector.Algorithms.Optimal    src/Data/Vector/Algorithms/Optimal.hs:56:1-58          587         256    0.0    0.0     0.0    0.0
+       sort2ByIndex          Data.Vector.Algorithms.Optimal    src/Data/Vector/Algorithms/Optimal.hs:(64,1)-(70,19)   588         256    0.0    0.0     0.0    0.0
+        marray#              Data.Primitive.Array              Data/Primitive/Array.hs:109:5-11                       589         628    0.0    0.0     0.0    0.0
+        bounding_box         Hittable                          src/Hittable.hs:120:3-14                               592         512    0.0    0.0     0.0    0.0
+        compareOnLongestAxis AABB                              src/AABB.hs:(106,1)-(113,18)                           590           0    0.0    0.0     0.0    0.0
+         aabbZ               AABB                              src/AABB.hs:19:5-9                                     595         248    0.0    0.0     0.0    0.0
+         aabbX               AABB                              src/AABB.hs:17:5-9                                     606         244    0.0    0.0     0.0    0.0
+         aabbY               AABB                              src/AABB.hs:18:5-9                                     591          20    0.0    0.0     0.0    0.0
+      sort4ByOffset          Data.Vector.Algorithms.Optimal    src/Data/Vector/Algorithms/Optimal.hs:114:1-78         581         255    0.0    0.0     0.0    0.0
+       sort4ByIndex          Data.Vector.Algorithms.Optimal    src/Data/Vector/Algorithms/Optimal.hs:(124,1)-(251,46) 582         255    0.0    0.0     0.0    0.0
+        bounding_box         Hittable                          src/Hittable.hs:120:3-14                               586        2254    0.0    0.0     0.0    0.0
+        marray#              Data.Primitive.Array              Data/Primitive/Array.hs:109:5-11                       583        1581    0.0    0.0     0.0    0.0
+        compareOnLongestAxis AABB                              src/AABB.hs:(106,1)-(113,18)                           584           0    0.0    0.0     0.0    0.0
+         aabbZ               AABB                              src/AABB.hs:19:5-9                                     596        1190    0.0    0.0     0.0    0.0
+         aabbX               AABB                              src/AABB.hs:17:5-9                                     605        1000    0.0    0.0     0.0    0.0
+         aabbY               AABB                              src/AABB.hs:18:5-9                                     585          64    0.0    0.0     0.0    0.0
+      sort3ByIndex           Data.Vector.Algorithms.Optimal    src/Data/Vector/Algorithms/Optimal.hs:(85,1)-(108,27)  570         163    0.0    0.0     0.0    0.0
+       bounding_box          Hittable                          src/Hittable.hs:120:3-14                               576         780    0.0    0.0     0.0    0.0
+       marray#               Data.Primitive.Array              Data/Primitive/Array.hs:109:5-11                       571         729    0.0    0.0     0.0    0.0
+       compareOnLongestAxis  AABB                              src/AABB.hs:(106,1)-(113,18)                           574           0    0.0    0.0     0.0    0.0
+        aabbZ                AABB                              src/AABB.hs:19:5-9                                     604         370    0.0    0.0     0.0    0.0
+        aabbY                AABB                              src/AABB.hs:18:5-9                                     575         228    0.0    0.0     0.0    0.0
+        aabbX                AABB                              src/AABB.hs:17:5-9                                     608         182    0.0    0.0     0.0    0.0
+      sort3ByOffset          Data.Vector.Algorithms.Optimal    src/Data/Vector/Algorithms/Optimal.hs:76:1-68          598          19    0.0    0.0     0.0    0.0
+       sort3ByIndex          Data.Vector.Algorithms.Optimal    src/Data/Vector/Algorithms/Optimal.hs:(85,1)-(108,27)  599          19    0.0    0.0     0.0    0.0
+        bounding_box         Hittable                          src/Hittable.hs:120:3-14                               603          82    0.0    0.0     0.0    0.0
+        marray#              Data.Primitive.Array              Data/Primitive/Array.hs:109:5-11                       600          69    0.0    0.0     0.0    0.0
+        compareOnLongestAxis AABB                              src/AABB.hs:(106,1)-(113,18)                           601           0    0.0    0.0     0.0    0.0
+         aabbX               AABB                              src/AABB.hs:17:5-9                                     609          42    0.0    0.0     0.0    0.0
+         aabbZ               AABB                              src/AABB.hs:19:5-9                                     602          40    0.0    0.0     0.0    0.0
+      compareOnLongestAxis   AABB                              src/AABB.hs:(106,1)-(113,18)                           578           0    0.0    0.0     0.0    0.0
+       aabbZ                 AABB                              src/AABB.hs:19:5-9                                     597       16504    0.0    0.0     0.0    0.0
+       aabbY                 AABB                              src/AABB.hs:18:5-9                                     579       10400    0.0    0.0     0.0    0.0
+       aabbX                 AABB                              src/AABB.hs:17:5-9                                     607        8026    0.0    0.0     0.0    0.0
+     buildBoundingBox        BVH                               src/BVH.hs:30:1-65                                     541           0    0.0    0.0     0.0    0.0
+      aabbFromBoxes          AABB                              src/AABB.hs:(41,1)-(45,34)                             566        4817    0.0    0.0     0.0    0.0
+       combineIntervals      Interval                          src/Interval.hs:(42,1)-(46,3)                          567       14451    0.0    0.0     0.0    0.0
+      array#                 Data.Primitive.Array              Data/Primitive/Array.hs:66:5-10                        544        4817    0.0    0.0     0.0    0.0
+      bounding_box           Hittable                          src/Hittable.hs:120:3-14                               545        4817    0.0    0.0     0.0    0.0
+      sElems                 Data.Vector.Fusion.Bundle.Monadic src/Data/Vector/Fusion/Bundle/Monadic.hs:121:30-35     543         530    0.0    0.0     0.0    0.0
+      unId                   Data.Vector.Fusion.Util           src/Data/Vector/Fusion/Util.hs:25:21-24                542         530    0.0    0.0     0.0    0.0
+    marray#                  Data.Primitive.Array              Data/Primitive/Array.hs:109:5-11                       531         532    0.0    0.0     0.0    0.0
+    unId                     Data.Vector.Fusion.Util           src/Data/Vector/Fusion/Util.hs:25:21-24                530         532    0.0    0.0     0.0    0.0
+    sChunks                  Data.Vector.Fusion.Bundle.Monadic src/Data/Vector/Fusion/Bundle/Monadic.hs:122:30-36     529           1    0.0    0.0     0.0    0.0
+    sSize                    Data.Vector.Fusion.Bundle.Monadic src/Data/Vector/Fusion/Bundle/Monadic.hs:124:30-34     528           1    0.0    0.0     0.0    0.0
+    upperBound               Data.Vector.Fusion.Bundle.Size    src/Data/Vector/Fusion/Bundle/Size.hs:(129,1)-(131,30) 527           1    0.0    0.0     0.0    0.0
+   camCenter                 Camera                            src/Camera.hs:56:5-13                                  656           1    0.0    0.0     0.0    0.0
+   camImageHeight            Camera                            src/Camera.hs:57:5-18                                  616           1    0.0    0.0     0.0    0.0
+   camPixel00Loc             Camera                            src/Camera.hs:60:5-17                                  647           1    0.0    0.0     0.0    0.0
+   cfgDefocusAngle           Camera                            src/Camera.hs:31:5-19                                  650           1    0.0    0.0     0.0    0.0
+   cfgSamplesPerPixel        Camera                            src/Camera.hs:30:5-22                                  635           1    0.0    0.0     0.0    0.0
+   using                     Control.Parallel.Strategies       Control/Parallel/Strategies.hs:338:1-35                617           1    0.0    0.0     0.0    0.0
+    runEval                  Control.Parallel.Strategies       Control/Parallel/Strategies.hs:219:1-42                619           0    0.0    0.0     0.0    0.0
+   initSMGen                 System.Random.SplitMix            src/System/Random/SplitMix.hs:375:1-36                 610           0    0.0    0.0     0.0    0.0
+    mkSMGen                  System.Random.SplitMix            src/System/Random/SplitMix.hs:371:1-61                 646           1    0.0    0.0     0.0    0.0
+   iterateUntil              Control.Monad.Loops               src/Control/Monad/Loops.hs:178:1-50                    652           0    0.4    6.0     0.8   12.1
+    nextWord64               System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         654    17970424    0.0    2.2     0.0    2.2
+    iterateUntilM            Control.Monad.Loops               src/Control/Monad/Loops.hs:(171,1)-(173,43)            653    11428011    0.4    3.3     0.4    3.9
+     contains                Interval                          src/Interval.hs:29:1-48                                655    11449179    0.0    0.0     0.0    0.0
+     nextWord64              System.Random.SplitMix            src/System/Random/SplitMix.hs:(115,1)-(117,29)         662     4914683    0.0    0.6     0.0    0.6
+   mkStdGen                  System.Random.Internal            src/System/Random/Internal.hs:787:1-36                 641           0    0.0    0.0     0.0    0.0
+    mkStdGen64               System.Random.Internal            src/System/Random/Internal.hs:797:1-32                 643           0    0.0    0.0     0.0    0.0
+     mkSMGen                 System.Random.SplitMix            src/System/Random/SplitMix.hs:371:1-61                 644         225    0.0    0.0     0.0    0.0
+   parList                   Control.Parallel.Strategies       Control/Parallel/Strategies.hs:552:1-24                623           0    0.0    0.0     0.0    0.0
+    rparWith                 Control.Parallel.Strategies       Control/Parallel/Strategies.hs:494:1-32                625           0    0.0    0.0     0.0    0.0
+     parEval                 Control.Parallel.Strategies       Control/Parallel/Strategies.hs:(513,1)-(518,28)        626         225    0.0    0.0     0.0    0.0
+      runEval                Control.Parallel.Strategies       Control/Parallel/Strategies.hs:219:1-42                627           0    0.0    0.0     0.0    0.0
+       rdeepseq              Control.Parallel.Strategies       Control/Parallel/Strategies.hs:450:1-38                629           0    0.0    0.0     0.0    0.0
+        rseq                 Control.Parallel.Strategies       Control/Parallel/Strategies.hs:429:1-26                630         225    0.0    0.0     0.0    0.0
+     rdeepseq                Control.Parallel.Strategies       Control/Parallel/Strategies.hs:450:1-38                628         225    0.0    0.0     0.0    0.0

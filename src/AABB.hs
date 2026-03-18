@@ -33,8 +33,8 @@ aabbFromPoints pa pb =
     (chooseInterval aY bY)
     (chooseInterval aZ bZ)
   where
-    (V3 aX aY aZ) = pa
-    (V3 bX bY bZ) = pb
+    (aX, aY, aZ) = toXYZ pa
+    (bX, bY, bZ) = toXYZ pb
     chooseInterval i j = if i <= j then Interval i j else Interval j i
 
 aabbFromBoxes :: AABB -> AABB -> AABB
@@ -48,41 +48,69 @@ aabbFromBoxes (AABB boxAx boxAy boxAz) (AABB boxBx boxBy boxBz) =
 
 -- hit gets a ray and the corresponding interval where such ray is considered
 -- ie the ray r is a ray from r at tMin to r at tMax
+-- {-# INLINE collision #-}
+-- collision :: AABB -> Ray -> Interval -> Bool
+-- collision AABB {..} (Ray rO rD _) rI =
+--   isJust (evalStateT (mapM_ (liesInAxis rO) l) rI) -- ignoring result since there is no result, ()
+--   where
+--     liesInAxis :: V3 -> (Interval, Double, Double) -> StateT Interval Maybe ()
+--     liesInAxis rOrigin (Interval axisMin axisMax, rDirAxis, rOrigAxis) =
+--       StateT
+--         ( \(Interval tMin tMax) ->
+--             let !rDirAxisInv = 1.0 / rDirAxis
+--                 !t0 = (axisMin - rOrigAxis) * rDirAxisInv
+--                 !t1 = (axisMax - rOrigAxis) * rDirAxisInv
+--                 !newTMin = max tMin (min t0 t1) -- min t0 t1 to ensure t0 is the min
+--                 !newTMax = min tMax (max t0 t1) -- max is same idea as before
+--              in if newTMin < newTMax
+--                   then Just ((), Interval newTMin newTMax)
+--                   -- () is the result, ie no result
+--                   -- Interval tMin tMax is the new Interval we care about,
+--                   -- this is passed as the state
+
+--                   else Nothing -- Nothing for early exit
+--         )
+
+--     (!rDx, !rDy, !rDz) = toXYZ rD
+--     (!rOx, !rOy, !rOz) = toXYZ rO
+--     !l = zip3 [aabbX, aabbY, aabbZ] [rDx, rDy, rDz] [rOx, rOy, rOz]
+--     -- per axis tuples, replaces the for loop in cpp
+
 {-# INLINE collision #-}
 collision :: AABB -> Ray -> Interval -> Bool
-collision AABB {..} (Ray rO rD _) rI =
-  isJust (evalStateT (mapM_ (liesInAxis rO) l) rI) -- ignoring result since there is no result, ()
-  where
-    liesInAxis :: V3 -> (Interval, Double, Double) -> StateT Interval Maybe ()
-    liesInAxis rOrigin (Interval axisMin axisMax, rDirAxis, rOrigAxis) =
-      StateT
-        ( \(Interval tMin tMax) ->
-            let !rDirAxisInv = 1.0 / rDirAxis
-                !t0 = (axisMin - rOrigAxis) * rDirAxisInv
-                !t1 = (axisMax - rOrigAxis) * rDirAxisInv
-                !newTMin = max tMin (min t0 t1) -- min t0 t1 to ensure t0 is the min
-                !newTMax = min tMax (max t0 t1) -- max is same idea as before
-             in if newTMin < newTMax
-                  then Just ((), Interval newTMin newTMax)
-                  -- () is the result, ie no result
-                  -- Interval tMin tMax is the new Interval we care about,
-                  -- this is passed as the state
+collision AABB{..} (Ray rO rD _) (Interval tMin tMax) =
+  let (!rDx, !rDy, !rDz) = toXYZ rD
+      (!rOx, !rOy, !rOz) = toXYZ rO
 
-                  else Nothing -- Nothing for early exit
-        )
+      !invDx = 1.0 / rDx
+      !tx0   = (minVal aabbX - rOx) * invDx
+      !tx1   = (maxVal aabbX - rOx) * invDx
+      !tMin1 = max tMin (min tx0 tx1)
+      !tMax1 = min tMax (max tx0 tx1)
 
-    (!rDx, !rDy, !rDz) = toXYZ rD
-    (!rOx, !rOy, !rOz) = toXYZ rO
-    !l = zip3 [aabbX, aabbY, aabbZ] [rDx, rDy, rDz] [rOx, rOy, rOz]
-    -- per axis tuples, replaces the for loop in cpp
+      !invDy = 1.0 / rDy
+      !ty0   = (minVal aabbY - rOy) * invDy
+      !ty1   = (maxVal aabbY - rOy) * invDy
+      !tMin2 = max tMin1 (min ty0 ty1)
+      !tMax2 = min tMax1 (max ty0 ty1)
+
+      !invDz = 1.0 / rDz
+      !tz0   = (minVal aabbZ - rOz) * invDz
+      !tz1   = (maxVal aabbZ - rOz) * invDz
+      !tMin3 = max tMin2 (min tz0 tz1)
+      !tMax3 = min tMax2 (max tz0 tz1)
+
+  in tMin3 < tMax3
 
 compareOnLongestAxis :: AABB -> (AABB -> AABB -> Ordering)
-compareOnLongestAxis (AABB x y z) =
-  snd $ maximumBy (compare `on` fst) l
+compareOnLongestAxis (AABB x y z)
+  | xSize >= ySize && xSize >= zSize = compare `on` aabbX
+  | ySize >= zSize                   = compare `on` aabbY
+  | otherwise                        = compare `on` aabbZ
   where
-    compareBy f = compare `on` f
-    l = zip [x, y, z] [compareBy aabbX, compareBy aabbY, compareBy aabbZ]
-
+    xSize = size x
+    ySize = size y
+    zSize = size z
 
 randAxisCompare :: Rand StdGen (AABB -> AABB -> Ordering)
 randAxisCompare = do

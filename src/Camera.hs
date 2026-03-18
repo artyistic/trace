@@ -1,99 +1,115 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Camera
   ( Camera,
-    camera,
-    camAspectRatio,
-    camImageWidth,
-    camSamplesPerPixel,
-    camDefocusAngle,
-    camFocusDistance,
-    camDefocusDiskU,
-    camDefocusDiskV,
+    CameraConfig (..),
+    defaultCameraConfig,
+    makeCamera,
+    camConfig,
     camCenter,
     camImageHeight,
     camPixelDu,
     camPixelDv,
-    camPixel00Loc
+    camPixel00Loc,
+    camDefocusDiskU,
+    camDefocusDiskV
   )
 where
 
-import Control.Monad.Loops
-import Control.Monad.Random
-import Data.Bool (bool)
-import Data.Function
 import Graphics
 import Hittable
-import Hittables
 import qualified Interval as I
 
--- camera is just defined by aspectRatio, imageWidth, and samplesPerPixel
-data Camera = Camera
-  { camAspectRatio :: Double,
-    camImageWidth :: Int,
-    camSamplesPerPixel :: Int,
-    camDefocusAngle :: Double,
-    camFocusDistance :: Double,
-    camDefocusDiskU :: V3,
-    camDefocusDiskV :: V3,
-    -- when intialized, user will gve lookFrom lookAt and vup
-    camCenter :: V3, -- will be lookFrom
-    -- derived from above
-    camImageHeight :: Int,
-    camPixelDu :: V3,
-    camPixelDv :: V3,
-    camPixel00Loc :: V3
+-- | User-provided camera parameters.
+-- Use 'defaultCameraConfig' and override only what you need:
+--
+-- > makeCamera defaultCameraConfig { cfgImageWidth = 1200, cfgVfov = 20 }
+data CameraConfig = CameraConfig
+  { cfgAspectRatio     :: Double,
+    cfgImageWidth      :: Int,
+    cfgSamplesPerPixel :: Int,
+    cfgDefocusAngle    :: Double, -- ^ 0 = no defocus blur
+    cfgFocusDistance   :: Double,
+    cfgVfov            :: Double, -- ^ Vertical field of view in degrees
+    cfgLookFrom        :: V3,
+    cfgLookAt          :: V3,
+    cfgVup             :: V3     -- ^ "Up" direction for camera orientation
   }
 
--- init a camera
-camera :: Double -> Int -> Int -> Double -> V3 -> V3 -> V3 -> Double -> Double -> Camera
-camera aspectRatio imageWidth samplesPerPixel vfov lookFrom lookAt vup defocusAngle focusDistance =
-  Camera
-    aspectRatio
-    imageWidth
-    samplesPerPixel
-    defocusAngle
-    focusDistance
-    defocusDiskU
-    defocusDiskV
-    cameraCenter
-    imageHeight
-    pixelDu
-    pixelDv
-    pixel00Loc
+defaultCameraConfig :: CameraConfig
+defaultCameraConfig = CameraConfig
+  { cfgAspectRatio     = 16.0 / 9.0,
+    cfgImageWidth      = 400,
+    cfgSamplesPerPixel = 10,
+    cfgDefocusAngle    = 0.0,
+    cfgFocusDistance   = 10.0,
+    cfgVfov            = 90.0,
+    cfgLookFrom        = V3 0 0 0,
+    cfgLookAt          = V3 0 0 (-1),
+    cfgVup             = V3 0 1 0
+  }
+
+-- | Fully initialised camera. Construct with 'makeCamera'.
+-- All derived fields are guaranteed valid; never construct directly.
+data Camera = Camera
+  { camConfig       :: CameraConfig,
+    camCenter       :: V3,
+    camImageHeight  :: Int,
+    camPixelDu      :: V3,
+    camPixelDv      :: V3,
+    camPixel00Loc   :: V3,
+    camDefocusDiskU :: V3,
+    camDefocusDiskV :: V3
+  }
+
+-- | Build a 'Camera' from a 'CameraConfig', computing all derived fields.
+makeCamera :: CameraConfig -> Camera
+makeCamera cfg@CameraConfig{..} = Camera
+  { camConfig       = cfg,
+    camCenter       = cfgLookFrom,
+    camImageHeight  = imageHeight,
+    camPixelDu      = pixelDu,
+    camPixelDv      = pixelDv,
+    camPixel00Loc   = pixel00Loc,
+    camDefocusDiskU = defocusDiskU,
+    camDefocusDiskV = defocusDiskV
+  }
   where
-    imageHeight = max (floor $ fromIntegral imageWidth / aspectRatio) 1
+    imageHeight = max 1 (floor $ fromIntegral cfgImageWidth / cfgAspectRatio)
 
-    -- vfov
-    thetaRad = vfov * (pi / 180)
-    h = tan $ thetaRad / 2
-    viewportHeight = 2.0 * h * focusDistance
-    viewportWidth = viewportHeight * on (/) fromIntegral imageWidth imageHeight
+    -- Viewport dimensions derived from vertical fov
+    h              = tan (toRad cfgVfov / 2)
+    viewportHeight = 2.0 * h * cfgFocusDistance
+    viewportWidth  = viewportHeight * fromIntegral cfgImageWidth / fromIntegral imageHeight
 
-    -- lookFrom is where the camera is positioned
-    cameraCenter = lookFrom
-
-    -- u v w are the basis vector for the camera coord frame
-    w = normalize (lookFrom <-> lookAt)
-    u = normalize (vup >< w)
+    -- Orthonormal basis for camera coordinate frame
+    w = normalize (cfgLookFrom <-> cfgLookAt)
+    u = normalize (cfgVup >< w)
     v = w >< u
 
-    viewportU = u .^ viewportWidth
-    viewportV = invert v .^ viewportHeight
+    -- Viewport edge vectors
+    viewportU = u            .^ viewportWidth
+    viewportV = invert v     .^ viewportHeight
 
-    pixelDu = viewportU .^ (1 / fromIntegral imageWidth)
+    -- Per-pixel delta vectors
+    pixelDu = viewportU .^ (1 / fromIntegral cfgImageWidth)
     pixelDv = viewportV .^ (1 / fromIntegral imageHeight)
 
+    -- Upper-left corner of the viewport
     viewportUpperLeft =
-        cameraCenter
-        
-              <-> (w .^ focusDistance)
-              <-> viewportU
-              .^ 0.5
-              <-> viewportV
-              .^ 0.5
+      cfgLookFrom
+      <-> (w        .^ cfgFocusDistance)
+      <-> (viewportU .^ 0.5)
+      <-> (viewportV .^ 0.5)
 
-    pixel00Loc = viewportUpperLeft <+> (pixelDu <+> pixelDv) .^ 0.5
+    -- Centre of pixel (0,0)
+    pixel00Loc = viewportUpperLeft <+> ((pixelDu <+> pixelDv) .^ 0.5)
 
-    -- camera's defocus basis vectors
-    defocusRadius = focusDistance * tan ((defocusAngle / 2) * (pi / 180))
-    defocusDiskU = u .^ defocusRadius
-    defocusDiskV = v .^ defocusRadius
+    -- Defocus (depth-of-field) disk basis vectors
+    defocusRadius = cfgFocusDistance * tan (toRad (cfgDefocusAngle / 2))
+    defocusDiskU  = u .^ defocusRadius
+    defocusDiskV  = v .^ defocusRadius
+
+-- | Convert degrees to radians.
+toRad :: Double -> Double
+toRad deg = deg * (pi / 180)

@@ -27,24 +27,23 @@ instance Show BVHNode where
 
 
 buildBoundingBox :: Hittables -> AABB
-buildBoundingBox = foldr (aabbFromBoxes . bounding_box) aabbEmpty
+buildBoundingBox = V.foldl' (\acc h -> aabbFromBoxes acc (bounding_box h)) aabbEmpty
 
 bvhFromList :: [Hittable] -> BVHNode
 bvhFromList l = fromHittables $ V.fromList l
 
 fromHittables :: Hittables -> BVHNode
-fromHittables l = do
-  case length l of
-    0 -> Empty
-    1 -> LeafNode (l V.! 0)
-    _ ->
-      let
-          sortedHittables = sortVectorBy comparator l
-          midPt = length l `div` 2
-          (fstHalf, sndHalf) = V.splitAt midPt sortedHittables
-      in InternalNode bvhAABB (fromHittables fstHalf) (fromHittables sndHalf)
-  where bvhAABB = buildBoundingBox l
-        comparator = compareOnLongestAxis bvhAABB `on` bounding_box
+fromHittables l = case V.length l of
+  0 -> Empty
+  1 -> LeafNode (l V.! 0)
+  _ -> InternalNode bvhAABB (fromHittables fstHalf) (fromHittables sndHalf)
+    where
+      sortedHittables = sortVectorBy comparator l
+      midPt           = V.length l `div` 2
+      (fstHalf, sndHalf) = V.splitAt midPt sortedHittables
+  where
+    bvhAABB    = buildBoundingBox l
+    comparator = compareOnLongestAxis bvhAABB `on` bounding_box
 
 sortVectorBy :: (a -> a -> Ordering) -> V.Vector a -> V.Vector a
 sortVectorBy cmp vec = runST $ do

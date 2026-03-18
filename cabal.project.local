@@ -1,6 +1,0 @@
---package *
---    profiling: true
---    profiling-detail: late
-
-package *
-  ghc-options: -O2

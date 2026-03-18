@@ -3,6 +3,7 @@ module Graphics.Vec3 where
 import Control.Monad.Loops
 import Control.Monad.Random
 import qualified Interval as I
+import Control.DeepSeq (NFData, rnf)
 
 class Vec3 v where
   fromXYZ :: Double -> Double -> Double -> v
@@ -120,6 +121,9 @@ class Vec3 v where
 
 data V3 = V3 !Double !Double !Double
   deriving (Eq, Show)
+
+instance NFData V3 where
+  rnf (V3 {}) = ()
 
 instance Vec3 V3 where
   fromXYZ = V3
