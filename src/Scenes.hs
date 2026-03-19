@@ -71,7 +71,7 @@ scenes =
         }
   ]
 
-selectScene :: IO Scene
+selectScene :: IO (Maybe Scene)
 selectScene = do
   putStrLn "Available scenes:"
   mapM_
@@ -82,13 +82,16 @@ selectScene = do
             ++ sceneDescription s
     )
     (zip [(0 :: Int) ..] scenes)
+  putStrLn "  q: quit"
   putStr "Select scene: "
   hFlush stdout
   input <- getLine
-  case readMaybe input of
-    Just i | i >= 0 && i < length scenes -> return (scenes !! i)
-    _ -> putStrLn "Invalid selection, try again." >> selectScene
-
+  case input of
+    "q" -> return Nothing
+    _   -> case readMaybe input of
+      Just i | i >= 0 && i < length scenes -> return (Just (scenes !! i))
+      _ -> putStrLn "Invalid selection, try again." >> selectScene
+      
 -- scene definitions
 
 dielectricTestWorld :: [Hittable]

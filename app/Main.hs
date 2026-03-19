@@ -5,7 +5,7 @@ import Scenes
 import Render
 import Control.Monad.Random
 import System.Environment (getArgs)
-import System.Exit (exitFailure)
+import System.Exit (exitFailure, exitSuccess)
 import Text.Read (readMaybe)
 
 data RenderConfig = RenderConfig
@@ -32,13 +32,16 @@ main = do
   cfg   <- case parseArgs args of
     Left err -> putStrLn err >> exitFailure
     Right c  -> return c
-  scene <- case rcSceneIndex cfg of
-    Just i  -> return (scenes !! i)
+  mScene <- case rcSceneIndex cfg of
+    Just i  -> return (Just (scenes !! i))
     Nothing -> selectScene
-  gen   <- getStdGen
-  let world = evalRand (sceneWorld scene) gen
-      cam   = makeCamera (sceneCamera scene)
-        { cfgImageWidth      = rcImageWidth cfg,
-          cfgSamplesPerPixel = rcSamplesPerPixel cfg
-        }
-  render "./output/test.ppm" world cam (rcNumBounces cfg)
+  case mScene of
+    Nothing    -> putStrLn "Goodbye." >> exitSuccess
+    Just scene -> do
+      gen <- getStdGen
+      let world = evalRand (sceneWorld scene) gen
+          cam   = makeCamera (sceneCamera scene)
+            { cfgImageWidth      = rcImageWidth cfg,
+              cfgSamplesPerPixel = rcSamplesPerPixel cfg
+            }
+      render "./output/test.ppm" world cam (rcNumBounces cfg)
