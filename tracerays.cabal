@@ -53,7 +53,7 @@ extra-doc-files: CHANGELOG.md
 -- extra-source-files:
 
 common warnings
-  ghc-options: -Wall
+  ghc-options: -Wall -Wunused-packages
 
 executable tracerays
   -- Import common warning flags.
@@ -80,7 +80,7 @@ executable tracerays
   -- Base language which the package is written in.
   default-language: Haskell2010
 
-  ghc-options:  -Wall -threaded -rtsopts -O2
+  ghc-options: -threaded -rtsopts -O2
 
 
 library tracerays-lib
@@ -104,7 +104,6 @@ library tracerays-lib
     , deepseq ^>=1.4.8.1
     , splitmix ^>=0.1.3.1
     , bytestring ^>=0.11.5.4
-    , parallel ^>=3.2.2.0
     , parallel ^>=3.2.2.0
     , transformers ^>=0.6.1.0
     , mtl ^>=2.3.1
