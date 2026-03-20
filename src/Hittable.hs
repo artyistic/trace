@@ -35,7 +35,6 @@ newtype Material = Material
   {
   {-
     scatter takes:
-    a : parameterized type
     ray that hits
     hitrecord
     returns

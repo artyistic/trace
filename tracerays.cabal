@@ -115,3 +115,19 @@ library tracerays-lib
     , vector-algorithms
 
   default-language: Haskell2010
+
+test-suite tracerays-test
+  type:             exitcode-stdio-1.0
+  main-is:          Spec.hs
+  hs-source-dirs:   test
+  other-modules:
+    , IntervalSpec
+    , Vec3Spec
+  build-depends:
+    , base
+    , tracerays-lib
+    , tasty
+    , tasty-hunit
+    , tasty-quickcheck
+    , QuickCheck
+  default-language: Haskell2010
