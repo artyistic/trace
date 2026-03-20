@@ -12,6 +12,8 @@ import Interval
 import Graphics (Ray)
 import Control.Applicative ((<|>))
 import Control.Monad.Random
+import HitRecord
+import Material
 
 type Hittables = (V.Vector Hittable)
 

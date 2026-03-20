@@ -7,6 +7,8 @@ import Graphics.Vec3
 import Hittable
 import qualified Interval as I
 import AABB (aabbFromPoints, aabbFromBoxes)
+import Material
+import HitRecord
 
 -- | Smart constructor for a moving sphere.
 -- The sphere center interpolates from centerFrom to centerTo over time [0,1].

@@ -13,6 +13,7 @@ import Hittable
 import qualified Interval as I
 import Random
 import System.Random.SplitMix (SMGen, initSMGen, splitSMGen, nextWord64)
+import Material
 
 -- | Render a scene to a PPM file.
 render :: FilePath -> [Hittable] -> Camera -> Int -> IO ()

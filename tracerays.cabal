@@ -91,6 +91,8 @@ library tracerays-lib
     Graphics.Vec3
     Shapes.Sphere
     Hittable
+    HitRecord
+    Material
     Camera
     Interval
     Render

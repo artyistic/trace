@@ -14,6 +14,7 @@ import Random
 import Shapes.Sphere
 import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
+import Material
 
 data Scene = Scene
   { sceneName        :: String,
