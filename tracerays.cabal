@@ -89,6 +89,7 @@ library tracerays-lib
     Graphics.Pixel
     Graphics.Ray
     Graphics.Vec3
+    Volumes.ConstantMedium
     Shapes.Sphere
     Hittable
     HitRecord
