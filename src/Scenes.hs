@@ -15,6 +15,7 @@ import Shapes.Sphere
 import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 import Material
+import Volumes.ConstantMedium (constantMedium)
 
 data Scene = Scene
   { sceneName        :: String,
@@ -125,7 +126,7 @@ bigWorld = do
       matbS2     = mkLambertian $ color 0.4 0.2 0.1
       matbS3     = mkMetal (color 0.7 0.6 0.5) 0.0
       ground     = stationarySphere (V3 0 (-1000) 0) 1000 matGround
-      bigSphere1 = stationarySphere (V3 0 1 0) 1.0 matbS1
+      bigSphere1 = constantMedium (stationarySphere (V3 0 1 0) 1.0 matbS1) 1 (color 1 0 0) -- red sphere fog
       bigSphere2 = stationarySphere (V3 (-4) 1 0) 1.0 matbS2
       bigSphere3 = stationarySphere (V3 4 1 0) 1.0 matbS3
   smallSpheres <- randomSpheres

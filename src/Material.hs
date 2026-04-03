@@ -65,3 +65,9 @@ mkDielectric refractiveIndex = Material {
       else pure $ Just (attenuation, Ray hitPt refractedRay inTime)
 }
 
+mkIsotropic :: Color -> Material
+mkIsotropic c = Material
+  { scatter = \r hr -> do
+      dir <- getRandomUnitVec
+      return $ Just (c, Ray (hitP hr) dir (rayTime r))
+  }

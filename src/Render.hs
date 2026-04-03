@@ -84,18 +84,19 @@ sampleDefocusDisk cam = do
 rayColor :: Ray -> BVHNode -> Int -> Rand StdGen Color
 rayColor _ _ 0 = pure $ color 0 0 0
 rayColor r@(Ray _ direction _) bvh depth =
-  case hitBVH bvh r (I.Interval 0.001 (1 / 0)) of
-    Nothing              -> pure background
-    Just (hitRec, mat)   -> do
-      result <- scatter mat r hitRec
-      case result of
-        Nothing                       -> pure $ color 0 0 0
-        Just (attenuation, scattered) ->
-          (attenuation `componentMul`) <$> rayColor scattered bvh (depth - 1)
+  maybe (pure background) bounceRay (hitBVH bvh r (I.Interval 0.001 (1 / 0)))
   where
+    bounceRay (hitRec, mat) = do
+      result <- scatter mat r hitRec
+      maybe (pure $ color 0 0 0) continueTrace result
+
+    continueTrace (attenuation, scattered) =
+      (attenuation `componentMul`) <$> rayColor scattered bvh (depth - 1)
+
     background =
       let a = 0.5 * (toY (normalize direction) + 1)
       in white .^ (1 - a) <+> lightBlue .^ a
+
     white     = color 1.0 1.0 1.0
     lightBlue = color 0.5 0.7 1.0
 

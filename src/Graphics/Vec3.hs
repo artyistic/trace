@@ -134,3 +134,7 @@ nearZero v = abs x < s && abs y < s && abs z < s
   where
     (x, y, z) = toXYZ v
     s = 1e-8
+
+withVec3 :: V3 -> (Double -> Double -> Double -> a) -> a
+withVec3 v f = f vx vy vz
+  where (vx, vy ,vz) = toXYZ v

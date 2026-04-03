@@ -9,6 +9,7 @@ import qualified Interval as I
 import AABB (aabbFromPoints, aabbFromBoxes)
 import Material
 import HitRecord
+-- import Control.Monad.Trans.Maybe (MaybeT(runMaybeT), hoistMaybe)
 
 -- | Smart constructor for a moving sphere.
 -- The sphere center interpolates from centerFrom to centerTo over time [0,1].
@@ -38,6 +39,7 @@ stationarySphere staticCenter radius mat =
     center = Ray staticCenter (V3 0 0 0) 0
 
 -- | Generate the hit function for a sphere given its center ray, radius, and material.
+{-# INLINE sphereHit #-}
 sphereHit :: Ray -> Double -> Material -> HitFun
 sphereHit center radius mat r@(Ray inOrigin inDirection inTime) tInterval = do
   let currCenter     = at center inTime
@@ -49,11 +51,11 @@ sphereHit center radius mat r@(Ray inOrigin inDirection inTime) tInterval = do
       sqrtDisc       = sqrt discriminant
       root1          = (h - sqrtDisc) / a
       root2          = (h + sqrtDisc) / a
-      checkRoot root = guard (I.surrounds tInterval root) >> Just root
+      validRoot root = guard (I.surrounds tInterval root) >> return root
 
   guard (discriminant >= 0)
 
-  t <- checkRoot root1 <|> checkRoot root2
+  t <- validRoot root1 <|> validRoot root2
 
   let p             = at r t
       outwardNormal = (p <-> currCenter) .^ (1 / radius)

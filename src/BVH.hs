@@ -1,5 +1,3 @@
--- {-# LANGUAGE Strict #-}
-{-# LANGUAGE BangPatterns #-}
 module BVH where
 import Hittable
 import AABB
@@ -14,6 +12,7 @@ import Control.Applicative ((<|>))
 import Control.Monad.Random
 import HitRecord
 import Material
+import Control.Monad.Trans.Maybe
 
 type Hittables = (V.Vector Hittable)
 
@@ -59,10 +58,11 @@ hitBVH bvh r i@(Interval tMin tMax) = case bvh of
   InternalNode box left right ->
     if collision box r i
       then
-        let !hitLeft = hitBVH left r i
-            !hitRightTMax = maybe tMax (hitT . fst) hitLeft
-            !hitRight = hitBVH right r (Interval tMin hitRightTMax)
-        in hitRight <|> hitLeft
+        let
+          lHit = hitBVH left r i
+          prunedTMax = maybe tMax (hitT . fst) lHit
+          rHit = hitBVH right r (Interval tMin prunedTMax)
+        in rHit <|> lHit
       else Nothing
   LeafNode h -> hit h r i
   Empty -> Nothing
