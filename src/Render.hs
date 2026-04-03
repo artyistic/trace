@@ -44,10 +44,11 @@ samplePixel :: Int -> Int -> BVHNode -> Camera -> Int -> Rand StdGen Color
 samplePixel x y bvh cam numBounces = do
   offsets <- replicateM samplesPerPixel getSampleSquare
   colors  <- traverse (sampleRay x y bvh cam numBounces defocusAngle) offsets
-  return . gammaCorrected . averageColor $ colors
+  return . gammaCorrect . averageColor $ colors
   where
     samplesPerPixel = cfgSamplesPerPixel . camConfig $ cam
     defocusAngle    = cfgDefocusAngle    . camConfig $ cam
+
 
 -- | Shoot one ray through pixel (x, y) with a random sub-pixel offset.
 sampleRay :: Int -> Int -> BVHNode -> Camera -> Int -> Double -> V3 -> Rand StdGen Color

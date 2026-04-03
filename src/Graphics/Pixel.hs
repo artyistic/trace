@@ -1,45 +1,44 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 
-module Graphics.Pixel (Color, color, colorFromV3, averageColor, colorToRGB, gammaCorrected) where
+module Graphics.Pixel (Color, color, colorFromV3, averageColor, colorToRGB, gammaCorrect, tonemap) where
 
 import Graphics.Vec3
 import Data.Word (Word8)
-import Data.Bool
 import Control.Parallel.Strategies (NFData)
 
--- Color are represented by [0,1] range
+-- Color are represented by 3 non negative doubles,
+-- Color will be clamped at final rendering for ppm
 newtype Color = Color { rgb :: V3 }
   deriving (Eq, Show, Vec3, NFData)
 
 -- Smart constructor that clamps values
 color :: Double -> Double -> Double -> Color
-color r g b = Color $ fromXYZ (clamp01 r) (clamp01 g) (clamp01 b)
-  where clamp01 x = max 0 (min 1 x)
+color r g b = Color (V3 (max 0 r) (max 0 g) (max 0 b))
 
 -- just a helper, calls color
 colorFromV3 :: V3 -> Color
 colorFromV3 v = color r g b
   where (r, g, b) = toXYZ v
 
--- interal conversions
-toWord8 :: Double -> Word8
-toWord8 x = fromIntegral (floor (x * 255.99))
-
 -- a function to average Colors from list
--- here bc color smart constructor clamps
--- this is really a safer way to do color I think
 averageColor :: [Color] -> Color
-averageColor xs = let (sum, count) = foldl (\(s, c) x -> (s <+> x, c + 1)) (color 0 0 0, 0) xs
-             in if count == 0 then color 0 0 0 else sum ./ count
+averageColor xs =
+  let (total, count) = foldl (\(s, c) x -> (s <+> x, c + 1)) (color 0 0 0, 0 :: Int) xs
+  in if count == 0 then color 0 0 0 else total ./ fromIntegral count
+
+-- reinhard gloabl tonemapping
+tonemap :: Color -> Color
+tonemap (Color (V3 r g b)) = Color (V3 (f r) (f g) (f b))
+  where f x = x / (1 + x)
 
 colorToRGB :: Color -> (Int, Int, Int)
-colorToRGB c =
-  let (x, y, z) = toXYZ c
-  in (to255 x, to255 y, to255 z)
+colorToRGB (Color (V3 r g b)) =
+  (to255 r, to255 g, to255 b)
   where
     to255 x = floor (clamp 0 1 x * 255) :: Int
-    clamp minVal maxVal = max minVal . min maxVal
+    clamp lo hi = max lo . min hi
 
-gammaCorrected :: Color -> Color
-gammaCorrected = transform (\x -> if x > 0 then sqrt x else x)
+gammaCorrect :: Color -> Color
+gammaCorrect = transform (\x -> if x > 0 then sqrt x else x)
+
