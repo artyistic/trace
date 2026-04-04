@@ -91,6 +91,7 @@ library tracerays-lib
     Graphics.Vec3
     Volumes.ConstantMedium
     Shapes.Sphere
+    Texture
     Hittable
     HitRecord
     Material

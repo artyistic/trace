@@ -49,7 +49,6 @@ samplePixel x y bvh cam numBounces = do
     samplesPerPixel = cfgSamplesPerPixel . camConfig $ cam
     defocusAngle    = cfgDefocusAngle    . camConfig $ cam
 
-
 -- | Shoot one ray through pixel (x, y) with a random sub-pixel offset.
 sampleRay :: Int -> Int -> BVHNode -> Camera -> Int -> Double -> V3 -> Rand StdGen Color
 sampleRay x y bvh cam numBounces defocusAngle offset = do

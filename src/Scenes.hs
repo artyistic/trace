@@ -16,6 +16,7 @@ import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 import Material
 import Volumes.ConstantMedium (constantMedium)
+import Texture (checkerTex, checkerTexFromColor)
 
 data Scene = Scene
   { sceneName        :: String,
@@ -121,7 +122,8 @@ vfovTestWorld =
 
 bigWorld :: Rand StdGen [Hittable]
 bigWorld = do
-  let matGround  = mkLambertian $ color 0.5 0.5 0.5
+  let checker = checkerTexFromColor 0.32 (color 0.2 0.3  0.1) (color 0.9 0.9 0.9)
+      matGround  = mkLambertianWithTex checker
       matbS1     = mkDielectric 1.5
       matbS2     = mkLambertian $ color 0.4 0.2 0.1
       matbS3     = mkMetal (color 0.7 0.6 0.5) 0.0

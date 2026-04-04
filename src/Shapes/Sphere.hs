@@ -59,4 +59,4 @@ sphereHit center radius mat r@(Ray inOrigin inDirection inTime) tInterval = do
 
   let p             = at r t
       outwardNormal = (p <-> currCenter) .^ (1 / radius)
-  return (generateHitRecord r p t outwardNormal, mat)
+  return (genHitRecord r p t outwardNormal 0 0 , mat)

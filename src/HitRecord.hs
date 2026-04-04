@@ -1,6 +1,6 @@
 module HitRecord where
 import Graphics
-  
+
 -- | Records the geometry of a ray-surface intersection.
 -- Produced by a 'HitFun' and consumed by 'scatter'.
 data HitRecord = HitRecord
@@ -8,11 +8,13 @@ data HitRecord = HitRecord
     hitNormal      :: !V3,     -- ^ Surface normal at the intersection point,
                                --   always points against the incident ray
     hitT           :: !Double, -- ^ Parameter t along the ray where the hit occurred
-    hitFrontFacing :: !Bool    -- ^ True if the ray hit the front face of the surface
+    hitFrontFacing :: !Bool,    -- ^ True if the ray hit the front face of the surface
+    hitU           :: !Double,
+    hitV           :: !Double
   }
 
-generateHitRecord :: Ray -> V3 -> Double -> V3 -> HitRecord
-generateHitRecord (Ray _ direction _) p t outwardNormal =
+genHitRecord :: Ray -> V3 -> Double -> V3 -> Double -> Double -> HitRecord
+genHitRecord (Ray _ direction _) p t outwardNormal = 
   HitRecord p normal t frontFacing
   where
     frontFacing = (direction .* outwardNormal) < 0

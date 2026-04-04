@@ -28,7 +28,8 @@ volumeHit boundary density c r@(Ray rO rD rT) (Interval tMin tMax) = do
   let hitDist = negInvDensity * log xi
   guard (hitDist <= (t2 - t1') * rayLength)
   let t       = t1' + hitDist / rayLength
-  return (HitRecord (at r t) (V3 1 0 0) t True, mkIsotropic c)
+  return 
+    (HitRecord (at r t) (V3 1 0 0) t True 0 0, mkIsotropic c)
   where
     negInvDensity = -(1 / density)
     rayLength     = norm (rayDirection r)

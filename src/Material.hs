@@ -1,8 +1,10 @@
+{-# LANGUAGE RecordWildCards #-}
 module Material where
 import HitRecord
 import Graphics
 import Control.Monad.Random
 import Random
+import Texture
 
 newtype Material = Material
   {
@@ -19,12 +21,13 @@ newtype Material = Material
   }
 
 mkLambertian :: Color -> Material
-mkLambertian c = Material {
-  scatter = \(Ray _ _ inTime) hR -> do
-    let normal = hitNormal hR
-        hitPt = hitP hR
-    d <- (\a -> if nearZero a then normal else a ) <$> getRandomUnitVec
-    return $ Just (c, Ray hitPt (d <+> normal) inTime)
+mkLambertian c = mkLambertianWithTex $ solidTex c
+
+mkLambertianWithTex :: Texture -> Material
+mkLambertianWithTex tex = Material {
+  scatter = \(Ray _ _ inTime) hR@HitRecord{..} -> do
+    d <- (\a -> if nearZero a then hitNormal else a ) <$> getRandomUnitVec
+    return $ Just (value tex hitU hitV hitP, Ray hitP (d <+> hitNormal) inTime)
 }
 
 mkMetal :: Color -> Double -> Material

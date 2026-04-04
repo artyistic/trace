@@ -6,6 +6,9 @@ import qualified Interval as I
 import Control.DeepSeq (NFData, rnf)
 
 class Vec3 v where
+  fromV :: (Double -> a) -> v -> (a, a, a)
+  fromV f v = (f x, f y, f z)
+    where (x, y, z) = toXYZ v
   fromXYZ :: Double -> Double -> Double -> v
   toXYZ :: v -> (Double, Double, Double)
   origin :: v
