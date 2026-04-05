@@ -124,7 +124,7 @@ vfovTestWorld =
 
 bigWorld :: RandT StdGen IO [Hittable]
 bigWorld = do
-  earthTex <- liftIO $ imageTexture "./texImages/8k_earth_daymap.jpg"
+  earthTex <- liftIO $ imageTexture "./texImages/earthmap.jpg"
   let checker = checkerTexFromColor 0.32 (color 0.2 0.3  0.1) (color 0.9 0.9 0.9)
       matGround  = mkLambertianWithTex checker
       matbS1     = mkDielectric 1.5

@@ -63,61 +63,61 @@ executable tracerays
   main-is:          Main.hs
 
   -- Modules included in this executable, other than Main.
---   other-modules:
+  --   other-modules:
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
   build-depends:
-    , base         ^>=4.18.3.0
+    , base           ^>=4.18.3.0
+    , MonadRandom    ^>=0.6.2
     , tracerays-lib
-    , MonadRandom ^>=0.6.2
 
   -- Directories containing source files.
   hs-source-dirs:   app
 
   -- Base language which the package is written in.
   default-language: Haskell2010
-
-  ghc-options: -O2 -threaded -rtsopts
+  ghc-options:      -O2 -threaded -rtsopts
 
 library tracerays-lib
   hs-source-dirs:   src
   exposed-modules:
+    AABB
+    BVH
+    Camera
     Graphics
     Graphics.Pixel
     Graphics.Ray
     Graphics.Vec3
-    Volumes.ConstantMedium
-    Shapes.Sphere
-    Texture
-    Hittable
     HitRecord
-    Material
-    Camera
+    Hittable
     Interval
-    Render
+    Material
     Random
+    Render
     Scenes
-    AABB
-    BVH
+    Shapes.Sphere
+    Shapes.Quad
+    Texture
+    Volumes.ConstantMedium
 
   build-depends:
-    mmorph ^>=1.2.1,
-    JuicyPixels
-    , deepseq ^>=1.4.8.1
-    , splitmix ^>=0.1.3.1
-    , bytestring ^>=0.11.5.4
-    , parallel ^>=3.2.2.0
-    , transformers ^>=0.6.1.0
-    , mtl ^>=2.3.1
-    , random ^>=1.3.1
-    , base         ^>=4.18.3.0
-    , MonadRandom ^>=0.6.2
-    , monad-loops >= 0.4
-    , vector
+    , base               ^>=4.18.3.0
+    , bytestring         ^>=0.11.5.4
     , containers
+    , deepseq            ^>=1.4.8.1
+    , JuicyPixels
+    , mmorph             ^>=1.2.1
+    , monad-loops        >=0.4
+    , MonadRandom        ^>=0.6.2
+    , mtl                ^>=2.3.1
+    , parallel           ^>=3.2.2.0
+    , random             ^>=1.3.1
+    , splitmix           ^>=0.1.3.1
+    , transformers       ^>=0.6.1.0
+    , vector
     , vector-algorithms
 
   default-language: Haskell2010
@@ -127,13 +127,15 @@ test-suite tracerays-test
   main-is:          Spec.hs
   hs-source-dirs:   test
   other-modules:
-    , IntervalSpec
-    , Vec3Spec
+    IntervalSpec
+    Vec3Spec
+
   build-depends:
     , base
-    , tracerays-lib
+    , QuickCheck
     , tasty
     , tasty-hunit
     , tasty-quickcheck
-    , QuickCheck
+    , tracerays-lib
+
   default-language: Haskell2010

@@ -9,7 +9,6 @@ import qualified Interval as I
 import AABB (aabbFromPoints, aabbFromBoxes)
 import Material
 import HitRecord
--- import Control.Monad.Trans.Maybe (MaybeT(runMaybeT), hoistMaybe)
 
 -- | Smart constructor for a moving sphere.
 -- The sphere center interpolates from centerFrom to centerTo over time [0,1].
@@ -17,7 +16,7 @@ movingSphere :: V3 -> V3 -> Double -> Material -> Hittable
 movingSphere centerFrom centerTo radius mat =
   Hittable
     { hit         = sphereHit center radius mat,
-      bounding_box =
+      bbox =
         let rvec = V3 radius radius radius
             boxA = aabbFromPoints (at center 0 <-> rvec) (at center 0 <+> rvec)
             boxB = aabbFromPoints (at center 1 <-> rvec) (at center 1 <+> rvec)
@@ -31,7 +30,7 @@ stationarySphere :: V3 -> Double -> Material -> Hittable
 stationarySphere staticCenter radius mat =
   Hittable
     { hit         = sphereHit center radius mat,
-      bounding_box =
+      bbox =
         let rvec = V3 radius radius radius
         in aabbFromPoints (staticCenter <-> rvec) (staticCenter <+> rvec)
     }

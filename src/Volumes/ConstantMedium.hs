@@ -13,7 +13,7 @@ constantMedium :: Hittable -> Double -> Color -> Hittable
 constantMedium boundary density c =
   Hittable {
     hit = volumeHit boundary density c,
-    bounding_box = bounding_box boundary
+    bbox = bbox boundary
   }
 
 volumeHit :: Hittable -> Double -> Color -> HitFun
