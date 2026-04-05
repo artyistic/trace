@@ -1,7 +1,10 @@
+{-# LANGUAGE BangPatterns #-}
 module Texture where
 
 import Graphics (Color, V3)
 import Graphics.Vec3 (fromV)
+import Graphics.Pixel (color)
+import Codec.Picture
 
 newtype Texture = Texture {value :: Double -> Double -> V3 -> Color}
 
@@ -21,3 +24,22 @@ checkerTex scale tex1 tex2 =
 checkerTexFromColor :: Double -> Color -> Color -> Texture
 checkerTexFromColor scale c1 c2 =
   checkerTex scale (solidTex c1) (solidTex c2)
+
+imageTexture :: FilePath -> IO Texture
+imageTexture fpath = do
+  img <- readImage fpath
+  case img of
+    Left err -> error err
+    Right dImage ->
+      let !a = convertRGB8 dImage
+          w = imageWidth a
+          h = imageHeight a
+      in return $ Texture {
+        value = \u v p ->
+          let u' = (max 0 . min 1) u
+              v' = 1.0 - (max 0 . min 1) v
+              i = truncate (u' * fromIntegral w)
+              j = truncate (v' * fromIntegral h)
+              (PixelRGB8 r g b ) = pixelAt a i j
+          in color ((1.0/255.0) * fromIntegral r) ((1.0/255.0) * fromIntegral g) ((1.0/255.0) * fromIntegral b)
+      }

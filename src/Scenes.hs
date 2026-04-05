@@ -5,6 +5,7 @@ module Scenes
   )
 where
 
+import Control.Monad.Morph (hoist, generalize)
 import Camera
 import Control.Monad.Random
 import Data.Maybe (catMaybes)
@@ -16,12 +17,13 @@ import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 import Material
 import Volumes.ConstantMedium (constantMedium)
-import Texture (checkerTex, checkerTexFromColor)
+import Texture (checkerTex, checkerTexFromColor, imageTexture)
+import Control.Monad.Identity
 
 data Scene = Scene
   { sceneName        :: String,
     sceneDescription :: String,
-    sceneWorld       :: Rand StdGen [Hittable],
+    sceneWorld       :: RandT StdGen IO [Hittable],
     sceneCamera      :: CameraConfig
   }
 
@@ -94,7 +96,7 @@ selectScene = do
     _   -> case readMaybe input of
       Just i | i >= 0 && i < length scenes -> return (Just (scenes !! i))
       _ -> putStrLn "Invalid selection, try again." >> selectScene
-      
+
 -- scene definitions
 
 dielectricTestWorld :: [Hittable]
@@ -120,18 +122,20 @@ vfovTestWorld =
       right    = stationarySphere (V3 r 0 (-1)) r matRight
   in [left, right]
 
-bigWorld :: Rand StdGen [Hittable]
+bigWorld :: RandT StdGen IO [Hittable]
 bigWorld = do
+  earthTex <- liftIO $ imageTexture "./texImages/8k_earth_daymap.jpg"
   let checker = checkerTexFromColor 0.32 (color 0.2 0.3  0.1) (color 0.9 0.9 0.9)
       matGround  = mkLambertianWithTex checker
       matbS1     = mkDielectric 1.5
       matbS2     = mkLambertian $ color 0.4 0.2 0.1
-      matbS3     = mkMetal (color 0.7 0.6 0.5) 0.0
+      -- matbS3     = mkMetal (color 0.7 0.6 0.5) 0.0
+      matbS3 = mkLambertianWithTex earthTex
       ground     = stationarySphere (V3 0 (-1000) 0) 1000 matGround
       bigSphere1 = constantMedium (stationarySphere (V3 0 1 0) 1.0 matbS1) 1 (color 1 0 0) -- red sphere fog
       bigSphere2 = stationarySphere (V3 (-4) 1 0) 1.0 matbS2
       bigSphere3 = stationarySphere (V3 4 1 0) 1.0 matbS3
-  smallSpheres <- randomSpheres
+  smallSpheres <- mapRandT (return . runIdentity) randomSpheres
   pure $ [ground, bigSphere1, bigSphere2, bigSphere3] ++ smallSpheres
 
 randomSpheres :: Rand StdGen [Hittable]

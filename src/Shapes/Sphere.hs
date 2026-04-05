@@ -59,4 +59,11 @@ sphereHit center radius mat r@(Ray inOrigin inDirection inTime) tInterval = do
 
   let p             = at r t
       outwardNormal = (p <-> currCenter) .^ (1 / radius)
-  return (genHitRecord r p t outwardNormal 0 0 , mat)
+      (u, v) = getSphereUV outwardNormal
+  return (genHitRecord r p t outwardNormal u v, mat)
+  where
+    getSphereUV :: V3 -> (Double, Double)
+    getSphereUV (V3 x y z) =
+      let theta = acos (negate y)
+          phi = atan2 (negate z) x + pi
+      in (phi / (2 * pi), theta / pi)

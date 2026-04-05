@@ -1,24 +1,24 @@
 module Main where
 
 import Camera
-import Scenes
-import Render
 import Control.Monad.Random
+import Render
+import Scenes
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 import Text.Read (readMaybe)
 
 data RenderConfig = RenderConfig
-  { rcSceneIndex    :: Maybe Int,  -- Nothing = prompt user
-    rcImageWidth    :: Int,
+  { rcSceneIndex :: Maybe Int, -- Nothing = prompt user
+    rcImageWidth :: Int,
     rcSamplesPerPixel :: Int,
-    rcNumBounces    :: Int
+    rcNumBounces :: Int
   }
 
 parseArgs :: [String] -> Either String RenderConfig
 parseArgs [w, s, b] = case (readMaybe w, readMaybe s, readMaybe b) of
   (Just w', Just s', Just b') -> Right $ RenderConfig Nothing w' s' b'
-  _                           -> Left "All arguments must be integers"
+  _ -> Left "All arguments must be integers"
 parseArgs [sc, w, s, b] = case (readMaybe sc, readMaybe w, readMaybe s, readMaybe b) of
   (Just sc', Just w', Just s', Just b')
     | sc' < 0 || sc' >= length scenes -> Left $ "Scene index out of range (0-" ++ show (length scenes - 1) ++ ")"
@@ -28,20 +28,22 @@ parseArgs _ = Left "Usage: tracerays [sceneIndex] <width> <spp> <bounces>"
 
 main :: IO ()
 main = do
-  args  <- getArgs
-  cfg   <- case parseArgs args of
+  args <- getArgs
+  cfg <- case parseArgs args of
     Left err -> putStrLn err >> exitFailure
-    Right c  -> return c
+    Right c -> return c
   mScene <- case rcSceneIndex cfg of
-    Just i  -> return (Just (scenes !! i))
+    Just i -> return (Just (scenes !! i))
     Nothing -> selectScene
   case mScene of
-    Nothing    -> putStrLn "Goodbye." >> exitSuccess
+    Nothing -> putStrLn "Goodbye." >> exitSuccess
     Just scene -> do
       gen <- getStdGen
-      let world = evalRand (sceneWorld scene) gen
-          cam   = makeCamera (sceneCamera scene)
-            { cfgImageWidth      = rcImageWidth cfg,
-              cfgSamplesPerPixel = rcSamplesPerPixel cfg
-            }
+      world <- evalRandT (sceneWorld scene) gen
+      let cam =
+            makeCamera
+              (sceneCamera scene)
+                { cfgImageWidth = rcImageWidth cfg,
+                  cfgSamplesPerPixel = rcSamplesPerPixel cfg
+                }
       render "./output/test.ppm" world cam (rcNumBounces cfg)
