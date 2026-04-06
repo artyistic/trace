@@ -83,6 +83,11 @@ executable tracerays
 
 library tracerays-lib
   hs-source-dirs:   src
+  default-extensions:
+    OverloadedRecordDot
+    DuplicateRecordFields
+    RecordWildCards
+
   exposed-modules:
     AABB
     BVH

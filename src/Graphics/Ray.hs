@@ -3,9 +3,9 @@ module Graphics.Ray where
 import Graphics.Vec3
 
 data Ray = Ray {
-  rayOrigin :: !V3,
-  rayDirection :: !V3,
-  rayTime :: !Double
+  orig :: !V3,
+  dir :: !V3,
+  time :: !Double
 }
 
 at :: Ray -> Double -> V3

@@ -26,30 +26,26 @@ mkLambertian c = mkLambertianWithTex $ solidTex c
 mkLambertianWithTex :: Texture -> Material
 mkLambertianWithTex tex = Material {
   scatter = \(Ray _ _ inTime) hR@HitRecord{..} -> do
-    d <- (\a -> if nearZero a then hitNormal else a ) <$> getRandomUnitVec
-    return $ Just (value tex hitU hitV hitP, Ray hitP (d <+> hitNormal) inTime)
+    d <- (\a -> if nearZero a then normal else a ) <$> getRandomUnitVec
+    return $ Just (tex.value u v p, Ray p (d <+> normal) inTime)
 }
 
 mkMetal :: Color -> Double -> Material
 mkMetal c fuzz = Material {
-  scatter = \r@(Ray _ inDirection inTime) hR -> do
+  scatter = \r@(Ray _ inDirection inTime) hR@HitRecord{..} -> do
     randomVec <- getRandomUnitVec
-    let normal = hitNormal hR
-        hitPt = hitP hR
-        reflectedRay = reflect inDirection normal
+    let reflectedRay = reflect inDirection normal
         fuzzedReflected = normalize reflectedRay <+> randomVec .^ fuzz
-        scattered@(Ray _ scatteredDir _adobeDctVersion) = Ray hitPt fuzzedReflected inTime
+        scattered@(Ray _ scatteredDir _adobeDctVersion) = Ray p fuzzedReflected inTime
 
     if scatteredDir .* normal > 0 then return $ pure (c, scattered) else pure Nothing
 }
 
 mkDielectric :: Double -> Material
 mkDielectric refractiveIndex = Material {
-  scatter = \r@(Ray _ inDirection inTime) hR -> do
-    let normal = hitNormal hR
-        attenuation = color 1.0 1.0 1.0
-        hitPt = hitP hR
-        ri = if hitFrontFacing hR
+  scatter = \r@(Ray _ inDirection inTime) hR@HitRecord{..} -> do
+    let attenuation = color 1.0 1.0 1.0
+        ri = if frontFacing
                 then 1.0 / refractiveIndex
                 else refractiveIndex
         unitInDirection = normalize inDirection
@@ -64,13 +60,13 @@ mkDielectric refractiveIndex = Material {
           in r0 + (1 - r0) * ((1 - cosine) ** 5)
     randomDouble <- getRandom :: Rand StdGen Double
     if cannotRefract || schlickReflectance cosTheta ri > randomDouble -- logic for total internal refraction
-      then pure $ Just (attenuation, Ray hitPt reflectedRay inTime)
-      else pure $ Just (attenuation, Ray hitPt refractedRay inTime)
+      then pure $ Just (attenuation, Ray p reflectedRay inTime)
+      else pure $ Just (attenuation, Ray p refractedRay inTime)
 }
 
 mkIsotropic :: Color -> Material
 mkIsotropic c = Material
-  { scatter = \r hr -> do
+  { scatter = \r hR@HitRecord{..} -> do
       dir <- getRandomUnitVec
-      return $ Just (c, Ray (hitP hr) dir (rayTime r))
+      return $ Just (c, Ray p dir t)
   }

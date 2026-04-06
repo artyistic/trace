@@ -28,7 +28,7 @@ instance Show BVHNode where
 
 
 buildBoundingBox :: Hittables -> AABB
-buildBoundingBox = V.foldl' (\acc h -> aabbFromBoxes acc (bbox h)) aabbEmpty
+buildBoundingBox = V.foldl' (\acc h -> aabbFromBoxes acc h.bbox) aabbEmpty
 
 bvhFromList :: [Hittable] -> BVHNode
 bvhFromList l = fromHittables $ V.fromList l
@@ -44,7 +44,7 @@ fromHittables l = case V.length l of
       (fstHalf, sndHalf) = V.splitAt midPt sortedHittables
   where
     bvhAABB    = buildBoundingBox l
-    comparator = compareOnLongestAxis bvhAABB `on` bbox
+    comparator = compareOnLongestAxis bvhAABB `on` (.bbox)
 
 sortVectorBy :: (a -> a -> Ordering) -> V.Vector a -> V.Vector a
 sortVectorBy cmp vec = runST $ do
@@ -60,9 +60,9 @@ hitBVH bvh r i@(Interval tMin tMax) = case bvh of
       then
         let
           lHit = hitBVH left r i
-          prunedTMax = maybe tMax (hitT . fst) lHit
+          prunedTMax = maybe tMax ((.t) . fst) lHit
           rHit = hitBVH right r (Interval tMin prunedTMax)
         in rHit <|> lHit
       else Nothing
-  LeafNode h -> hit h r i
+  LeafNode h -> h.hit r i
   Empty -> Nothing

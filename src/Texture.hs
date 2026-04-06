@@ -17,7 +17,7 @@ checkerTex scale tex1 tex2 =
   Texture
     { value = \u v p ->
         let (x, y, z) = fromV (floor . (/ scale)) p
-         in if even (x + y + z) then value tex1 u v p else value tex2 u v p
+         in if even (x + y + z) then tex1.value u v p else tex2.value u v p
     }
 
 -- Use 'solidTex' directly inside the call

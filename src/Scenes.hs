@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Scenes
   ( Scene (..),
     scenes,

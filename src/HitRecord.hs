@@ -4,13 +4,13 @@ import Graphics
 -- | Records the geometry of a ray-surface intersection.
 -- Produced by a 'HitFun' and consumed by 'scatter'.
 data HitRecord = HitRecord
-  { hitP           :: !V3,     -- ^ Point of intersection in world space
-    hitNormal      :: !V3,     -- ^ Surface normal at the intersection point,
+  { p           :: !V3,     -- ^ Point of intersection in world space
+    normal      :: !V3,     -- ^ Surface normal at the intersection point,
                                --   always points against the incident ray
-    hitT           :: !Double, -- ^ Parameter t along the ray where the hit occurred
-    hitFrontFacing :: !Bool,    -- ^ True if the ray hit the front face of the surface
-    hitU           :: !Double,
-    hitV           :: !Double
+    t           :: !Double, -- ^ Parameter t along the ray where the hit occurred
+    frontFacing :: !Bool,    -- ^ True if the ray hit the front face of the surface
+    u           :: !Double,
+    v           :: !Double
   }
 
 genHitRecord :: Ray -> V3 -> Double -> V3 -> Double -> Double -> HitRecord
