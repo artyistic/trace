@@ -24,18 +24,24 @@ data AABB = AABB
 aabbEmpty :: AABB
 aabbEmpty = AABB empty empty empty
 
+-- | used to pad flat aabb, like quads
+pad :: Interval -> Interval
+pad i = if size i < delta then expands i delta else i
+  where delta = 0.0001
+
 aabbFromInterval :: Interval -> Interval -> Interval -> AABB
-aabbFromInterval = AABB
+aabbFromInterval x y z = AABB (pad x) (pad y) (pad z)
+  where
+    delta = 0.0001
+    pad i = if size i < delta then expands i delta else i
 
 aabbFromPoints :: V3 -> V3 -> AABB
-aabbFromPoints pa pb =
+aabbFromPoints (V3 aX aY aZ) (V3 bX bY bZ) =
   AABB
-    (chooseInterval aX bX)
-    (chooseInterval aY bY)
-    (chooseInterval aZ bZ)
+    (pad $ chooseInterval aX bX)
+    (pad $ chooseInterval aY bY)
+    (pad $ chooseInterval aZ bZ)
   where
-    (aX, aY, aZ) = toXYZ pa
-    (bX, bY, bZ) = toXYZ pb
     chooseInterval i j = if i <= j then Interval i j else Interval j i
 
 aabbFromBoxes :: AABB -> AABB -> AABB

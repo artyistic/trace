@@ -55,13 +55,6 @@ extra-doc-files: CHANGELOG.md
 common warnings
   ghc-options: -Wall -Wunused-packages
 
--- common extensions
---   default-extensions:
---     DuplicateRecordFields
---     -- NoFieldSelectors
---     OverloadedRecordDot
---     RecordWildCards
-
 executable tracerays
   -- Import common warning flags.
   import:           warnings
@@ -86,7 +79,7 @@ executable tracerays
 
   default-extensions:
     DuplicateRecordFields
-    -- NoFieldSelectors
+    NoFieldSelectors
     OverloadedRecordDot
     RecordWildCards
 
@@ -98,7 +91,7 @@ library tracerays-lib
   hs-source-dirs:     src
   default-extensions:
     DuplicateRecordFields
-    -- NoFieldSelectors
+    NoFieldSelectors
     OverloadedRecordDot
     RecordWildCards
 

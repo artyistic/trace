@@ -14,6 +14,7 @@ import Material
 import Volumes.ConstantMedium (constantMedium)
 import Texture (checkerTex, checkerTexFromColor, imageTexture)
 import Control.Monad.Identity
+import Shapes.Quad
 
 data Scene = Scene
   { name        :: String,
@@ -68,6 +69,20 @@ scenes =
           vup             = V3 0 1 0,
           defocusAngle    = 0,
           focusDistance   = 10.0
+        },
+    Scene
+      "quads-test"
+      "five quads forming a boxish figure"
+      (pure quadsWorld)
+      defaultCameraConfig
+        { aspectRatio     = 1.0,
+          imageWidth      = 400,
+          samplesPerPixel = 100,
+          vfov            = 80,
+          lookFrom        = V3 0 0 9,
+          lookAt          = V3 0 0 0,
+          vup             = V3 0 1 0,
+          defocusAngle    = 0
         }
   ]
 
@@ -132,6 +147,21 @@ bigWorld = do
       bigSphere3 = stationarySphere (V3 4 1 0) 1.0 matbS3
   smallSpheres <- mapRandT (return . runIdentity) randomSpheres
   pure $ [ground, bigSphere1, bigSphere2, bigSphere3] ++ smallSpheres
+
+quadsWorld :: [Hittable]
+quadsWorld = 
+  let red = mkLambertian $ color 1.0 0.2 0.2
+      green = mkLambertian $ color 0.2 1.0 0.2
+      blue = mkLambertian $ color 0.2 0.2 1.0
+      orange = mkLambertian $ color 1.0 0.5 0.0
+      teal = mkLambertian $ color 0.2 0.8 0.8
+
+      left = quad (V3 (-3) (-2) 5) (V3 0 0 (-4)) (V3 0 4 0) red
+      back   = quad (V3 (-2) (-2) 0) (V3 4 0 0) (V3 0 4 0) green
+      right  = quad (V3 3 (-2) 1) (V3 0 0 4) (V3 0 4 0) blue
+      upper  = quad (V3 (-2) 3 1) (V3 4 0 0) (V3 0 0 4) orange
+      lower  = quad (V3 (-2) (-3) 5) (V3 4 0 0) (V3 0 0 (-4)) teal
+  in [left, back, right, upper, lower]
 
 randomSpheres :: Rand StdGen [Hittable]
 randomSpheres =

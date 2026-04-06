@@ -32,7 +32,7 @@ main = do
   cfg <- case parseArgs args of
     Left err -> putStrLn err >> exitFailure
     Right c -> return c
-  mScene <- case rcSceneIndex cfg of
+  mScene <- case cfg.rcSceneIndex of
     Just i -> return (Just (scenes !! i))
     Nothing -> selectScene
   case mScene of
@@ -43,7 +43,7 @@ main = do
       let cam =
             makeCamera
               scene.camera
-                { imageWidth = rcImageWidth cfg,
-                  samplesPerPixel = rcSamplesPerPixel cfg
+                { imageWidth = cfg.rcImageWidth,
+                  samplesPerPixel = cfg.rcSamplesPerPixel
                 }
-      render "./output/test.ppm" world cam (rcNumBounces cfg)
+      render "./output/test.ppm" world cam cfg.rcNumBounces
