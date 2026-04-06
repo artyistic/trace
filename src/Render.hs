@@ -14,6 +14,7 @@ import qualified Interval as I
 import Random
 import System.Random.SplitMix (SMGen, initSMGen, splitSMGen, nextWord64)
 import Material
+import HitRecord (HitRecord(HitRecord))
 
 -- | Render a scene to a PPM file.
 render :: FilePath -> [Hittable] -> Camera -> Int -> IO ()
@@ -28,8 +29,8 @@ render fpath world cam numBounces = do
   BL.writeFile fpath $ toPPM imageWidth imageHeight (concat rowResults)
   where
     !bvh        = bvhFromList world
-    imageWidth  = cfgImageWidth . camConfig $ cam
-    imageHeight = camImageHeight cam
+    imageWidth  = cam.config.imageWidth
+    imageHeight = cam.imageHeight
 
 -- | Render all pixels in a single row.
 renderRow :: Int -> BVHNode -> Camera -> Int -> Rand StdGen [Color]
@@ -37,7 +38,7 @@ renderRow y bvh cam numBounces =
   forM [0 .. imageWidth - 1] $ \x ->
     samplePixel x y bvh cam numBounces
   where
-    imageWidth = cfgImageWidth . camConfig $ cam
+    imageWidth = cam.config.imageWidth
 
 -- | Sample a pixel at (x, y) by averaging multiple random rays.
 samplePixel :: Int -> Int -> BVHNode -> Camera -> Int -> Rand StdGen Color
@@ -46,14 +47,14 @@ samplePixel x y bvh cam numBounces = do
   colors  <- traverse (sampleRay x y bvh cam numBounces defocusAngle) offsets
   return . gammaCorrect . averageColor $ colors
   where
-    samplesPerPixel = cfgSamplesPerPixel . camConfig $ cam
-    defocusAngle    = cfgDefocusAngle    . camConfig $ cam
+    samplesPerPixel = cam.config.samplesPerPixel
+    defocusAngle    = cam.config.defocusAngle
 
 -- | Shoot one ray through pixel (x, y) with a random sub-pixel offset.
 sampleRay :: Int -> Int -> BVHNode -> Camera -> Int -> Double -> V3 -> Rand StdGen Color
 sampleRay x y bvh cam numBounces defocusAngle offset = do
   origin <- if defocusAngle <= 0
-              then pure (camCenter cam)
+              then pure cam.center
               else sampleDefocusDisk cam
   ray    <- shootRay origin x y offset cam
   rayColor ray bvh numBounces
@@ -69,15 +70,15 @@ shootRay origin x y (V3 offsetX offsetY _) cam = do
 -- | World-space position of a (possibly fractional) pixel coordinate.
 pixelCenter :: Double -> Double -> Camera -> V3
 pixelCenter x y cam =
-  camPixel00Loc cam <+> camPixelDu cam .^ x <+> camPixelDv cam .^ y
+  cam.pixel00Loc <+> cam.pixelDu .^ x <+> cam.pixelDv .^ y
 
 -- | Sample a random point on the defocus disk.
 sampleDefocusDisk :: Camera -> Rand StdGen V3
 sampleDefocusDisk cam = do
   (V3 px py _) <- getRandomInUnitDisk
-  return $ camCenter cam
-        <+> camDefocusDiskU cam .^ px
-        <+> camDefocusDiskV cam .^ py
+  return $ cam.center
+        <+> cam.defocusDiskU .^ px
+        <+> cam.defocusDiskV .^ py
 
 -- | Trace a ray through the scene, returning its color.
 {-# INLINE rayColor #-}
@@ -86,8 +87,9 @@ rayColor _ _ 0 = pure $ color 0 0 0
 rayColor r@(Ray _ direction _) bvh depth =
   maybe (pure background) bounceRay (hitBVH bvh r (I.Interval 0.001 (1 / 0)))
   where
+    bounceRay :: (HitRecord, Material) -> Rand StdGen Color
     bounceRay (hitRec, mat) = do
-      result <- scatter mat r hitRec
+      result <- mat.scatter r hitRec
       maybe (pure $ color 0 0 0) continueTrace result
 
     continueTrace (attenuation, scattered) =

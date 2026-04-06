@@ -55,6 +55,13 @@ extra-doc-files: CHANGELOG.md
 common warnings
   ghc-options: -Wall -Wunused-packages
 
+-- common extensions
+--   default-extensions:
+--     DuplicateRecordFields
+--     -- NoFieldSelectors
+--     OverloadedRecordDot
+--     RecordWildCards
+
 executable tracerays
   -- Import common warning flags.
   import:           warnings
@@ -77,15 +84,22 @@ executable tracerays
   -- Directories containing source files.
   hs-source-dirs:   app
 
+  default-extensions:
+    DuplicateRecordFields
+    -- NoFieldSelectors
+    OverloadedRecordDot
+    RecordWildCards
+
   -- Base language which the package is written in.
   default-language: Haskell2010
   ghc-options:      -O2 -threaded -rtsopts
 
 library tracerays-lib
-  hs-source-dirs:   src
+  hs-source-dirs:     src
   default-extensions:
-    OverloadedRecordDot
     DuplicateRecordFields
+    -- NoFieldSelectors
+    OverloadedRecordDot
     RecordWildCards
 
   exposed-modules:
@@ -103,8 +117,8 @@ library tracerays-lib
     Random
     Render
     Scenes
-    Shapes.Sphere
     Shapes.Quad
+    Shapes.Sphere
     Texture
     Volumes.ConstantMedium
 
@@ -125,7 +139,7 @@ library tracerays-lib
     , vector
     , vector-algorithms
 
-  default-language: Haskell2010
+  default-language:   Haskell2010
 
 test-suite tracerays-test
   type:             exitcode-stdio-1.0

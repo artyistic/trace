@@ -15,9 +15,9 @@ import Data.Ord (comparing)
 
 -- An AABB (Axis-Aligned Bounding Box) is three intervals on xyz planes
 data AABB = AABB
-  { aabbX :: !Interval,
-    aabbY :: !Interval,
-    aabbZ :: !Interval
+  { x :: !Interval,
+    y :: !Interval,
+    z :: !Interval
   }
   deriving Show
 
@@ -52,20 +52,20 @@ collision AABB{..} (Ray rO rD _) (Interval tMin tMax) =
       (!rOx, !rOy, !rOz) = toXYZ rO
 
       !invDx = 1.0 / rDx
-      !tx0   = (aabbX.minVal - rOx) * invDx
-      !tx1   = (aabbX.maxVal - rOx) * invDx
+      !tx0   = (x.minVal - rOx) * invDx
+      !tx1   = (x.maxVal - rOx) * invDx
       !tMin1 = max tMin (min tx0 tx1)
       !tMax1 = min tMax (max tx0 tx1)
 
       !invDy = 1.0 / rDy
-      !ty0   = (aabbY.minVal - rOy) * invDy
-      !ty1   = (aabbY.maxVal - rOy) * invDy
+      !ty0   = (y.minVal - rOy) * invDy
+      !ty1   = (y.maxVal - rOy) * invDy
       !tMin2 = max tMin1 (min ty0 ty1)
       !tMax2 = min tMax1 (max ty0 ty1)
 
       !invDz = 1.0 / rDz
-      !tz0   = (aabbZ.minVal - rOz) * invDz
-      !tz1   = (aabbZ.maxVal - rOz) * invDz
+      !tz0   = (z.minVal - rOz) * invDz
+      !tz1   = (z.maxVal - rOz) * invDz
       !tMin3 = max tMin2 (min tz0 tz1)
       !tMax3 = min tMax2 (max tz0 tz1)
 
@@ -74,4 +74,4 @@ collision AABB{..} (Ray rO rD _) (Interval tMin tMax) =
 compareOnLongestAxis :: AABB -> (AABB -> AABB -> Ordering)
 compareOnLongestAxis (AABB x y z) = compare `on` accessor
   where
-    accessor = snd $ maximumBy (comparing fst) [(size x, (.aabbX)), (size y, (.aabbY)), (size z, (.aabbZ))]
+    accessor = snd $ maximumBy (comparing fst) [(size x, (.x)), (size y, (.y)), (size z, (.z))]

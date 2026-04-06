@@ -39,11 +39,11 @@ main = do
     Nothing -> putStrLn "Goodbye." >> exitSuccess
     Just scene -> do
       gen <- getStdGen
-      world <- evalRandT (sceneWorld scene) gen
+      world <- evalRandT scene.world gen
       let cam =
             makeCamera
-              (sceneCamera scene)
-                { cfgImageWidth = rcImageWidth cfg,
-                  cfgSamplesPerPixel = rcSamplesPerPixel cfg
+              scene.camera
+                { imageWidth = rcImageWidth cfg,
+                  samplesPerPixel = rcSamplesPerPixel cfg
                 }
       render "./output/test.ppm" world cam (rcNumBounces cfg)

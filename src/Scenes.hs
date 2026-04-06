@@ -1,10 +1,4 @@
-{-# LANGUAGE BangPatterns #-}
-module Scenes
-  ( Scene (..),
-    scenes,
-    selectScene
-  )
-where
+module Scenes where
 
 import Control.Monad.Morph (hoist, generalize)
 import Camera
@@ -22,10 +16,10 @@ import Texture (checkerTex, checkerTexFromColor, imageTexture)
 import Control.Monad.Identity
 
 data Scene = Scene
-  { sceneName        :: String,
-    sceneDescription :: String,
-    sceneWorld       :: RandT StdGen IO [Hittable],
-    sceneCamera      :: CameraConfig
+  { name        :: String,
+    description :: String,
+    world       :: RandT StdGen IO [Hittable],
+    camera      :: CameraConfig
   }
 
 scenes :: [Scene]
@@ -35,45 +29,45 @@ scenes =
       "Random spheres with motion blur and depth of field"
       bigWorld
       defaultCameraConfig
-        { cfgAspectRatio     = 16.0 / 9.0,
-          cfgImageWidth      = 400,
-          cfgSamplesPerPixel = 100,
-          cfgVfov            = 20,
-          cfgLookFrom        = V3 13 2 3,
-          cfgLookAt          = V3 0 0 0,
-          cfgVup             = V3 0 1 0,
-          cfgDefocusAngle    = 0.6,
-          cfgFocusDistance   = 10.0
+        { aspectRatio     = 16.0 / 9.0,
+          imageWidth      = 400,
+          samplesPerPixel = 100,
+          vfov            = 20,
+          lookFrom        = V3 13 2 3,
+          lookAt          = V3 0 0 0,
+          vup             = V3 0 1 0,
+          defocusAngle    = 0.6,
+          focusDistance   = 10.0
         },
     Scene
       "dielectric"
       "Glass bubble and metal sphere test"
       (pure dielectricTestWorld)
       defaultCameraConfig
-        { cfgAspectRatio     = 16.0 / 9.0,
-          cfgImageWidth      = 400,
-          cfgSamplesPerPixel = 100,
-          cfgVfov            = 20,
-          cfgLookFrom        = V3 (-2) 2 1,
-          cfgLookAt          = V3 0 0 (-1),
-          cfgVup             = V3 0 1 0,
-          cfgDefocusAngle    = 10.0,
-          cfgFocusDistance   = 3.4
+        { aspectRatio     = 16.0 / 9.0,
+          imageWidth      = 400,
+          samplesPerPixel = 100,
+          vfov            = 20,
+          lookFrom        = V3 (-2) 2 1,
+          lookAt          = V3 0 0 (-1),
+          vup             = V3 0 1 0,
+          defocusAngle    = 10.0,
+          focusDistance   = 3.4
         },
     Scene
       "vfov-test"
       "Wide angle FOV test with two colored spheres"
       (pure vfovTestWorld)
       defaultCameraConfig
-        { cfgAspectRatio     = 16.0 / 9.0,
-          cfgImageWidth      = 400,
-          cfgSamplesPerPixel = 100,
-          cfgVfov            = 90,
-          cfgLookFrom        = V3 0 0 0,
-          cfgLookAt          = V3 0 0 (-1),
-          cfgVup             = V3 0 1 0,
-          cfgDefocusAngle    = 0,
-          cfgFocusDistance   = 10.0
+        { aspectRatio     = 16.0 / 9.0,
+          imageWidth      = 400,
+          samplesPerPixel = 100,
+          vfov            = 90,
+          lookFrom        = V3 0 0 0,
+          lookAt          = V3 0 0 (-1),
+          vup             = V3 0 1 0,
+          defocusAngle    = 0,
+          focusDistance   = 10.0
         }
   ]
 
@@ -81,11 +75,11 @@ selectScene :: IO (Maybe Scene)
 selectScene = do
   putStrLn "Available scenes:"
   mapM_
-    (\(i, s) ->
+    (\(i, scene) ->
         putStrLn $
-          "  " ++ show i ++ ": " ++ sceneName s
+          "  " ++ show i ++ ": " ++ scene.name
             ++ " — "
-            ++ sceneDescription s
+            ++ scene.description
     )
     (zip [(0 :: Int) ..] scenes)
   putStrLn "  q: quit"
