@@ -25,7 +25,8 @@ data CameraConfig = CameraConfig
     vfov            :: Double, -- ^ Vertical field of view in degrees
     lookFrom        :: V3,
     lookAt          :: V3,
-    vup             :: V3     -- ^ "Up" direction for camera orientation
+    vup             :: V3,     -- ^ "Up" direction for camera orientation
+    background      :: V3 -> Color 
   }
 
 defaultCameraConfig :: CameraConfig
@@ -38,7 +39,8 @@ defaultCameraConfig = CameraConfig
     vfov            = 90.0,
     lookFrom        = V3 0 0 0,
     lookAt          = V3 0 0 (-1),
-    vup             = V3 0 1 0
+    vup             = V3 0 1 0,
+    background      = skyBox
   }
 
 -- | Fully initialised camera. Construct with 'makeCamera'.
@@ -51,7 +53,8 @@ data Camera = Camera
     pixelDv      :: V3,
     pixel00Loc   :: V3,
     defocusDiskU :: V3,
-    defocusDiskV :: V3
+    defocusDiskV :: V3,
+    background   :: V3 -> Color
   }
 
 -- | Build a 'Camera' from a 'CameraConfig', computing all derived fields.
@@ -64,7 +67,9 @@ makeCamera cfg@CameraConfig{..} = Camera
     pixelDv      = pixelDv,
     pixel00Loc   = pixel00Loc,
     defocusDiskU = defocusDiskU,
-    defocusDiskV = defocusDiskV
+    defocusDiskV = defocusDiskV,
+    background   = background
+
   }
   where
     imageHeight = max 1 (floor $ fromIntegral imageWidth / aspectRatio)

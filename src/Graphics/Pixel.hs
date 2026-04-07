@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 
-module Graphics.Pixel (Color, color, colorFromV3, averageColor, colorToRGB, gammaCorrect, tonemap) where
+module Graphics.Pixel where
 
 import Graphics.Vec3
 import Data.Word (Word8)
@@ -11,6 +11,12 @@ import Control.Parallel.Strategies (NFData)
 -- Color will be clamped at final rendering for ppm
 newtype Color = Color { rgb :: V3 }
   deriving (Eq, Show, Vec3, NFData)
+
+-- instance Semigroup Color where
+--   (<>) = (<+>)
+
+-- instance Monoid Color where
+--   mempty = color 0 0 0 
 
 -- Smart constructor that clamps values
 color :: Double -> Double -> Double -> Color
@@ -42,3 +48,11 @@ colorToRGB (Color (V3 r g b)) =
 gammaCorrect :: Color -> Color
 gammaCorrect = transform (\x -> if x > 0 then sqrt x else x)
 
+
+skyBox :: V3 -> Color
+skyBox direction =
+  white .^ (1 - a) <+> lightBlue .^ a
+  where
+    a = 0.5 * (toY (normalize direction) + 1)
+    white     = color 1.0 1.0 1.0
+    lightBlue = color 0.5 0.7 1.0

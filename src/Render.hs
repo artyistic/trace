@@ -57,7 +57,7 @@ sampleRay x y bvh cam numBounces defocusAngle offset = do
               then pure cam.center
               else sampleDefocusDisk cam
   ray    <- shootRay origin x y offset cam
-  rayColor ray bvh numBounces
+  rayColor ray bvh cam.background numBounces
 
 -- | Construct a ray from an origin through pixel (x, y) with a sub-pixel offset.
 shootRay :: V3 -> Int -> Int -> V3 -> Camera -> Rand StdGen Ray
@@ -82,25 +82,18 @@ sampleDefocusDisk cam = do
 
 -- | Trace a ray through the scene, returning its color.
 {-# INLINE rayColor #-}
-rayColor :: Ray -> BVHNode -> Int -> Rand StdGen Color
-rayColor _ _ 0 = pure $ color 0 0 0
-rayColor r@(Ray _ direction _) bvh depth =
-  maybe (pure background) bounceRay (hitBVH bvh r (I.Interval 0.001 (1 / 0)))
+rayColor :: Ray -> BVHNode -> (V3 -> Color) -> Int -> Rand StdGen Color
+rayColor _ _ _ 0 = pure $ color 0 0 0
+rayColor r@(Ray _ direction _) bvh background depth =
+  maybe (pure $ background direction) bounceRay (hitBVH bvh r (I.Interval 0.001 (1 / 0)))
   where
     bounceRay :: (HitRecord, Material) -> Rand StdGen Color
-    bounceRay (hitRec, mat) = do
+    bounceRay (hitRec@(HitRecord p _ _ _ u v), mat) = do
       result <- mat.scatter r hitRec
-      maybe (pure $ color 0 0 0) continueTrace result
+      maybe (pure $ mat.emit u v p) continueTrace result
 
     continueTrace (attenuation, scattered) =
-      (attenuation `componentMul`) <$> rayColor scattered bvh (depth - 1)
-
-    background =
-      let a = 0.5 * (toY (normalize direction) + 1)
-      in white .^ (1 - a) <+> lightBlue .^ a
-
-    white     = color 1.0 1.0 1.0
-    lightBlue = color 0.5 0.7 1.0
+      (attenuation `componentMul`) <$> rayColor scattered bvh background (depth - 1)
 
 -- | Serialize pixels to PPM format using ByteString.Builder.
 toPPM :: Int -> Int -> [Color] -> BL.ByteString
@@ -111,8 +104,6 @@ toPPM w h pixels = toLazyByteString $
              <> intDec w <> string7 " " <> intDec h <> string7 "\n"
              <> string7 "255\n"
     pixelLine c = colorToBuilder c <> string7 "\n"
-
-colorToBuilder :: Color -> Builder
-colorToBuilder c =
-  let (r, g, b) = colorToRGB c
-  in intDec r <> string7 " " <> intDec g <> string7 " " <> intDec b
+    colorToBuilder c =
+      let (r, g, b) = colorToRGB c
+      in intDec r <> string7 " " <> intDec g <> string7 " " <> intDec b
