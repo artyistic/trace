@@ -33,7 +33,7 @@ render fpath world cam numBounces = do
     imageHeight = cam.imageHeight
 
 -- | Render all pixels in a single row.
-renderRow :: Int -> BVHNode -> Camera -> Int -> Rand StdGen [Color]
+renderRow :: Int -> Hittable -> Camera -> Int -> Rand StdGen [Color]
 renderRow y bvh cam numBounces =
   forM [0 .. imageWidth - 1] $ \x ->
     samplePixel x y bvh cam numBounces
@@ -41,7 +41,7 @@ renderRow y bvh cam numBounces =
     imageWidth = cam.config.imageWidth
 
 -- | Sample a pixel at (x, y) by averaging multiple random rays.
-samplePixel :: Int -> Int -> BVHNode -> Camera -> Int -> Rand StdGen Color
+samplePixel :: Int -> Int -> Hittable -> Camera -> Int -> Rand StdGen Color
 samplePixel x y bvh cam numBounces = do
   offsets <- replicateM samplesPerPixel getSampleSquare
   colors  <- traverse (sampleRay x y bvh cam numBounces defocusAngle) offsets
@@ -51,7 +51,7 @@ samplePixel x y bvh cam numBounces = do
     defocusAngle    = cam.config.defocusAngle
 
 -- | Shoot one ray through pixel (x, y) with a random sub-pixel offset.
-sampleRay :: Int -> Int -> BVHNode -> Camera -> Int -> Double -> V3 -> Rand StdGen Color
+sampleRay :: Int -> Int -> Hittable -> Camera -> Int -> Double -> V3 -> Rand StdGen Color
 sampleRay x y bvh cam numBounces defocusAngle offset = do
   origin <- if defocusAngle <= 0
               then pure cam.center
@@ -82,10 +82,10 @@ sampleDefocusDisk cam = do
 
 -- | Trace a ray through the scene, returning its color.
 {-# INLINE rayColor #-}
-rayColor :: Ray -> BVHNode -> (V3 -> Color) -> Int -> Rand StdGen Color
+rayColor :: Ray -> Hittable -> (V3 -> Color) -> Int -> Rand StdGen Color
 rayColor _ _ _ 0 = pure $ color 0 0 0
 rayColor r@(Ray _ direction _) bvh background depth =
-  maybe (pure $ background direction) bounceRay (hitBVH bvh r (I.Interval 0.001 (1 / 0)))
+  maybe (pure $ background direction) bounceRay (bvh.hit r (I.Interval 0.001 (1 / 0)))
   where
     bounceRay :: (HitRecord, Material) -> Rand StdGen Color
     bounceRay (hitRec@(HitRecord p _ _ _ u v), mat) = do
