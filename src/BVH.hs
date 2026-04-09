@@ -3,19 +3,14 @@ module BVH where
 import AABB
 import Control.Applicative ((<|>))
 import Control.Monad.Random
-import Control.Monad.ST (runST)
-import Control.Monad.Trans.Maybe
 import Data.Function
 import Data.List (sortBy)
-import qualified Data.Vector as V
-import qualified Data.Vector.Algorithms.Intro as Intro
 import Graphics (Ray)
 import HitRecord
 import Hittable
 import Interval
 import Material
-
-type Hittables = (V.Vector Hittable)
+import Data.Foldable
 
 data BVHNode
   = InternalNode !AABB !BVHNode !BVHNode
@@ -28,9 +23,6 @@ instance Show BVHNode where
     LeafNode _ -> "Leaf"
     InternalNode b l r -> "(" ++ "Internal" ++ show l ++ show r ++ ")"
 
-buildBoundingBox :: Hittables -> AABB
-buildBoundingBox = V.foldl' (\acc h -> aabbFromBoxes acc h.bbox) aabbEmpty
-
 bvhFromList :: [Hittable] -> Hittable
 bvhFromList l =
   Hittable
@@ -38,31 +30,25 @@ bvhFromList l =
       bbox = nodeBBox node
     }
   where
-    node = fromHittables $ V.fromList l
+    node = fromHittables l
 
     nodeBBox :: BVHNode -> AABB
     nodeBBox (InternalNode box _ _) = box
     nodeBBox (LeafNode h) = h.bbox
     nodeBBox Empty = aabbEmpty
 
-fromHittables :: Hittables -> BVHNode
-fromHittables l = case V.length l of
-  0 -> Empty
-  1 -> LeafNode (l V.! 0)
-  _ -> InternalNode bvhAABB (fromHittables fstHalf) (fromHittables sndHalf)
-    where
-      sortedHittables = sortVectorBy comparator l
-      midPt = V.length l `div` 2
-      (fstHalf, sndHalf) = V.splitAt midPt sortedHittables
+fromHittables :: [Hittable] -> BVHNode
+fromHittables []  = Empty
+fromHittables [x] = LeafNode x
+fromHittables xs  = InternalNode bvhAABB (fromHittables fstHalf) (fromHittables sndHalf)
   where
-    bvhAABB = buildBoundingBox l
-    comparator = compareOnLongestAxis bvhAABB `on` (.bbox)
+    bvhAABB              = buildBoundingBox xs
+    sorted               = sortBy (compareOnLongestAxis bvhAABB `on` (.bbox)) xs
+    midPt                = length xs `div` 2
+    (fstHalf, sndHalf)   = splitAt midPt sorted
 
-sortVectorBy :: (a -> a -> Ordering) -> V.Vector a -> V.Vector a
-sortVectorBy cmp vec = runST $ do
-  mvec <- V.thaw vec -- Make a mutable copy
-  Intro.sortBy cmp mvec -- In-place sort
-  V.freeze mvec -- Return immutable sorted vector
+buildBoundingBox :: [Hittable] -> AABB
+buildBoundingBox = foldl' (\acc h -> aabbFromBoxes acc h.bbox) aabbEmpty
 
 {-# INLINE hitBVH #-}
 hitBVH :: BVHNode -> Ray -> Interval -> Maybe (HitRecord, Material)
