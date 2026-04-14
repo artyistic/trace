@@ -122,7 +122,7 @@ class Vec3 v where
     where
       (_, _, z') = toXYZ v
 
-data V3 = V3 !Double !Double !Double
+data V3 = V3 {x :: !Double, y :: !Double, z :: !Double}
   deriving (Eq, Show)
 
 instance NFData V3 where

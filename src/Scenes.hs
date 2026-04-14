@@ -218,7 +218,9 @@ cornellBoxWorld =
       a = quad (V3 0 0 0) (V3 555 0 0) (V3 0 0 555) white
       b = quad (V3 555 555 555) (V3 (-555) 0 0) (V3 0 0 (-555)) white
       c = quad (V3 0 0 555) (V3 555 0 0) (V3 0 555 0) white
-   in [left, right, light, a, b, c]
+      leftBox = box (V3 130 0 65) (V3 295 165 230) white
+      rightBox = box (V3 265 0 295) (V3 430 330 460) white
+   in [left, right, light, a, b, c, leftBox, rightBox]
 
 randomSpheres :: Rand StdGen [Hittable]
 randomSpheres =

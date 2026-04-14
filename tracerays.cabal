@@ -106,6 +106,7 @@ library tracerays-lib
     HitRecord
     Hittable
     Interval
+    Instances.Translation
     Material
     Random
     Render

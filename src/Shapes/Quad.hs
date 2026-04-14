@@ -7,6 +7,7 @@ import HitRecord (genHitRecord)
 import Hittable
 import Interval (Interval (Interval), contains)
 import Material
+import BVH (bvhFromList)
 
 -- |
 -- Quad is defined by
@@ -48,3 +49,24 @@ quadHit pq u v unitN d w mat r@(Ray orig dir time) i = do
   guard (isUnit beta)
 
   return (hr, mat)
+
+box :: V3 -> V3 -> Material -> Hittable
+box va@(V3 ax ay az) vb@(V3 bx by bz) m = Hittable {
+  hit = b.hit,
+  bbox = b.bbox
+}
+  where
+    minPt = zipV min va vb
+    maxPt = zipV max va vb
+    dx = V3 (maxPt.x - minPt.x) 0 0
+    dy = V3 0 (maxPt.y - minPt.y) 0
+    dz = V3 0 0 (maxPt.z - minPt.z)
+    sides = 
+      [ quad (V3 minPt.x minPt.y maxPt.z)  dx  dy m
+      , quad (V3 maxPt.x minPt.y maxPt.z) (invert dz)  dy m
+      , quad (V3 maxPt.x minPt.y minPt.z) (invert dx)  dy m
+      , quad (V3 minPt.x minPt.y minPt.z)  dz  dy m
+      , quad (V3 minPt.x maxPt.y maxPt.z)  dx (invert dz) m
+      , quad (V3 minPt.x minPt.y minPt.z)  dx  dz m
+      ]
+    b = bvhFromList sides
