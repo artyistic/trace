@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Shapes.Quad where
 
 import AABB (aabbFromBoxes, aabbFromPoints)
@@ -69,4 +70,4 @@ box va@(V3 ax ay az) vb@(V3 bx by bz) m = Hittable {
       , quad (V3 minPt.x maxPt.y maxPt.z)  dx (invert dz) m
       , quad (V3 minPt.x minPt.y minPt.z)  dx  dz m
       ]
-    b = bvhFromList sides
+    !b = bvhFromList sides

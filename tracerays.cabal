@@ -107,6 +107,7 @@ library tracerays-lib
     Hittable
     Interval
     Instances.Translation
+    Instances.Rotation
     Material
     Random
     Render

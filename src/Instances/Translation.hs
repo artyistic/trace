@@ -12,7 +12,7 @@ translate primitive v = Hittable
     -- all this is doing is moving ray by offset, then using the hit
     -- function by the primitive and correcting the intersection point by offset
     hit = \(Ray orig dir t) i ->
-      first (\a -> a { p = a.p <+> v })
+      first (\hr -> hr { p = hr.p <+> v })
         <$> primitive.hit (Ray (orig <-> v) dir t) i
   , bbox = AABB.offset primitive.bbox v
   }

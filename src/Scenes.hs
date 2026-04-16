@@ -15,6 +15,8 @@ import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 import Texture (checkerTex, checkerTexFromColor, imageTexture)
 import Volumes.ConstantMedium (constantMedium)
+import Instances.Translation (translate)
+import Instances.Rotation (rotateY)
 
 data Scene = Scene
   { name :: String,
@@ -218,6 +220,10 @@ cornellBoxWorld =
       a = quad (V3 0 0 0) (V3 555 0 0) (V3 0 0 555) white
       b = quad (V3 555 555 555) (V3 (-555) 0 0) (V3 0 0 (-555)) white
       c = quad (V3 0 0 555) (V3 555 0 0) (V3 0 555 0) white
+
+
+      -- leftBox = translate (rotateY (box (V3 0 0 0) (V3 165 330 165) white) 15) (V3 265 0 295)
+      -- rightBox = translate (rotateY (box (V3 0 0 0) (V3 165 165 165) white) (-18)) (V3 130 0 65)
       leftBox = box (V3 130 0 65) (V3 295 165 230) white
       rightBox = box (V3 265 0 295) (V3 430 330 460) white
    in [left, right, light, a, b, c, leftBox, rightBox]
