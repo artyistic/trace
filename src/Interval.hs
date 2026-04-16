@@ -37,6 +37,9 @@ expands :: Interval -> Double -> Interval
 expands (Interval lo hi) delta = Interval (lo - padding) (hi + padding)
   where padding = delta / 2
 
+offset :: Interval -> Double -> Interval
+offset (Interval minVal maxVal) d = Interval (minVal + d) (maxVal + d)
+
 -- | Create the interval tightly enclosing two input intervals
 combineIntervals :: Interval -> Interval -> Interval
 combineIntervals (Interval aMin aMax) (Interval bMin bMax) =

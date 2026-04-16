@@ -29,6 +29,9 @@ pad :: Interval -> Interval
 pad i = if size i < delta then expands i delta else i
   where delta = 0.0001
 
+offset :: AABB -> V3 -> AABB
+offset (AABB x y z) v = AABB (Interval.offset x v.x) (Interval.offset y v.y) (Interval.offset z v.z)
+
 aabbFromInterval :: Interval -> Interval -> Interval -> AABB
 aabbFromInterval x y z = AABB (pad x) (pad y) (pad z)
   where

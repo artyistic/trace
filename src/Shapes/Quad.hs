@@ -40,13 +40,13 @@ quadHit pq u v unitN d w mat r@(Ray orig dir time) i = do
       planarHitPt = intersection <-> pq
       alpha = w .* (planarHitPt >< v)
       beta = w .* (u >< planarHitPt)
-      isUnit = contains $ Interval 0 1
+      isNormalized = contains $ Interval 0 1
       hr = genHitRecord r intersection t unitN alpha beta
 
   guard (abs denom > 1e-8)
   guard (contains i t)
-  guard (isUnit alpha)
-  guard (isUnit beta)
+  guard (isNormalized alpha)
+  guard (isNormalized beta)
 
   return (hr, mat)
 
