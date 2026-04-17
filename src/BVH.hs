@@ -25,13 +25,12 @@ instance Show BVHNode where
 
 bvhFromList :: [Hittable] -> Hittable
 bvhFromList l =
-  Hittable
+  let !node = fromHittables l
+  in Hittable
     { hit = hitBVH node,
       bbox = nodeBBox node
     }
   where
-    node = fromHittables l
-
     nodeBBox :: BVHNode -> AABB
     nodeBBox (InternalNode box _ _) = box
     nodeBBox (LeafNode h) = h.bbox

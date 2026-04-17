@@ -10,7 +10,9 @@ import Interval
 
 rotateY :: Hittable -> Double -> Hittable
 rotateY primitive deg =
-  Hittable
+  let !b = fromPoints $ map rotInv (corners primitive.bbox) 
+
+  in Hittable
     { hit = \r i -> do
         let
           rotatedRay = Ray (rot r.orig) (rot r.dir) r.time
@@ -18,7 +20,7 @@ rotateY primitive deg =
         res <- primitive.hit rotatedRay i
 
         Just $ first (\hr -> hr {p = rotInv hr.p, normal = rotInv hr.normal}) res,
-      bbox = fromPoints $ map rotInv (corners primitive.bbox) 
+      bbox = b
 
     }
   where

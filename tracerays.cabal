@@ -94,6 +94,7 @@ library tracerays-lib
     NoFieldSelectors
     OverloadedRecordDot
     RecordWildCards
+    BangPatterns
 
   exposed-modules:
     AABB

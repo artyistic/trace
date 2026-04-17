@@ -26,5 +26,5 @@ type Hittable where
 -}
 data Hittable = Hittable {
   hit :: HitFun,
-  bbox :: AABB
+  bbox :: !AABB
 }
