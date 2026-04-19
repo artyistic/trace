@@ -7,6 +7,7 @@ import Graphics
 import HitRecord
 import Random
 import Texture
+import System.Random.Stateful (IOGenM, Uniform (..), UniformRange (..))
 
 data Material = Material
   { {-
@@ -18,7 +19,7 @@ data Material = Material
         color known as attenuation
         scattered ray
     -}
-    scatter :: Ray -> HitRecord -> Rand StdGen (Maybe (Color, Ray)),
+    scatter :: IOGenM StdGen -> Ray -> HitRecord -> IO (Maybe (Color, Ray)),
     emit :: Double -> Double -> V3 -> Color
   }
 
@@ -29,14 +30,14 @@ emitBlack _ _ _ = color 0 0 0
 mkDiffuseLightWithTex :: Texture -> Material
 mkDiffuseLightWithTex tex =
   Material {
-    scatter = const $ const $ pure Nothing,
+    scatter = const $ const $ pure $ pure Nothing,
     emit = tex.value
   }
 
 mkDiffuseLight :: Color -> Material
 mkDiffuseLight c =
   Material {
-    scatter = const $ const $ pure Nothing,
+    scatter = const $ const $ pure $ pure Nothing,
     emit = const $ const $ const c
   }
 
@@ -46,17 +47,17 @@ mkLambertian c = mkLambertianWithTex $ solidTex c
 mkLambertianWithTex :: Texture -> Material
 mkLambertianWithTex tex =
   Material
-    { scatter = \(Ray _ _ inTime) hR@HitRecord {..} -> do
-        d <- (\a -> if nearZero a then normal else a) <$> getRandomUnitVec
+    { scatter = \gen (Ray _ _ inTime) hR@HitRecord {..} -> do
+        d <- (\a -> if nearZero a then normal else a) <$> getRandomUnitVec gen
         return $ Just (tex.value u v p, Ray p (d <+> normal) inTime),
-      emit = tex.value
+      emit = emitBlack
     }
 
 mkMetal :: Color -> Double -> Material
 mkMetal c fuzz =
   Material
-    { scatter = \r@(Ray _ inDirection inTime) hR@HitRecord {..} -> do
-        randomVec <- getRandomUnitVec
+    { scatter = \gen r@(Ray _ inDirection inTime) hR@HitRecord {..} -> do
+        randomVec <- getRandomUnitVec gen
         let reflectedRay = reflect inDirection normal
             fuzzedReflected = normalize reflectedRay <+> randomVec .^ fuzz
             scattered@(Ray _ scatteredDir _adobeDctVersion) = Ray p fuzzedReflected inTime
@@ -68,7 +69,7 @@ mkMetal c fuzz =
 mkDielectric :: Double -> Material
 mkDielectric refractiveIndex =
   Material
-    { scatter = \r@(Ray _ inDirection inTime) hR@HitRecord {..} -> do
+    { scatter = \gen r@(Ray _ inDirection inTime) hR@HitRecord {..} -> do
         let attenuation = color 1.0 1.0 1.0
             ri =
               if frontFacing
@@ -84,7 +85,7 @@ mkDielectric refractiveIndex =
             schlickReflectance cosine r =
               let r0 = (1 - r) / (1 + r) * (1 - r) / (1 + r)
                in r0 + (1 - r0) * ((1 - cosine) ** 5)
-        randomDouble <- getRandom :: Rand StdGen Double
+        randomDouble <- uniformRM (0, 1) gen
         if cannotRefract || schlickReflectance cosTheta ri > randomDouble -- logic for total internal refraction
           then pure $ Just (attenuation, Ray p reflectedRay inTime)
           else pure $ Just (attenuation, Ray p refractedRay inTime),
@@ -92,10 +93,10 @@ mkDielectric refractiveIndex =
     }
 
 mkIsotropic :: Color -> Material
-mkIsotropic c =
+mkIsotropic c = 
   Material
-    { scatter = \r hR@HitRecord {..} -> do
-        dir <- getRandomUnitVec
+    { scatter = \gen r hR@HitRecord {..} -> do
+        dir <- getRandomUnitVec gen
         return $ Just (c, Ray p dir t),
       emit = emitBlack
     }

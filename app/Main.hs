@@ -7,6 +7,8 @@ import Scenes
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 import Text.Read (readMaybe)
+import System.Random.Stateful (newIOGenM)
+
 
 data RenderConfig = RenderConfig
   { rcSceneIndex :: Maybe Int, -- Nothing = prompt user
@@ -37,13 +39,11 @@ main = do
     Nothing -> selectScene
   case mScene of
     Nothing -> putStrLn "Goodbye." >> exitSuccess
-    Just scene -> do
-      gen <- getStdGen
-      world <- evalRandT scene.world gen
+    Just scene -> 
       let cam =
             makeCamera
               scene.camera
                 { imageWidth = cfg.rcImageWidth,
                   samplesPerPixel = cfg.rcSamplesPerPixel
                 }
-      render "./output/test.ppm" world cam cfg.rcNumBounces
+      in getStdGen >>= newIOGenM >>= scene.build >>= render "./output/test.ppm" cam cfg.rcNumBounces

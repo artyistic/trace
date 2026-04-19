@@ -5,7 +5,7 @@ import Interval
 import HitRecord
 import Control.Monad (guard)
 import Graphics
-import Random (getRandomDouble, hashToFloat01)
+import Random (hashToFloat01)
 import Material
 import Control.Monad.Random
 

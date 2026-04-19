@@ -1,8 +1,6 @@
 module Scenes where
 
 import Camera
-import Control.Monad.Identity
-import Control.Monad.Morph (generalize, hoist)
 import Control.Monad.Random
 import Data.Maybe (catMaybes)
 import Graphics
@@ -17,11 +15,12 @@ import Texture (checkerTex, checkerTexFromColor, imageTexture)
 import Volumes.ConstantMedium (constantMedium)
 import Instances.Translation (translate)
 import Instances.Rotation (rotateY)
+import System.Random.Stateful (IOGenM, UniformRange (..), uniform)
 
 data Scene = Scene
   { name :: String,
     description :: String,
-    world :: RandT StdGen IO [Hittable],
+    build :: IOGenM StdGen -> IO [Hittable],
     camera :: CameraConfig
   }
 
@@ -45,7 +44,7 @@ scenes =
     Scene
       "dielectric"
       "Glass bubble and metal sphere test"
-      (pure dielectricTestWorld)
+      (const $ pure dielectricTestWorld)
       defaultCameraConfig
         { aspectRatio = 16.0 / 9.0,
           imageWidth = 400,
@@ -60,7 +59,7 @@ scenes =
     Scene
       "vfov-test"
       "Wide angle FOV test with two colored spheres"
-      (pure vfovTestWorld)
+      (const $ pure vfovTestWorld)
       defaultCameraConfig
         { aspectRatio = 16.0 / 9.0,
           imageWidth = 400,
@@ -75,7 +74,7 @@ scenes =
     Scene
       "quads-test"
       "five quads forming a boxish figure"
-      (pure quadsWorld)
+      (const $ pure quadsWorld)
       defaultCameraConfig
         { aspectRatio = 1.0,
           imageWidth = 400,
@@ -89,7 +88,7 @@ scenes =
     Scene
       "simple-light test"
       "quad light on the right of a ball"
-      (pure simpleLightsWorld)
+      (const $ pure simpleLightsWorld)
       defaultCameraConfig
         { aspectRatio = 16.0 / 9.0,
           imageWidth = 400,
@@ -104,7 +103,7 @@ scenes =
     Scene
       "cornell-box"
       "cornell box without objects inside box"
-      (pure cornellBoxWorld)
+      (const $ pure cornellBoxWorld)
       defaultCameraConfig
         { aspectRatio = 1.0,
           imageWidth = 600,
@@ -167,8 +166,8 @@ vfovTestWorld =
       right = stationarySphere (V3 r 0 (-1)) r matRight
    in [left, right]
 
-bigWorld :: RandT StdGen IO [Hittable]
-bigWorld = do
+bigWorld :: IOGenM StdGen -> IO [Hittable]
+bigWorld gen = do
   earthTex <- liftIO $ imageTexture "./texImages/earthmap.jpg"
   let checker = checkerTexFromColor 0.32 (color 0.2 0.3 0.1) (color 0.9 0.9 0.9)
       matGround = mkLambertianWithTex checker
@@ -180,7 +179,7 @@ bigWorld = do
       bigSphere1 = constantMedium (stationarySphere (V3 0 1 0) 1.0 matbS1) 1 (color 1 0 0) -- red sphere fog
       bigSphere2 = stationarySphere (V3 (-4) 1 0) 1.0 matbS2
       bigSphere3 = stationarySphere (V3 4 1 0) 1.0 matbS3
-  smallSpheres <- mapRandT (return . runIdentity) randomSpheres
+  smallSpheres <- randomSpheres gen
   pure $ [ground, bigSphere1, bigSphere2, bigSphere3] ++ smallSpheres
 
 quadsWorld :: [Hittable]
@@ -228,29 +227,29 @@ cornellBoxWorld =
       rightBox = box (V3 265 0 295) (V3 430 330 460) white
    in [left, right, light, a, b, c, leftBox, rightBox]
 
-randomSpheres :: Rand StdGen [Hittable]
-randomSpheres =
-  catMaybes <$> sequenceA [genSpheres a b | a <- [-11 .. 11], b <- [-11 .. 11]]
+randomSpheres :: IOGenM StdGen -> IO [Hittable]
+randomSpheres gen =
+  catMaybes <$> sequenceA [genSpheres a b gen| a <- [-11 .. 11], b <- [-11 .. 11]]
 
-genSpheres :: Int -> Int -> Rand StdGen (Maybe Hittable)
-genSpheres a b = do
-  offsetX <- getRandomDouble
-  offsetZ <- getRandomDouble
-  chooseMat <- getRandomDouble
+genSpheres :: Int -> Int -> IOGenM StdGen -> IO (Maybe Hittable)
+genSpheres a b gen = do
+  offsetX <- uniformRM (0, 1) gen
+  offsetZ <- uniformRM (0, 1) gen
+  chooseMat <- uniformRM (0, 1) gen
   let center = V3 (fromIntegral a + 0.9 * offsetX) 0.2 (fromIntegral b + 0.9 * offsetZ)
   if distance center (V3 4 0.2 0) <= 0.9
     then pure Nothing
-    else Just <$> mkSphere chooseMat center
+    else Just <$> mkSphere chooseMat center gen
   where
-    mkSphere :: Double -> V3 -> Rand StdGen Hittable
-    mkSphere chooseMat center
+    mkSphere :: Double -> V3 -> IOGenM StdGen -> IO Hittable
+    mkSphere chooseMat center gen
       | chooseMat < 0.8 = do
-          c <- colorFromV3 <$> getRandomVec 0 1
-          center2Dir <- flip (V3 0) 0 <$> getRandomR (0, 0.5)
+          c <- colorFromV3 <$> getRandomVec (0, 1) gen
+          center2Dir <- flip (V3 0) 0 <$> uniformRM (0, 0.5) gen
           return $ movingSphere center (center <+> center2Dir) 0.2 (mkLambertian c)
       | chooseMat < 0.95 = do
-          c <- colorFromV3 <$> getRandomVec 0.5 1
-          f <- getRandomR (0, 0.5) :: Rand StdGen Double
+          c <- colorFromV3 <$> getRandomVec (0.5, 1) gen
+          f <- uniformRM (0, 0.5) gen
           return $ stationarySphere center 0.2 (mkMetal c f)
       | otherwise =
           return $ stationarySphere center 0.2 (mkDielectric 1.5)

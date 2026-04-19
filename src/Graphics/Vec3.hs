@@ -128,6 +128,19 @@ data V3 = V3 {x :: !Double, y :: !Double, z :: !Double}
 instance NFData V3 where
   rnf (V3 {}) = ()
 
+-- an instance of uniformRange for V3
+-- mainly used by Random definitions
+-- instance UniformRange V3 where
+--   uniformRM (V3 lx ly lz, V3 hx hy hz) gen =
+--     V3 <$> uniformRM (lx, hx) gen
+--        <*> uniformRM (ly, hy) gen
+--        <*> uniformRM (lz, hz) gen
+
+--   isInRange (V3 lx ly lz, V3 hx hy hz) (V3 x y z) =
+--     isInRange (lx, hx) x &&
+--     isInRange (ly, hy) y &&
+--     isInRange (lz, hz) z
+
 instance Vec3 V3 where
   fromXYZ = V3
   toXYZ (V3 x y z) = (x, y, z)
