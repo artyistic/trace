@@ -6,7 +6,8 @@ module Graphics.Pixel where
 import Graphics.Vec3
 import Data.Word (Word8)
 import Control.Parallel.Strategies (NFData)
-
+import Prelude as P
+import qualified Data.Massiv.Array as A
 -- Color are represented by 3 non negative doubles,
 -- Color will be clamped at final rendering for ppm
 newtype Color = Color { rgb :: V3 }

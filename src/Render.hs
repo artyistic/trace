@@ -12,32 +12,36 @@ import Graphics
 import Hittable
 import qualified Interval as I
 import Random
-import System.Random.SplitMix (SMGen, initSMGen, splitSMGen, nextWord64)
 import Material
 import HitRecord (HitRecord(HitRecord))
 import System.Random.Stateful (IOGenM, UniformRange (..), newIOGenM)
 import Data.List (unfoldr)
+import qualified Data.Massiv.Array as A
+import Data.Massiv.Array (computeAs)
+import qualified Data.Vector as V
 
--- | Render a scene to a PPM file.
 render :: FilePath -> Camera -> Int -> [Hittable] -> IO ()
 render fpath cam numBounces world = do
-  gen <- initSMGen
-  let rowGens = unfoldr (Just . splitSMGen) gen
-      rowResults =
-        [(newIOGenM . mkStdGen . fromIntegral . fst . nextWord64) g >>= renderRow y bvh cam numBounces
-          | (y, g) <- zip [0 .. imageHeight - 1] rowGens
-        ]
-  colors  <- sequence rowResults
-  BL.writeFile fpath $ toPPM imageWidth imageHeight (concat colors)
+  workerStates <- A.initWorkerStates A.Par (\_ -> newIOGenM =<< initStdGen)
+  rows <- A.generateArrayLinearWS workerStates (A.Sz imageHeight)
+            (\i g -> renderRow i bvh cam numBounces g) :: IO (A.Array A.BN A.Ix1 (V.Vector Color))
+  BL.writeFile fpath $ toPPM imageWidth imageHeight (V.concat $ A.toList rows)
   where
     !bvh        = bvhFromList world
     imageWidth  = cam.config.imageWidth
     imageHeight = cam.imageHeight
 
 -- | Render all pixels in a single row.
-renderRow :: Int -> Hittable -> Camera -> Int -> IOGenM StdGen -> IO [Color]
+-- renderRow :: Int -> Hittable -> Camera -> Int -> IOGenM StdGen -> IO [Color]
+-- renderRow y bvh cam numBounces gen =
+--   forM [0 .. imageWidth - 1] $ \x ->
+--     samplePixel x y bvh cam numBounces gen
+--   where
+--     imageWidth = cam.config.imageWidth
+
+renderRow :: Int -> Hittable -> Camera -> Int -> IOGenM StdGen -> IO (V.Vector Color)
 renderRow y bvh cam numBounces gen =
-  forM [0 .. imageWidth - 1] $ \x ->
+  V.generateM imageWidth $ \x ->
     samplePixel x y bvh cam numBounces gen
   where
     imageWidth = cam.config.imageWidth
@@ -98,9 +102,9 @@ rayColor r@(Ray _ direction _) bvh background depth gen =
       (attenuation `componentMul`) <$> rayColor scattered bvh background (depth - 1) gen
 
 -- | Serialize pixels to PPM format using ByteString.Builder.
-toPPM :: Int -> Int -> [Color] -> BL.ByteString
+toPPM :: Int -> Int -> V.Vector Color -> BL.ByteString
 toPPM w h pixels = toLazyByteString $
-  header <> foldMap pixelLine pixels
+  header <> V.foldMap pixelLine pixels
   where
     header    = string7 "P3\n"
              <> intDec w <> string7 " " <> intDec h <> string7 "\n"

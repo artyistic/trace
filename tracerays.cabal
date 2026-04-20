@@ -125,6 +125,7 @@ library tracerays-lib
     , containers
     , deepseq            ^>=1.4.8.1
     , JuicyPixels
+    , massiv
     , mmorph             ^>=1.2.1
     , monad-loops        >=0.4
     , MonadRandom        ^>=0.6.2

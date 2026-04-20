@@ -4,9 +4,8 @@ import Control.Monad.Random
 import Graphics.Vec3
 import Control.Monad.Loops
 import qualified Interval as I
-import System.Random.SplitMix (mkSMGen, nextDouble)
 import Data.Bits (xor)
-import GHC.Float (castDoubleToWord64)
+import GHC.Float (castDoubleToWord64, castWord64ToDouble)
 import System.Random.Stateful
 
 -- | hash function rng from ray data, large prime are from FNV/xxHash family,
@@ -19,8 +18,8 @@ hashToFloat01 (V3 ox oy oz) (V3 dx dy dz) t =
           `xor` castDoubleToWord64 dy * 668265263
           `xor` castDoubleToWord64 dz * 374761393
           `xor` castDoubleToWord64 t  * 1640531513
-      gen  = mkSMGen seed
-  in fst (nextDouble gen)
+      gen  = mkStdGen64 seed
+  in fst $ uniformR (0.0, 1.0) gen
 
 -- | Returns a vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square on viewport
 -- | per documentation, the range of random of Doubles lies in [0, 1)
