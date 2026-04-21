@@ -17,7 +17,7 @@ rotateY primitive deg =
         let
           rotatedRay = Ray (rot r.orig) (rot r.dir) r.time
 
-        res <- primitive.hit rotatedRay i
+        !res <- primitive.hit rotatedRay i
 
         Just $ first (\hr -> hr {p = rotInv hr.p, normal = rotInv hr.normal}) res,
       bbox = b
@@ -27,11 +27,14 @@ rotateY primitive deg =
     theta = deg * pi / 180
     cosTheta = cos theta
     sinTheta = sin theta
+    {-# INLINE rot #-}
     rot :: V3 -> V3
     rot p = V3 (cosTheta * p.x - sinTheta * p.z) p.y (sinTheta * p.x + cosTheta * p.z)
+    {-# INLINE rotInv #-}
     rotInv :: V3 -> V3
     rotInv p = V3 (cosTheta * p.x + sinTheta * p.z) p.y (- (sinTheta * p.x) + cosTheta * p.z)
 
+{-# INLINE fromPoints #-}
 fromPoints :: [V3] -> AABB
 fromPoints pts =
   let 

@@ -46,4 +46,4 @@ main = do
                 { imageWidth = cfg.rcImageWidth,
                   samplesPerPixel = cfg.rcSamplesPerPixel
                 }
-      in getStdGen >>= newIOGenM >>= scene.build >>= render "./output/test.ppm" cam cfg.rcNumBounces
+      in print scene.name >> getStdGen >>= newIOGenM >>= scene.build >>= render "./output/test.ppm" cam cfg.rcNumBounces

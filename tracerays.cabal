@@ -111,6 +111,7 @@ library tracerays-lib
     Instances.Translation
     Instances.Rotation
     Material
+    Perlin
     Random
     Render
     Scenes

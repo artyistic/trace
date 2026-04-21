@@ -11,7 +11,7 @@ import Shapes.Quad
 import Shapes.Sphere
 import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
-import Texture (checkerTex, checkerTexFromColor, imageTexture)
+import Texture (checkerTex, checkerTexFromColor, imageTexture, perlinTexture)
 import Volumes.ConstantMedium (constantMedium)
 import Instances.Translation (translate)
 import Instances.Rotation (rotateY)
@@ -114,6 +114,20 @@ scenes =
           vup = V3 0 1 0,
           defocusAngle = 0,
           background = const $ color 0 0 0
+        },
+    Scene
+      "perlin"
+      "blocky perlin noise ground and a single sphere"
+      perlinWorld
+      defaultCameraConfig
+        { aspectRatio = 16.0 / 9.0,
+          imageWidth = 400,
+          samplesPerPixel = 100,
+          vfov = 20,
+          lookFrom = V3 13 2 3,
+          lookAt = V3 0 0 0,
+          vup = V3 0 1 0,
+          defocusAngle = 0
         }
   ]
 
@@ -221,11 +235,18 @@ cornellBoxWorld =
       c = quad (V3 0 0 555) (V3 555 0 0) (V3 0 555 0) white
 
 
-      -- leftBox = translate (rotateY (box (V3 0 0 0) (V3 165 330 165) white) 15) (V3 265 0 295)
-      -- rightBox = translate (rotateY (box (V3 0 0 0) (V3 165 165 165) white) (-18)) (V3 130 0 65)
-      leftBox = box (V3 130 0 65) (V3 295 165 230) white
-      rightBox = box (V3 265 0 295) (V3 430 330 460) white
+      leftBox = translate (rotateY (box (V3 0 0 0) (V3 165 330 165) white) 15) (V3 265 0 295)
+      rightBox = translate (rotateY (box (V3 0 0 0) (V3 165 165 165) white) (-18)) (V3 130 0 65)
+      -- leftBox = box (V3 130 0 65) (V3 295 165 230) white
+      -- rightBox = box (V3 265 0 295) (V3 430 330 460) white
    in [left, right, light, a, b, c, leftBox, rightBox]
+
+perlinWorld :: IOGenM StdGen -> IO [Hittable]
+perlinWorld gen = do
+  perlinTex <- perlinTexture gen
+  let ground = stationarySphere (V3 0 (-1000) 0) 1000 (mkLambertianWithTex perlinTex)
+      ball = stationarySphere (V3 0 2 0) 2 (mkLambertianWithTex perlinTex)
+  return [ground, ball]
 
 randomSpheres :: IOGenM StdGen -> IO [Hittable]
 randomSpheres gen =

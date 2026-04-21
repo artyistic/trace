@@ -25,6 +25,6 @@ type Hittable where
 @bounding_box@: bounding box to determine collision
 -}
 data Hittable = Hittable {
-  hit :: HitFun,
+  hit :: !HitFun,
   bbox :: !AABB
 }

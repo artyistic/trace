@@ -5,6 +5,9 @@ import Graphics (Color, V3)
 import Graphics.Vec3 (fromV)
 import Graphics.Pixel (color)
 import Codec.Picture
+import Perlin (generatePerlin, noise)
+import System.Random.Stateful (IOGenM, StdGen)
+import Graphics.Vec3
 
 newtype Texture = Texture {value :: Double -> Double -> V3 -> Color}
 
@@ -43,3 +46,11 @@ imageTexture fpath = do
               (PixelRGB8 r g b ) = pixelAt a i j
           in color ((1.0/255.0) * fromIntegral r) ((1.0/255.0) * fromIntegral g) ((1.0/255.0) * fromIntegral b)
       }
+
+perlinTexture :: IOGenM StdGen -> IO Texture
+perlinTexture gen = do
+  perlin <- generatePerlin gen
+  return Texture
+    { value = \u v p ->
+        color 1 1 1 .^ abs (noise perlin p)
+    }
