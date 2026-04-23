@@ -47,10 +47,10 @@ imageTexture fpath = do
           in color ((1.0/255.0) * fromIntegral r) ((1.0/255.0) * fromIntegral g) ((1.0/255.0) * fromIntegral b)
       }
 
-perlinTexture :: IOGenM StdGen -> IO Texture
-perlinTexture gen = do
+perlinTexture :: IOGenM StdGen -> Double -> IO Texture
+perlinTexture gen scale = do
   perlin <- generatePerlin gen
   return Texture
     { value = \u v p ->
-        color 1 1 1 .^ abs (noise perlin p)
+        color 1 1 1 .^ abs (noise perlin (p .^ scale))
     }

@@ -217,8 +217,9 @@ simpleLightsWorld =
       white = mkLambertian $ color 1 1 1
       ground = stationarySphere (V3 0 (-1000) 0) 1000 white
       ball = stationarySphere (V3 0 2 0) 2 white
+      ballLight = stationarySphere (V3 0 7 0) 2 diffLight
       light = quad (V3 3 1 (-2)) (V3 2 0 0) (V3 0 2 0) diffLight
-   in [light, ball, ground]
+   in [light, ball, ballLight , ground]
 
 cornellBoxWorld :: [Hittable]
 cornellBoxWorld =
@@ -243,7 +244,7 @@ cornellBoxWorld =
 
 perlinWorld :: IOGenM StdGen -> IO [Hittable]
 perlinWorld gen = do
-  perlinTex <- perlinTexture gen
+  perlinTex <- perlinTexture gen 4
   let ground = stationarySphere (V3 0 (-1000) 0) 1000 (mkLambertianWithTex perlinTex)
       ball = stationarySphere (V3 0 2 0) 2 (mkLambertianWithTex perlinTex)
   return [ground, ball]

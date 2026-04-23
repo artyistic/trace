@@ -40,8 +40,24 @@ permute v gen = do
   UV.freeze mv
 
 noise :: Perlin -> V3 -> Double
-noise table p = ptLookup table.randVec (i `xor` j `xor` k)
+noise table p = trilinearInterp cornerValue u v w
   where
-    i = ptLookup table.permX (truncate (4 * p.x) :: Int)
-    j = ptLookup table.permY (truncate (4 * p.y) :: Int)
-    k = ptLookup table.permZ (truncate (4 * p.z) :: Int)
+    u = hermitianSmoothing $ p.x - fromIntegral (floor p.x :: Int)
+    v = hermitianSmoothing $ p.y - fromIntegral (floor p.y :: Int)
+    w = hermitianSmoothing $ p.z - fromIntegral (floor p.z :: Int)
+    i = floor p.x :: Int
+    j = floor p.y :: Int
+    k = floor p.z :: Int
+    cornerValue di dj dk = ptLookup table.randVec $
+        ptLookup table.permX ((i + di) .&. 255) `xor`
+        ptLookup table.permY ((j + dj) .&. 255) `xor`
+        ptLookup table.permZ ((k + dk) .&. 255)
+    hermitianSmoothing t = t * t * (3 - 2 * t)
+
+trilinearInterp :: (Int -> Int -> Int -> Double) -> Double -> Double -> Double -> Double
+trilinearInterp c u v w = sum
+    [ weight i u * weight j v * weight k w * c i j k
+    | i <- [0,1], j <- [0,1], k <- [0,1] ]
+  where
+    weight 0 t = 1 - t
+    weight _ t = t
