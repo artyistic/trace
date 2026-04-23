@@ -36,9 +36,12 @@ getRandomVec range gen = liftM3 V3 (uniformRM range gen) (uniformRM range gen) (
 -- | ie keep finding until the normalized vector is within sphere
 {-# INLINE getRandomUnitVec #-}
 getRandomUnitVec :: StatefulGen g m => g -> m V3
-getRandomUnitVec gen = (\x -> x ./ sqrt (lengthSquared x)) <$> iterateUntil inUnitBall (getRandomVec (-1, 1) gen)
-  where
-    inUnitBall = I.contains (I.Interval 1e-160 1) . lengthSquared
+getRandomUnitVec gen = do
+  (x, y) <- iterateUntil (\(x,y) -> x*x + y*y < 1)
+    $ liftM2 (,) (uniformRM (-1, 1) gen) (uniformRM (-1, 1) gen)
+  let s = x*x + y*y
+      r = 2 * sqrt (1 - s)
+  pure $ V3 (x * r) (y * r) (1 - 2*s)
 
 {-# INLINE getRandomInUnitDisk #-}
 getRandomInUnitDisk :: StatefulGen g m => g -> m V3
