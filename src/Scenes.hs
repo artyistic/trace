@@ -266,11 +266,11 @@ genSpheres a b gen = do
     mkSphere :: Double -> V3 -> IOGenM StdGen -> IO Hittable
     mkSphere chooseMat center gen
       | chooseMat < 0.8 = do
-          c <- colorFromV3 <$> getRandomVec (0, 1) gen
+          c <- Color <$> getRandomVec (0, 1) gen
           center2Dir <- flip (V3 0) 0 <$> uniformRM (0, 0.5) gen
           return $ movingSphere center (center <+> center2Dir) 0.2 (mkLambertian c)
       | chooseMat < 0.95 = do
-          c <- colorFromV3 <$> getRandomVec (0.5, 1) gen
+          c <- Color <$> getRandomVec (0.5, 1) gen
           f <- uniformRM (0, 0.5) gen
           return $ stationarySphere center 0.2 (mkMetal c f)
       | otherwise =

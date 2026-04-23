@@ -1,8 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 module Texture where
 
-import Graphics (Color, V3)
-import Graphics.Vec3 (fromV)
+import Graphics (Color, V3, mulColor)
 import Graphics.Pixel (color)
 import Codec.Picture
 import Perlin (generatePerlin, noise)
@@ -52,5 +51,5 @@ perlinTexture gen scale = do
   perlin <- generatePerlin gen
   return Texture
     { value = \u v p ->
-        color 1 1 1 .^ abs (noise perlin (p .^ scale))
+        color 1 1 1 `mulColor` abs (noise perlin (p .^ scale))
     }

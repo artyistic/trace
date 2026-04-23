@@ -99,7 +99,7 @@ rayColor r@(Ray _ direction _) bvh background depth gen =
       maybe (pure $ mat.emit u v p) (continueTrace gen) result
 
     continueTrace gen (attenuation, scattered) =
-      (attenuation `componentMul`) <$> rayColor scattered bvh background (depth - 1) gen
+      (attenuation `modulate`) <$> rayColor scattered bvh background (depth - 1) gen
 
 -- | Serialize pixels to PPM format using ByteString.Builder.
 toPPM :: Int -> Int -> V.Vector Color -> BL.ByteString

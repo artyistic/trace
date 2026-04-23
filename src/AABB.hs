@@ -57,8 +57,8 @@ aabbFromBoxes (AABB boxAx boxAy boxAz) (AABB boxBx boxBy boxBz) =
 {-# INLINE collision #-}
 collision :: AABB -> Ray -> Interval -> Bool
 collision AABB{..} (Ray rO rD _) (Interval tMin tMax) =
-  let (!rDx, !rDy, !rDz) = toXYZ rD
-      (!rOx, !rOy, !rOz) = toXYZ rO
+  let (V3 !rDx !rDy !rDz) = rD
+      (V3 !rOx !rOy !rOz) = rO
 
       !invDx = 1.0 / rDx
       !tx0   = (x.minVal - rOx) * invDx
