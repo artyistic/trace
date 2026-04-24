@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 module Shapes.Quad where
 
 import AABB (aabbFromBoxes, aabbFromPoints)

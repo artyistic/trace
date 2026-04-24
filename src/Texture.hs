@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 module Texture where
 
 import Graphics (Color, V3, mulColor)

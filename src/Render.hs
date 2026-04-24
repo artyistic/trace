@@ -29,15 +29,7 @@ render fpath cam numBounces world = do
     !bvh        = bvhFromList world
     imageWidth  = cam.config.imageWidth
     imageHeight = cam.imageHeight
-
--- | Render all pixels in a single row.
--- renderRow :: Int -> Hittable -> Camera -> Int -> IOGenM StdGen -> IO [Color]
--- renderRow y bvh cam numBounces gen =
---   forM [0 .. imageWidth - 1] $ \x ->
---     samplePixel x y bvh cam numBounces gen
---   where
---     imageWidth = cam.config.imageWidth
-
+    
 renderRow :: Int -> Hittable -> Camera -> Int -> IOGenM StdGen -> IO (V.Vector Color)
 renderRow y bvh cam numBounces gen =
   V.generateM imageWidth $ \x ->

@@ -127,13 +127,11 @@ library tracerays-lib
     , deepseq            ^>=1.4.8.1
     , JuicyPixels
     , massiv
-    , mmorph             ^>=1.2.1
     , monad-loops        >=0.4
     , MonadRandom        ^>=0.6.2
     , mtl                ^>=2.3.1
     , parallel           ^>=3.2.2.0
     , random             ^>=1.3.1
-    , splitmix           ^>=0.1.3.1
     , transformers       ^>=0.6.1.0
     , vector
     , vector-algorithms
