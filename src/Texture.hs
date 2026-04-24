@@ -50,5 +50,5 @@ perlinTexture gen scale = do
   perlin <- generatePerlin gen
   return Texture
     { value = \u v p ->
-        color 1 1 1 `mulColor` abs (noise perlin (p .^ scale))
+        (color 1 1 1 `mulColor` 0.5 ) `mulColor` (1 + noise perlin (p .^ scale))
     }

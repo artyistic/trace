@@ -8,6 +8,7 @@ import System.Random.Stateful (IOGenM, UniformRange (uniformRM))
 import System.Random (StdGen)
 import Control.Monad
 import qualified Data.Vector.Unboxed.Mutable as MUV
+import Data.Functor ((<&>))
 
 newtype PerlinTable a = PerlinTable (UV.Vector a)
 
@@ -15,21 +16,31 @@ ptLookup :: UV.Unbox a => PerlinTable a -> Int -> a
 ptLookup (PerlinTable v) i = v UV.! (i .&. 255)
 
 data Perlin = Perlin
-  { randVec :: PerlinTable Double
+  { randX :: PerlinTable Double
+  , randY :: PerlinTable Double
+  , randZ :: PerlinTable Double
   , permX   :: PerlinTable Int
   , permY   :: PerlinTable Int
   , permZ   :: PerlinTable Int
   }
 
+
+-- has to be a cleaner way to do this
 generatePerlin :: IOGenM StdGen -> IO Perlin
 generatePerlin gen = do
-  rands <- UV.replicateM perlinLength $ uniformRM (0.0, 1.0) gen :: IO (UV.Vector Double)
-  permX <- permute (UV.generate perlinLength id) gen
-  permY <- permute (UV.generate perlinLength id) gen
-  permZ <- permute (UV.generate perlinLength id) gen
-  return $ Perlin (PerlinTable rands) (PerlinTable permX) (PerlinTable permY) (PerlinTable permZ)
+  randX <- getPerlinDoubles
+  randY <- getPerlinDoubles
+  randZ <- getPerlinDoubles
+
+  permX <- permuteIndices
+  permY <- permuteIndices
+  permZ <- permuteIndices
+
+  return $ Perlin randX randY randZ permX permY permZ
   where
     perlinLength = 256
+    getPerlinDoubles = PerlinTable <$> UV.replicateM perlinLength (uniformRM (-1.0, 1.0) gen)
+    permuteIndices = PerlinTable <$> permute (UV.generate perlinLength id) gen
 
 permute :: UV.Vector Int -> IOGenM StdGen -> IO (UV.Vector Int)
 permute v gen = do
@@ -40,24 +51,25 @@ permute v gen = do
   UV.freeze mv
 
 noise :: Perlin -> V3 -> Double
-noise table p = trilinearInterp cornerValue u v w
+noise table p = perlinInterp cornerValue u v w
   where
-    u = hermitianSmoothing $ p.x - fromIntegral (floor p.x :: Int)
-    v = hermitianSmoothing $ p.y - fromIntegral (floor p.y :: Int)
-    w = hermitianSmoothing $ p.z - fromIntegral (floor p.z :: Int)
+    u = p.x - fromIntegral (floor p.x :: Int)
+    v = p.y - fromIntegral (floor p.y :: Int)
+    w = p.z - fromIntegral (floor p.z :: Int)
     i = floor p.x :: Int
     j = floor p.y :: Int
     k = floor p.z :: Int
-    cornerValue di dj dk = ptLookup table.randVec $
-        ptLookup table.permX ((i + di) .&. 255) `xor`
+    cornerValue di dj dk = let
+      ix = ptLookup table.permX ((i + di) .&. 255) `xor`
         ptLookup table.permY ((j + dj) .&. 255) `xor`
         ptLookup table.permZ ((k + dk) .&. 255)
-    hermitianSmoothing t = t * t * (3 - 2 * t)
+      in V3 (ptLookup table.randX ix) (ptLookup table.randY ix) (ptLookup table.randZ ix)
 
-trilinearInterp :: (Int -> Int -> Int -> Double) -> Double -> Double -> Double -> Double
-trilinearInterp c u v w = sum
-    [ weight i u * weight j v * weight k w * c i j k
+perlinInterp :: (Int -> Int -> Int -> V3) -> Double -> Double -> Double -> Double
+perlinInterp c u v w = sum
+    [ weight i u * weight j v * weight k w * (c i j k .* V3 (u - fromIntegral i) (v - fromIntegral j) (w - fromIntegral k))
     | i <- [0,1], j <- [0,1], k <- [0,1] ]
   where
-    weight 0 t = 1 - t
-    weight _ t = t
+    weight 0 b = 1- hermitianSmoothing b
+    weight _ b = hermitianSmoothing b
+    hermitianSmoothing t = t * t * (3 - 2 * t)
