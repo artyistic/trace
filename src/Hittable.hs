@@ -1,15 +1,11 @@
 module Hittable where
 
 import Graphics.Ray
-import Graphics.Vec3
 import Interval (Interval)
-import Graphics
 import Control.Monad.Random
-import Random
 import AABB
 import HitRecord
 import Material
-import Control.Monad.Trans.Maybe
 
 
 -- -- | A hit function takes an incident ray and a valid interval [tMin, tMax]

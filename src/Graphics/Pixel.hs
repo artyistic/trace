@@ -4,10 +4,10 @@
 module Graphics.Pixel where
 
 import Graphics.Vec3
+    ( (./), (.^), (<+>), componentMul, mapV, normalize, V3(V3, y) )
 import Data.Word (Word8)
 import Control.Parallel.Strategies (NFData)
-import Prelude as P
-import qualified Data.Massiv.Array as A
+
 -- Color are represented by 3 non negative doubles,
 -- Color will be clamped at final rendering for ppm
 newtype Color = Color { rgb :: V3 }
@@ -19,6 +19,8 @@ instance Semigroup Color where
 instance Monoid Color where
   mempty = color 0 0 0 
 
+-- some vector operations for color
+-- color used to derive Vec3 typeclass
 divideColor :: Color -> Double -> Color
 divideColor c i = Color $ c.rgb ./ i
 

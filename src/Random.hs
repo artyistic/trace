@@ -32,8 +32,8 @@ getSampleSquare gen = liftM3 V3 (uniformRM (-0.5, 0.5) gen) (uniformRM (-0.5, 0.
 getRandomVec :: StatefulGen g m => (Double, Double) -> g -> m V3
 getRandomVec range gen = liftM3 V3 (uniformRM range gen) (uniformRM range gen) (uniformRM range gen)
 
--- | return a unit sphere vector, by rejection method
--- | ie keep finding until the normalized vector is within sphere
+-- | return a unit sphere vector, by marsaglia method
+-- ie keep finding until the normalized vector is within sphere
 {-# INLINE getRandomUnitVec #-}
 getRandomUnitVec :: StatefulGen g m => g -> m V3
 getRandomUnitVec gen = do
@@ -48,8 +48,3 @@ getRandomInUnitDisk :: StatefulGen g m => g -> m V3
 getRandomInUnitDisk gen = iterateUntil inUnitDisk (liftM3 V3 (uniformRM (-1, 1) gen) (uniformRM (-1, 1) gen) (pure 0))
   where
     inUnitDisk = I.contains (I.Interval 1e-160 1) . lengthSquared
-
--- {-# INLINE getRandomDouble #-}
--- getRandomDouble :: Rand StdGen Double
--- -- | getRandomDouble = getRandomR (0, 1)
--- getRandomDouble = getRandom

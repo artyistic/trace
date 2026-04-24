@@ -5,7 +5,6 @@ module Render (render) where
 import BVH
 import Camera
 import Control.Monad.Random
-import Control.Parallel.Strategies
 import Data.ByteString.Builder (Builder, intDec, string7, toLazyByteString)
 import qualified Data.ByteString.Lazy as BL
 import Graphics

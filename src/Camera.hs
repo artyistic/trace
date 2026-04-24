@@ -9,8 +9,6 @@ module Camera
 where
 
 import Graphics
-import Hittable
-import qualified Interval as I
 
 -- | User-provided camera parameters.
 -- Use 'defaultCameraConfig' and override only what you need:

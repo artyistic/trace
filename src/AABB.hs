@@ -3,14 +3,11 @@
 
 module AABB where
 
-import Control.Monad.State.Lazy
-import Data.Maybe
 import Graphics.Ray
 import Graphics.Vec3
 import Interval
 import Data.Function
 import Data.Foldable (maximumBy)
-import Control.Monad.Random
 import Data.Ord (comparing)
 
 -- An AABB (Axis-Aligned Bounding Box) is three intervals on xyz planes
