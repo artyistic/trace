@@ -9,6 +9,7 @@ import System.Random (StdGen)
 import Control.Monad
 import qualified Data.Vector.Unboxed.Mutable as MUV
 import Data.Functor ((<&>))
+import Data.List (foldl')
 
 newtype PerlinTable a = PerlinTable (UV.Vector a)
 
@@ -27,20 +28,13 @@ data Perlin = Perlin
 
 -- has to be a cleaner way to do this
 generatePerlin :: IOGenM StdGen -> IO Perlin
-generatePerlin gen = do
-  randX <- getPerlinDoubles
-  randY <- getPerlinDoubles
-  randZ <- getPerlinDoubles
-
-  permX <- permuteIndices
-  permY <- permuteIndices
-  permZ <- permuteIndices
-
-  return $ Perlin randX randY randZ permX permY permZ
+generatePerlin gen = Perlin
+  <$> getPerlinDoubles <*> getPerlinDoubles <*> getPerlinDoubles
+  <*> permuteIndices   <*> permuteIndices   <*> permuteIndices
   where
     perlinLength = 256
     getPerlinDoubles = PerlinTable <$> UV.replicateM perlinLength (uniformRM (-1.0, 1.0) gen)
-    permuteIndices = PerlinTable <$> permute (UV.generate perlinLength id) gen
+    permuteIndices   = PerlinTable <$> permute (UV.generate perlinLength id) gen
 
 permute :: UV.Vector Int -> IOGenM StdGen -> IO (UV.Vector Int)
 permute v gen = do
@@ -70,6 +64,14 @@ perlinInterp c u v w = sum
     [ weight i u * weight j v * weight k w * (c i j k .* V3 (u - fromIntegral i) (v - fromIntegral j) (w - fromIntegral k))
     | i <- [0,1], j <- [0,1], k <- [0,1] ]
   where
-    weight 0 b = 1- hermitianSmoothing b
-    weight _ b = hermitianSmoothing b
+    smooth t = t * t * (3 - 2 * t)
+    weight i t = if i == 0 then 1 - smooth t else smooth t
     hermitianSmoothing t = t * t * (3 - 2 * t)
+
+-- turbulence with octaves 
+turb :: Perlin -> V3 -> Int -> Double
+turb table origin depth = abs $ sum . take depth $
+    zipWith (\point w -> w * noise table point) points weights
+  where
+    points  = iterate (.^ 2) origin
+    weights = iterate (* 0.5) 1.0

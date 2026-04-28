@@ -3,7 +3,7 @@ module Texture where
 import Graphics (Color, V3, mulColor)
 import Graphics.Pixel (color)
 import Codec.Picture
-import Perlin (generatePerlin, noise)
+import Perlin (generatePerlin, noise, turb)
 import System.Random.Stateful (IOGenM, StdGen)
 import Graphics.Vec3
 
@@ -47,8 +47,8 @@ imageTexture fpath = do
 
 perlinTexture :: IOGenM StdGen -> Double -> IO Texture
 perlinTexture gen scale = do
-  perlin <- generatePerlin gen
+  table <- generatePerlin gen
   return Texture
-    { value = \u v p ->
-        (color 1 1 1 `mulColor` 0.5 ) `mulColor` (1 + noise perlin (p .^ scale))
+    { value = \u v p -> let depth = 7 in
+        (color 0.5 0.5 0.5 `mulColor` (1 + sin (scale * p.z + 10 * turb table p depth)))
     }
