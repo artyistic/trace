@@ -14,7 +14,7 @@ import Random
 import Material
 import HitRecord (HitRecord(HitRecord))
 import System.Random.Stateful (IOGenM, UniformRange (..), newIOGenM)
-import Data.List (unfoldr)
+import Data.List (unfoldr, sortOn)
 import qualified Data.Massiv.Array as A
 import Data.Massiv.Array (computeAs)
 import qualified Data.Vector as V
@@ -23,12 +23,16 @@ render :: FilePath -> Camera -> Int -> [Hittable] -> IO ()
 render fpath cam numBounces world = do
   workerStates <- A.initWorkerStates A.Par (\_ -> newIOGenM =<< initStdGen)
   rows <- A.generateArrayLinearWS workerStates (A.Sz imageHeight)
-            (\i g -> renderRow i bvh cam numBounces g) :: IO (A.Array A.BN A.Ix1 (V.Vector Color))
-  BL.writeFile fpath $ toPPM imageWidth imageHeight (V.concat $ A.toList rows)
+            (\i g -> renderRow (rowIndex i) bvh cam numBounces g) :: IO (A.Array A.BN A.Ix1 (V.Vector Color))
+  let rowList = A.toList rows
+      ordered = map snd $ sortOn fst
+                  [ (rowIndex i, rowList !! i) | i <- [0 .. imageHeight - 1] ]
+  BL.writeFile fpath $ toPPM imageWidth imageHeight (V.concat ordered)
   where
     !bvh        = bvhFromList world
     imageWidth  = cam.config.imageWidth
     imageHeight = cam.imageHeight
+    rowIndex i  = (i * (imageHeight `div` 8 + 1)) `mod` imageHeight
     
 renderRow :: Int -> Hittable -> Camera -> Int -> IOGenM StdGen -> IO (V.Vector Color)
 renderRow y bvh cam numBounces gen =

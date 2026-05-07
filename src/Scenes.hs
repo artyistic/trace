@@ -16,6 +16,7 @@ import Volumes.ConstantMedium (constantMedium)
 import Instances.Translation (translate)
 import Instances.Rotation (rotateY)
 import System.Random.Stateful (IOGenM, UniformRange (..), uniform)
+import BVH (bvhFromList)
 
 data Scene = Scene
   { name :: String,
@@ -128,6 +129,21 @@ scenes =
           lookAt = V3 0 0 0,
           vup = V3 0 1 0,
           defocusAngle = 0
+        },
+    Scene
+      "final-scene"
+      "Book 2 final scene — all features combined"
+      finalScene
+      defaultCameraConfig
+        { aspectRatio     = 1.0,
+          imageWidth      = 400,
+          samplesPerPixel = 250,
+          vfov            = 40,
+          lookFrom        = V3 478 278 (-600),
+          lookAt          = V3 278 278 0,
+          vup             = V3 0 1 0,
+          defocusAngle    = 0,
+          background      = const $ color 0 0 0
         }
   ]
 
@@ -275,3 +291,58 @@ genSpheres a b gen = do
           return $ stationarySphere center 0.2 (mkMetal c f)
       | otherwise =
           return $ stationarySphere center 0.2 (mkDielectric 1.5)
+
+finalScene :: IOGenM StdGen -> IO [Hittable]
+finalScene gen = do
+  -- ground: 20x20 grid of boxes with random heights
+  let groundMat = mkLambertian $ color 0.48 0.83 0.53
+      boxesPerSide = 20
+      w = 100.0
+  heights <- sequenceA [ uniformRM (1.0, 101.0) gen | _ <- [1 .. boxesPerSide * boxesPerSide] ]
+  let groundBoxes =
+        [ let x0 = -1000 + fromIntegral i * w
+              z0 = -1000 + fromIntegral j * w
+              y1 = heights !! (i * boxesPerSide + j)
+          in box (V3 x0 0 z0) (V3 (x0 + w) y1 (z0 + w)) groundMat
+        | i <- [0 .. boxesPerSide - 1], j <- [0 .. boxesPerSide - 1] ]
+
+  -- sphere cluster: 1000 random spheres in a 165-unit cube, rotated and translated
+  let white = mkLambertian $ color 0.73 0.73 0.73
+  clusterPositions <- sequenceA [ getRandomVec (0, 165) gen | _ <- [1 .. 1000] ]
+  let clusterSpheres = map (\p -> stationarySphere p 10 white) clusterPositions
+      cluster = translate (rotateY (bvhFromList clusterSpheres) 15) (V3 (-100) 270 395)
+
+  -- textures
+  earthTex  <- imageTexture "./texImages/earthmap.jpg"
+  perlinTex <- perlinTexture gen 0.2
+
+  let light     = mkDiffuseLight $ color 7 7 7
+      lightQuad = quad (V3 123 554 147) (V3 300 0 0) (V3 0 0 265) light
+
+      -- motion blur sphere
+      center1    = V3 400 400 200
+      movingSph  = movingSphere center1 (center1 <+> V3 30 0 0) 50 (mkLambertian $ color 0.7 0.3 0.1)
+
+      -- glass and metal
+      glassSph   = stationarySphere (V3 260 150 45)  50  (mkDielectric 1.5)
+      metalSph   = stationarySphere (V3 0 150 145)   50  (mkMetal (color 0.8 0.8 0.9) 1.0)
+
+      -- volumes
+      boundary1  = stationarySphere (V3 360 150 145) 70  (mkDielectric 1.5)
+      volume1    = constantMedium boundary1 0.2 (color 0.2 0.4 0.9)
+      boundary2  = stationarySphere (V3 0 0 0)       5000 (mkDielectric 1.5)
+      volume2    = constantMedium boundary2 0.0001 (color 1 1 1)
+
+      -- textured spheres
+      earthSph   = stationarySphere (V3 400 200 400) 100 (mkLambertianWithTex earthTex)
+      perlinSph  = stationarySphere (V3 220 280 300) 80  (mkLambertianWithTex perlinTex)
+
+  pure
+    [ bvhFromList groundBoxes
+    , lightQuad
+    , movingSph, glassSph, metalSph
+    , boundary1, volume1
+    , boundary2, volume2
+    , earthSph, perlinSph
+    , cluster
+    ]
