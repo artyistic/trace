@@ -1,10 +1,44 @@
 
 
+-- module Render (render) where
+
+-- import BVH
+-- import Camera
+-- import Control.Monad.Random
+-- import Data.ByteString.Builder (Builder, intDec, string7, toLazyByteString)
+-- import qualified Data.ByteString.Lazy as BL
+-- import Graphics
+-- import Hittable
+-- import qualified Interval as I
+-- import Random
+-- import Material
+-- import HitRecord (HitRecord(HitRecord))
+-- import System.Random.Stateful (IOGenM, UniformRange (..), newIOGenM)
+-- import Data.List (unfoldr, sortOn)
+-- import qualified Data.Massiv.Array as A
+-- import Data.Massiv.Array (computeAs)
+-- import qualified Data.Vector as V
+
+-- render :: FilePath -> Camera -> Int -> [Hittable] -> IO ()
+-- render fpath cam numBounces world = do
+--   workerStates <- A.initWorkerStates A.Par (\_ -> newIOGenM =<< initStdGen)
+--   rows <- A.generateArrayLinearWS workerStates (A.Sz imageHeight)
+--             (\i g -> renderRow (rowIndex i) bvh cam numBounces g) :: IO (A.Array A.BN A.Ix1 (V.Vector Color))
+--   let rowList = A.toList rows
+--       ordered = map snd $ sortOn fst
+--                   [ (rowIndex i, rowList !! i) | i <- [0 .. imageHeight - 1] ]
+--   BL.writeFile fpath $ toPPM imageWidth imageHeight (V.concat ordered)
+--   where
+--     !bvh        = bvhFromList world
+--     imageWidth  = cam.config.imageWidth
+--     imageHeight = cam.imageHeight
+--     rowIndex i  = (i * (imageHeight `div` 8 + 1)) `mod` imageHeight
+
 module Render (render) where
 
 import BVH
 import Camera
-import Control.Monad.Random
+import Control.Monad (forM_)
 import Data.ByteString.Builder (Builder, intDec, string7, toLazyByteString)
 import qualified Data.ByteString.Lazy as BL
 import Graphics
@@ -13,26 +47,50 @@ import qualified Interval as I
 import Random
 import Material
 import HitRecord (HitRecord(HitRecord))
+import System.IO (withFile, IOMode(..))
 import System.Random.Stateful (IOGenM, UniformRange (..), newIOGenM)
-import Data.List (unfoldr, sortOn)
 import qualified Data.Massiv.Array as A
-import Data.Massiv.Array (computeAs)
+import System.Random (StdGen)
 import qualified Data.Vector as V
+import Control.Monad.Random (initStdGen)
+import Control.Monad (replicateM)
 
 render :: FilePath -> Camera -> Int -> [Hittable] -> IO ()
 render fpath cam numBounces world = do
   workerStates <- A.initWorkerStates A.Par (\_ -> newIOGenM =<< initStdGen)
-  rows <- A.generateArrayLinearWS workerStates (A.Sz imageHeight)
-            (\i g -> renderRow (rowIndex i) bvh cam numBounces g) :: IO (A.Array A.BN A.Ix1 (V.Vector Color))
-  let rowList = A.toList rows
-      ordered = map snd $ sortOn fst
-                  [ (rowIndex i, rowList !! i) | i <- [0 .. imageHeight - 1] ]
-  BL.writeFile fpath $ toPPM imageWidth imageHeight (V.concat ordered)
+  -- Pre-allocate entire image as a flat 2D array.
+  -- imageHeight × imageWidth Color values claimed upfront — memory is fixed and known.
+  -- Workers write directly to (y, x) slots via linear index decomposition.
+  -- No intermediate V.Vector per row, no scrambling, no sort, no concat.
+  let sz = A.Sz2 imageHeight imageWidth
+  img <- A.generateArrayLinearWS workerStates sz
+           (\i g ->
+             let A.Ix2 y x = A.fromLinearIndex sz i
+             in samplePixel x y bvh cam numBounces g)
+           :: IO (A.Array A.B A.Ix2 Color)
+  -- Stream to disk one row at a time.
+  -- Peak memory here is one row's Builder — a few KB regardless of image size or spp.
+  withFile fpath WriteMode $ \h -> do
+    BL.hPut h . toLazyByteString $ ppmHeader imageWidth imageHeight
+    forM_ [0 .. imageHeight - 1] $ \y ->
+      BL.hPut h . toLazyByteString $
+        foldMap (\x -> colorToBuilder (img A.! A.Ix2 y x) <> string7 "\n")
+                [0 .. imageWidth - 1]
   where
     !bvh        = bvhFromList world
     imageWidth  = cam.config.imageWidth
     imageHeight = cam.imageHeight
-    rowIndex i  = (i * (imageHeight `div` 8 + 1)) `mod` imageHeight
+
+ppmHeader :: Int -> Int -> Builder
+ppmHeader w h =
+  string7 "P3\n"
+  <> intDec w <> string7 " " <> intDec h <> string7 "\n"
+  <> string7 "255\n"
+
+colorToBuilder :: Color -> Builder
+colorToBuilder c =
+  let (r, g, b) = colorToRGB c
+  in intDec r <> string7 " " <> intDec g <> string7 " " <> intDec b
     
 renderRow :: Int -> Hittable -> Camera -> Int -> IOGenM StdGen -> IO (V.Vector Color)
 renderRow y bvh cam numBounces gen =
