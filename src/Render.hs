@@ -33,12 +33,13 @@
 --     imageWidth  = cam.config.imageWidth
 --     imageHeight = cam.imageHeight
 --     rowIndex i  = (i * (imageHeight `div` 8 + 1)) `mod` imageHeight
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Render (render) where
 
 import BVH
 import Camera
-import Control.Monad (forM_)
+import Control.Monad ( forM_, replicateM, when )
 import Data.ByteString.Builder (Builder, intDec, string7, toLazyByteString)
 import qualified Data.ByteString.Lazy as BL
 import Graphics
@@ -47,39 +48,53 @@ import qualified Interval as I
 import Random
 import Material
 import HitRecord (HitRecord(HitRecord))
-import System.IO (withFile, IOMode(..))
+import System.IO (withFile, IOMode(..), hPutStr, stderr)
 import System.Random.Stateful (IOGenM, UniformRange (..), newIOGenM)
 import qualified Data.Massiv.Array as A
 import System.Random (StdGen)
 import qualified Data.Vector as V
 import Control.Monad.Random (initStdGen)
-import Control.Monad (replicateM)
+import Data.Massiv.Array (MArray)
+import Data.IORef (newIORef, IORef, atomicModifyIORef')
 
 render :: FilePath -> Camera -> Int -> [Hittable] -> IO ()
 render fpath cam numBounces world = do
   workerStates <- A.initWorkerStates A.Par (\_ -> newIOGenM =<< initStdGen)
-  -- Pre-allocate entire image as a flat 2D array.
+  -- Pre-allocate entire image as a flat 2D mutable array.
   -- imageHeight × imageWidth Color values claimed upfront — memory is fixed and known.
-  -- Workers write directly to (y, x) slots via linear index decomposition.
-  -- No intermediate V.Vector per row, no scrambling, no sort, no concat.
-  let sz = A.Sz2 imageHeight imageWidth
-  img <- A.generateArrayLinearWS workerStates sz
-           (\i g ->
-             let A.Ix2 y x = A.fromLinearIndex sz i
-             in samplePixel x y bvh cam numBounces g)
-           :: IO (A.Array A.B A.Ix2 Color)
+  let sz    = A.Sz2 imageHeight imageWidth
+      total = imageHeight * imageWidth
+  img <- A.newMArray sz (color 0 0 0) :: IO (MArray A.RealWorld A.S A.Ix2 Color)
+  -- Scatter compute order to mix cheap (background) and expensive (interior) pixels
+  -- throughout the work queue, keeping all cores saturated until the end.
+  -- Workers write directly to the correct (y, x) slot — no sorting or retention needed.
+  -- counter <- newIORef 0 :: IO (IORef Int)
+  (_ :: A.Array A.B A.Ix1 ()) <- A.generateArrayLinearWS workerStates (A.Sz total) $ \i g -> do
+    let j        = (i * (total `div` 8 + 1)) `mod` total
+        A.Ix2 y x = A.fromLinearIndex sz j
+    c <- samplePixel x y bvh cam numBounces g
+    A.writeM img (A.Ix2 y x) c
+    -- n <- atomicModifyIORef' counter (\n -> (n + 1, n + 1))
+    -- when (n `mod` reportEvery == 0) $
+    --   hPutStr stderr $ progress n total
+  frozen <- A.freezeS img
   -- Stream to disk one row at a time.
   -- Peak memory here is one row's Builder — a few KB regardless of image size or spp.
   withFile fpath WriteMode $ \h -> do
     BL.hPut h . toLazyByteString $ ppmHeader imageWidth imageHeight
     forM_ [0 .. imageHeight - 1] $ \y ->
       BL.hPut h . toLazyByteString $
-        foldMap (\x -> colorToBuilder (img A.! A.Ix2 y x) <> string7 "\n")
+        foldMap (\x -> colorToBuilder (frozen A.! A.Ix2 y x) <> string7 "\n")
                 [0 .. imageWidth - 1]
   where
     !bvh        = bvhFromList world
     imageWidth  = cam.config.imageWidth
     imageHeight = cam.imageHeight
+    -- reportEvery = max 1 (imageWidth * imageHeight `div` 1000)  -- report every 0.1%
+    -- progress n total =
+    --   let pct = (100 * n) `div` total
+    --   in "\r" ++ show pct ++ "% (" ++ show n ++ "/" ++ show total ++ " pixels) "
+
 
 ppmHeader :: Int -> Int -> Builder
 ppmHeader w h =
@@ -91,7 +106,7 @@ colorToBuilder :: Color -> Builder
 colorToBuilder c =
   let (r, g, b) = colorToRGB c
   in intDec r <> string7 " " <> intDec g <> string7 " " <> intDec b
-    
+
 renderRow :: Int -> Hittable -> Camera -> Int -> IOGenM StdGen -> IO (V.Vector Color)
 renderRow y bvh cam numBounces gen =
   V.generateM imageWidth $ \x ->

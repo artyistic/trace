@@ -7,11 +7,12 @@ import Graphics.Vec3
     ( (./), (.^), (<+>), componentMul, mapV, normalize, V3(V3, y) )
 import Data.Word (Word8)
 import Control.Parallel.Strategies (NFData)
+import Foreign (Storable)
 
 -- Color are represented by 3 non negative doubles,
 -- Color will be clamped at final rendering for ppm
 newtype Color = Color { rgb :: V3 }
-  deriving (Eq, Show, NFData)
+  deriving (Eq, Show, NFData, Storable)
 
 instance Semigroup Color where
   (<>) c1 c2 = Color $ c1.rgb <+> c2.rgb 

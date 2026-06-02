@@ -1,0 +1,59 @@
+WITHOUT SHUFFLING
+
+46,095,206,255,632 bytes allocated in the heap
+ 767,116,758,896 bytes copied during GC
+      49,948,688 bytes maximum residency (7608 sample(s))
+      48,710,912 bytes maximum slop
+             708 MiB total memory in use (0 MiB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     82264 colls, 82264 par   1636.434s  257.220s     0.0031s    0.0197s
+  Gen  1      7608 colls,  7607 par   616.385s  161.108s     0.0212s    0.0749s
+
+  Parallel GC work balance: 80.78% (serial 0%, perfect 100%)
+
+  TASKS: 18 (1 bound, 17 peak workers (17 total), using -N8)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.008s  (  0.006s elapsed)
+  MUT     time  43728.909s  (10283.135s elapsed)
+  GC      time  2252.820s  (418.327s elapsed)
+  EXIT    time    0.007s  (  0.002s elapsed)
+  Total   time  45981.744s  (10701.470s elapsed)
+
+  Alloc rate    1,054,112,879 bytes per MUT second
+
+  Productivity  95.1% of total user, 96.1% of total elapsed
+
+cabal run tracerays -- 800 5000 40 +RTS -A64m -s -N8  45731.62s user 250.26s system 429% cpu 2:58:21.60 total
+
+WITH SHUFFLING AND STORABLE (storable apparently had no effect on the memory footprint)
+"final-scene"
+47,260,901,063,488 bytes allocated in the heap
+1,082,255,015,176 bytes copied during GC
+      60,727,968 bytes maximum residency (9024 sample(s))
+       1,605,936 bytes maximum slop
+             676 MiB total memory in use (0 MiB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     82096 colls, 82096 par   2473.468s  377.827s     0.0046s    0.0222s
+  Gen  1      9024 colls,  9023 par   310.173s  52.346s     0.0058s    0.0198s
+
+  Parallel GC work balance: 89.41% (serial 0%, perfect 100%)
+
+  TASKS: 18 (1 bound, 17 peak workers (17 total), using -N8)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.007s  (  0.005s elapsed)
+  MUT     time  53520.678s  (6821.267s elapsed)
+  GC      time  2783.641s  (430.173s elapsed)
+  EXIT    time    0.006s  (  0.005s elapsed)
+  Total   time  56304.333s  (7251.450s elapsed)
+
+  Alloc rate    883,040,021 bytes per MUT second
+
+  Productivity  95.1% of total user, 94.1% of total elapsed
+
+cabal run tracerays -- 7 800 5000 40 +RTS -A64m -s -N8  56175.24s user 129.19s system 776% cpu 2:00:51.55 total

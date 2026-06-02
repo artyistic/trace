@@ -1,10 +1,22 @@
 module Graphics.Vec3 where
 
 import Control.DeepSeq (NFData, rnf)
+import Foreign.Storable
+import Foreign (castPtr)
 
-data V3 = V3 { x :: !Double, y :: !Double, z :: !Double }
+data V3 = V3 { x :: {-# UNPACK #-} !Double, y :: {-# UNPACK #-} !Double, z :: {-# UNPACK #-} !Double }
   deriving (Eq, Show)
 
+instance Storable V3 where
+  sizeOf _ = 3 * sizeOf (undefined :: Double)
+  alignment _ = alignment (undefined :: Double)
+  peek ptr = V3 <$> peekElemOff (castPtr ptr) 0
+                <*> peekElemOff (castPtr ptr) 1
+                <*> peekElemOff (castPtr ptr) 2
+  poke ptr (V3 x y z) = do
+    pokeElemOff (castPtr ptr) 0 x
+    pokeElemOff (castPtr ptr) 1 y
+    pokeElemOff (castPtr ptr) 2 z
 instance NFData V3 where
   rnf (V3 {}) = ()
 
