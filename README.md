@@ -1,4 +1,4 @@
-![final render, 800 width, 5000 spp, 40 bounces](finalScene_800w_5000spp_40.jpg "final render")
+![final render, 800 width, 10000 spp, 40 bounces](finalScene.jpg "final render")
 
 
 Yet another raytracer written in haskell
@@ -16,7 +16,7 @@ by this project. It was either that or use monad transformers which is excruciat
 
 referenced
  
-[_Ray Tracing: The Next Week_](https://raytracing.github.io/books/RayTracingTheNextWeek.html)
+[_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
 [_Ray Tracing: The Next Week_](https://raytracing.github.io/books/RayTracingTheNextWeek.html)
 
